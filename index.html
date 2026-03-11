@@ -180,14 +180,54 @@ tbody td{padding:10px 12px;vertical-align:middle;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
 
+/* CLICKABLE STAT CARDS */
+.stat-card-clickable{cursor:pointer;transition:all .2s;}
+.stat-card-clickable:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.35);border-color:rgba(255,255,255,.12);}
+.stat-hint{font-size:10px;color:var(--muted);margin-top:8px;font-family:var(--mono);opacity:0;transition:opacity .2s;letter-spacing:.3px;}
+.stat-card-clickable:hover .stat-hint{opacity:1;}
+
+/* STAT DETAIL MODAL */
+.stat-modal-inner{width:min(680px,96vw);max-height:88vh;overflow-y:auto;}
+.stat-modal-summary{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;}
+.sms-chip{flex:1;min-width:100px;background:#111420;border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center;}
+.sms-chip .sms-val{font-size:22px;font-weight:700;font-family:var(--mono);}
+.sms-chip .sms-lbl{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.5px;font-family:var(--mono);}
+.stat-detail-table{width:100%;border-collapse:collapse;font-size:12px;}
+.stat-detail-table thead th{text-align:left;padding:8px 10px;font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);background:#0d0f14;white-space:nowrap;}
+.stat-detail-table tbody tr{border-bottom:1px solid #1a1e2a;transition:background .12s;}
+.stat-detail-table tbody tr:hover{background:#181d2a;}
+.stat-detail-table tbody td{padding:9px 10px;vertical-align:middle;}
+.stat-modal-section{font-size:11px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.mini-bar-wrap{display:flex;align-items:center;gap:6px;}
+.mini-bar{height:4px;width:60px;background:#1a1e2a;border-radius:2px;overflow:hidden;}
+.mini-bar-fill{height:100%;border-radius:2px;}
+
 @media(max-width:700px){
   .sidebar{display:none;}
   .chart-grid{grid-template-columns:1fr;}
   .form-grid{grid-template-columns:1fr;}
   .topbar-meta{display:none;}
+  #page-emp-dash .chart-grid{grid-template-columns:1fr;}
 }
 
-/* ══ LOGIN SCREEN ══ */
+/* TEAM SUMMARY CARDS */
+.team-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;}
+.team-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px;position:relative;overflow:hidden;transition:border-color .2s;}
+.team-card:hover{border-color:var(--accent);}
+.team-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.team-card-name{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.team-card-name .team-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.team-card-rows{display:flex;flex-direction:column;gap:7px;}
+.team-card-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;}
+.team-card-row .tc-label{color:var(--muted);}
+.team-card-row .tc-val{font-family:var(--mono);font-weight:600;}
+.team-card-kpi{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.team-card-kpi .kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-family:var(--mono);}
+.team-card-kpi .kpi-score{font-size:22px;font-weight:700;font-family:var(--mono);}
+.team-card-members{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;}
+.team-member-chip{background:#111420;border:1px solid var(--border);border-radius:4px;padding:2px 7px;font-size:11px;color:var(--muted);font-family:var(--mono);}
+
+
 #login-screen{
   position:fixed;inset:0;background:var(--bg);z-index:99999;
   display:flex;align-items:center;justify-content:center;
@@ -263,7 +303,7 @@ tbody td{padding:10px 12px;vertical-align:middle;}
 <div id="loading-overlay">
   <div class="loader-brand">ACC TASK MANAGER</div>
   <div class="loader-ring"></div>
-  <div class="loader-text" id="load-msg">Connecting to Google Sheets...</div>
+  <div class="loader-text" id="load-msg">Connecting to Database...</div>
 </div>
 
 <!-- TOPBAR -->
@@ -305,6 +345,7 @@ tbody td{padding:10px 12px;vertical-align:middle;}
   <!-- Employee nav (always shown) -->
   <div id="emp-nav">
     <div class="nav-grp" id="emp-nav-grp">Employee</div>
+    <div class="nav-item" data-page="emp-dash" id="nav-emp-dash" style="display:none"><span class="ni">◈</span> Dashboard</div>
     <div class="nav-item" data-page="emp" id="nav-my-tasks"><span class="ni">▷</span> My Tasks</div>
   </div>
 </div>
@@ -319,19 +360,19 @@ tbody td{padding:10px 12px;vertical-align:middle;}
     <button class="btn btn-ghost btn-sm" onclick="fullSync()">↻ Refresh</button>
   </div>
   <div class="stat-grid">
-    <div class="stat-card blue"><div class="stat-label">Total Tasks</div><div class="stat-value blue" id="s-total">—</div><div class="stat-delta">All assigned</div></div>
-    <div class="stat-card green"><div class="stat-label">Completed</div><div class="stat-value green" id="s-done">—</div><div class="stat-delta">On time / Late</div></div>
-    <div class="stat-card orange"><div class="stat-label">Pending</div><div class="stat-value orange" id="s-pending">—</div><div class="stat-delta">In progress</div></div>
-    <div class="stat-card red"><div class="stat-label">Missed</div><div class="stat-value red" id="s-missed">—</div><div class="stat-delta">Past target date</div></div>
-    <div class="stat-card blue"><div class="stat-label">Avg KPI</div><div class="stat-value blue" id="s-kpi">—</div><div class="stat-delta">Team average</div></div>
-    <div class="stat-card green"><div class="stat-label">Team Size</div><div class="stat-value green" id="s-team">—</div><div class="stat-delta">Active employees</div></div>
+    <div class="stat-card blue stat-card-clickable" onclick="openStatModal('total')"><div class="stat-label">Total Tasks</div><div class="stat-value blue" id="s-total">—</div><div class="stat-delta">All assigned</div><div class="stat-hint">Click for details ›</div></div>
+    <div class="stat-card green stat-card-clickable" onclick="openStatModal('completed')"><div class="stat-label">Completed</div><div class="stat-value green" id="s-done">—</div><div class="stat-delta">On time / Late</div><div class="stat-hint">Click for details ›</div></div>
+    <div class="stat-card orange stat-card-clickable" onclick="openStatModal('pending')"><div class="stat-label">Pending</div><div class="stat-value orange" id="s-pending">—</div><div class="stat-delta">In progress</div><div class="stat-hint">Click for details ›</div></div>
+    <div class="stat-card red stat-card-clickable" onclick="openStatModal('missed')"><div class="stat-label">Missed</div><div class="stat-value red" id="s-missed">—</div><div class="stat-delta">Past target date</div><div class="stat-hint">Click for details ›</div></div>
+    <div class="stat-card blue stat-card-clickable" onclick="openStatModal('kpi')"><div class="stat-label">Avg KPI</div><div class="stat-value blue" id="s-kpi">—</div><div class="stat-delta">Team average</div><div class="stat-hint">Click for details ›</div></div>
+    <div class="stat-card green stat-card-clickable" onclick="openStatModal('team')"><div class="stat-label">Team Size</div><div class="stat-value green" id="s-team">—</div><div class="stat-delta">Active employees</div><div class="stat-hint">Click for details ›</div></div>
   </div>
   <div class="chart-grid">
     <div class="chart-box"><div class="chart-title">KPI by Employee</div><div class="bar-chart" id="kpi-chart"><div style="color:var(--muted);font-size:13px;align-self:center">Loading...</div></div></div>
     <div class="chart-box"><div class="chart-title">Tasks by Type</div><div class="bar-chart" id="type-chart"><div style="color:var(--muted);font-size:13px;align-self:center">Loading...</div></div></div>
   </div>
   <div class="section">
-    <div class="section-title">Employee Performance Summary <span class="badge">Live from DB Sheet</span></div>
+    <div class="section-title">Employee Performance Summary <span class="badge">Live from Database</span></div>
     <div class="table-wrap">
       <table>
         <thead><tr><th>Employee</th><th>Tasks</th><th>Completed</th><th>Missed</th><th>Daily KPI</th><th>Weekly KPI</th><th>Monthly KPI</th><th>Overall</th></tr></thead>
@@ -344,7 +385,7 @@ tbody td{padding:10px 12px;vertical-align:middle;}
 <!-- ══ TEAM MASTER ══ -->
 <div class="page" id="page-team">
   <div class="page-header">
-    <div><div class="page-title">Team Master</div><div class="page-sub">Employee records · STAFF Sheet</div></div>
+    <div><div class="page-title">Team Master</div><div class="page-sub">Employee records · Staff Table</div></div>
   </div>
   <div class="section">
     <div class="section-title">Add New Employee</div>
@@ -360,6 +401,14 @@ tbody td{padding:10px 12px;vertical-align:middle;}
       <button class="btn btn-primary" onclick="addEmployee()">＋ Add Employee</button>
     </div>
   </div>
+  <!-- Teamwise Summary Cards -->
+  <div id="team-summary-wrap" style="margin-bottom:20px;display:none;">
+    <div style="font-size:13px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+      Team Summary <span class="badge" id="team-count-badge">0 teams</span>
+    </div>
+    <div id="team-summary-cards" class="team-cards-grid"></div>
+  </div>
+
   <div class="section">
     <div class="section-title">Employee List <span class="badge" id="emp-count">0 staff</span></div>
     <div class="table-wrap">
@@ -374,7 +423,7 @@ tbody td{padding:10px 12px;vertical-align:middle;}
 <!-- ══ AREA OF WORK ══ -->
 <div class="page" id="page-aow">
   <div class="page-header">
-    <div><div class="page-title">Area of Work</div><div class="page-sub">Assign responsibilities · AREA_OF_WORK Sheet</div></div>
+    <div><div class="page-title">Area of Work</div><div class="page-sub">Assign responsibilities · Area of Work Table</div></div>
   </div>
   <div class="alert alert-info">⊙ Employees only receive tasks from their assigned responsibility areas.</div>
   <div class="section">
@@ -399,7 +448,7 @@ tbody td{padding:10px 12px;vertical-align:middle;}
 <!-- ══ TASK ASSIGNMENT ══ -->
 <div class="page" id="page-assign">
   <div class="page-header">
-    <div><div class="page-title">Task Assignment</div><div class="page-sub">Create and assign tasks · TASK Sheet</div></div>
+    <div><div class="page-title">Task Assignment</div><div class="page-sub">Create and assign tasks · Tasks Table</div></div>
   </div>
   <div class="section">
     <div class="section-title">New Task</div>
@@ -513,6 +562,57 @@ tbody td{padding:10px 12px;vertical-align:middle;}
   </div>
 </div>
 
+<!-- ══ EMPLOYEE DASHBOARD ══ -->
+<div class="page" id="page-emp-dash">
+  <div class="page-header">
+    <div>
+      <div class="page-title" id="ed-name">My Dashboard</div>
+      <div class="page-sub" id="ed-desig">Employee Portal</div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="renderEmpDashboard()">↻ Refresh</button>
+  </div>
+  <div class="stat-grid">
+    <div class="stat-card blue"><div class="stat-label">Total Tasks</div><div class="stat-value blue" id="ed-total">—</div><div class="stat-delta">All assigned</div></div>
+    <div class="stat-card green"><div class="stat-label">Completed</div><div class="stat-value green" id="ed-done">—</div><div class="stat-delta">Finished tasks</div></div>
+    <div class="stat-card orange"><div class="stat-label">Pending</div><div class="stat-value orange" id="ed-pending">—</div><div class="stat-delta">In progress</div></div>
+    <div class="stat-card red"><div class="stat-label">Missed</div><div class="stat-value red" id="ed-missed">—</div><div class="stat-delta">Past target date</div></div>
+    <div class="stat-card blue"><div class="stat-label">Avg KPI</div><div class="stat-value" id="ed-kpi" style="font-size:30px;font-weight:700;margin-top:6px">—</div><div class="stat-delta">Overall score</div></div>
+  </div>
+  <!-- Completion Rate -->
+  <div class="section">
+    <div class="section-title">Completion Rate</div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div style="flex:1;background:#1a1e2a;border-radius:6px;height:10px;overflow:hidden;">
+        <div id="ed-rate-bar" style="height:100%;background:var(--accent2);border-radius:6px;width:0%;transition:width .5s ease;"></div>
+      </div>
+      <span id="ed-rate-num" style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--accent2);min-width:40px">0%</span>
+    </div>
+  </div>
+  <!-- KPI by Task Type -->
+  <div class="chart-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="chart-box" id="ed-kpi-daily">
+      <div class="chart-title">Daily KPI</div>
+      <div class="kpi-type-val" style="font-size:36px;font-weight:700;color:var(--accent)">—</div>
+      <div class="kpi-type-count" style="font-size:12px;color:var(--muted);margin-top:4px">0 tasks</div>
+    </div>
+    <div class="chart-box" id="ed-kpi-weekly">
+      <div class="chart-title">Weekly KPI</div>
+      <div class="kpi-type-val" style="font-size:36px;font-weight:700;color:var(--accent2)">—</div>
+      <div class="kpi-type-count" style="font-size:12px;color:var(--muted);margin-top:4px">0 tasks</div>
+    </div>
+    <div class="chart-box" id="ed-kpi-monthly">
+      <div class="chart-title">Monthly KPI</div>
+      <div class="kpi-type-val" style="font-size:36px;font-weight:700;color:var(--accent3)">—</div>
+      <div class="kpi-type-count" style="font-size:12px;color:var(--muted);margin-top:4px">0 tasks</div>
+    </div>
+  </div>
+  <!-- Recent Tasks -->
+  <div class="section">
+    <div class="section-title">Recent Tasks <span class="badge">Latest 5</span></div>
+    <div id="ed-recent-tasks"><div class="empty-state"><div class="ei">◌</div><p>Loading...</p></div></div>
+  </div>
+</div>
+
 </div><!-- /main -->
 </div><!-- /layout -->
 
@@ -548,27 +648,27 @@ tbody td{padding:10px 12px;vertical-align:middle;}
 
 <script>
 // ══════════════════════════════════════════════════
-// CONFIG — Your Google Apps Script Web App URL
+// CONFIG — Database API Endpoint
 // ══════════════════════════════════════════════════
-const GAS_URL = 'https://script.google.com/macros/s/AKfycby_j29z-w7L4w0FqVYy-VHYtXnuhO9QhPPWUGZ3b02bOgXeH--qrqDW0EyY-iYRVMMD/exec';
+const DB_URL = 'https://script.google.com/macros/s/AKfycby_j29z-w7L4w0FqVYy-VHYtXnuhO9QhPPWUGZ3b02bOgXeH--qrqDW0EyY-iYRVMMD/exec';
 
 // ══════════════════════════════════════════════════
 // IN-MEMORY DATA STORE
 // ══════════════════════════════════════════════════
 let DB = { staff: [], aow: [], tasks: [] };
-let sheetConnected = false;
+let dbConnected = false;
 
 // ══════════════════════════════════════════════════
-// GAS API
+// DATABASE API
 // ══════════════════════════════════════════════════
-async function gasGet() {
-  const r = await fetch(GAS_URL);
+async function dbGet() {
+  const r = await fetch(DB_URL);
   if (!r.ok) throw new Error('HTTP ' + r.status);
   return r.json();
 }
 
-async function gasPost(payload) {
-  const r = await fetch(GAS_URL, {
+async function dbPost(payload) {
+  const r = await fetch(DB_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain' },
     body: JSON.stringify(payload)
@@ -578,13 +678,13 @@ async function gasPost(payload) {
 }
 
 // ══════════════════════════════════════════════════
-// FULL SYNC — load all data from Google Sheets
+// FULL SYNC — load all data from Database
 // ══════════════════════════════════════════════════
 async function fullSync() {
   setSyncState(true);
   try {
-    setLoadMsg('Loading data from Google Sheets...');
-    const res = await gasGet();
+    setLoadMsg('Loading data from Database...');
+    const res = await dbGet();
     const d = res.result || res;
 
     if (d.staff && Array.isArray(d.staff)) {
@@ -629,7 +729,7 @@ async function fullSync() {
     recalcStatuses();
     setConnected(true);
     refreshAllViews();
-    toast('✓ Synced with Google Sheets');
+    toast('✓ Database sync complete');
   } catch(e) {
     setConnected(false);
     toast('✕ Sync failed: ' + e.message, 'var(--danger)');
@@ -659,9 +759,9 @@ function setSyncState(on) {
   b.textContent = on ? '↻ Syncing…' : '↻ Sync';
 }
 function setConnected(ok) {
-  sheetConnected = ok;
+  dbConnected = ok;
   document.getElementById('gs-dot').className = 'gs-dot' + (ok ? '' : ' red');
-  document.getElementById('gs-label').textContent = ok ? 'Live · Google Sheets' : 'Offline';
+  document.getElementById('gs-label').textContent = ok ? 'Live · Database' : 'Offline';
 }
 
 // ══════════════════════════════════════════════════
@@ -682,12 +782,22 @@ setInterval(updateClock, 1000); updateClock();
 // ══════════════════════════════════════════════════
 function refreshAllViews() {
   populateDropdowns();
-  renderEmpTable();
+  renderEmpTable();   // also calls renderTeamSummary internally
   renderAoWTable();
   renderTaskTable();
   renderDashboard();
   renderStatusTable();
   renderReminders();
+  // Refresh current employee view if admin is on emp page
+  if (currentUser && currentUser.role === 'admin') {
+    const empPage = document.getElementById('page-emp');
+    if (empPage && empPage.classList.contains('active')) renderAdminEmpView();
+  }
+  // Refresh employee dashboard if employee is logged in
+  if (currentUser && currentUser.role === 'employee') {
+    const empDash = document.getElementById('page-emp-dash');
+    if (empDash && empDash.classList.contains('active')) renderEmpDashboard();
+  }
 }
 
 // ══════════════════════════════════════════════════
@@ -757,11 +867,11 @@ async function addEmployee() {
   if (DB.staff.find(s=>s.empId===id)) { toast('EMP ID already exists','var(--accent3)'); return; }
   DB.staff.push({empId:id,name,designation:desig,team,doj,email});
   renderEmpTable(); populateDropdowns(); renderDashboard();
-  toast('Adding employee to sheet...');
+  toast('Saving employee to database...');
   try {
-    await gasPost({action:'addStaff',empId:id,name,designation:desig,team,doj,email});
-    toast('✓ Employee added to Google Sheet');
-  } catch(e) { toast('Saved locally. Sheet sync failed.','var(--accent3)'); }
+    await dbPost({action:'addStaff',empId:id,name,designation:desig,team,doj,email});
+    toast('✓ Employee saved to database');
+  } catch(e) { toast('Saved locally. Database sync failed.','var(--accent3)'); }
   ['emp-id','emp-name','emp-desig','emp-email','emp-doj'].forEach(x=>document.getElementById(x).value='');
 }
 
@@ -778,6 +888,97 @@ function renderEmpTable() {
     <td><button class="btn btn-ghost btn-sm" onclick="removeEmp('${s.empId}')">✕</button></td>
   </tr>`).join('');
   document.getElementById('emp-count').textContent = DB.staff.length+' staff';
+  renderTeamSummary();
+}
+
+// ══════════════════════════════════════════════════
+// TEAMWISE SUMMARY CARDS
+// ══════════════════════════════════════════════════
+const TEAM_COLORS = [
+  {bar:'var(--accent)',    dot:'#4f8ef7', kpi:'var(--accent)'},
+  {bar:'var(--accent2)',   dot:'#38d9a9', kpi:'var(--accent2)'},
+  {bar:'var(--accent3)',   dot:'#f5a623', kpi:'var(--accent3)'},
+  {bar:'var(--danger)',    dot:'#f06464', kpi:'var(--danger)'},
+  {bar:'#a78bfa',          dot:'#a78bfa', kpi:'#a78bfa'},
+  {bar:'#f472b6',          dot:'#f472b6', kpi:'#f472b6'},
+  {bar:'#34d399',          dot:'#34d399', kpi:'#34d399'},
+  {bar:'#60a5fa',          dot:'#60a5fa', kpi:'#60a5fa'},
+];
+
+function renderTeamSummary() {
+  recalcStatuses();
+  const wrap = document.getElementById('team-summary-wrap');
+  const container = document.getElementById('team-summary-cards');
+  if (!DB.staff.length) { wrap.style.display='none'; return; }
+
+  // Group staff by team name (fallback 'Unassigned')
+  const teams = {};
+  DB.staff.forEach(s => {
+    const teamName = (s.team || 'Unassigned').trim();
+    if (!teams[teamName]) teams[teamName] = [];
+    teams[teamName].push(s);
+  });
+
+  const teamNames = Object.keys(teams).sort();
+  document.getElementById('team-count-badge').textContent = teamNames.length + (teamNames.length===1?' team':' teams');
+
+  container.innerHTML = teamNames.map((teamName, idx) => {
+    const members  = teams[teamName];
+    const empIds   = members.map(m => m.empId);
+    const tasks    = DB.tasks.filter(t => empIds.includes(t.empId));
+    const done     = tasks.filter(t => t.status === 'Completed');
+    const pending  = tasks.filter(t => t.status === 'Pending');
+    const missed   = tasks.filter(t => t.status === 'Missed');
+    const kpis     = done.map(t => parseInt(t.kpi)||0);
+    const avgKpi   = kpis.length ? Math.round(kpis.reduce((a,b)=>a+b,0)/kpis.length) : null;
+    const clr      = TEAM_COLORS[idx % TEAM_COLORS.length];
+    const kpiColor = avgKpi===null ? 'var(--muted)' : avgKpi>=90 ? 'var(--accent2)' : avgKpi>=70 ? 'var(--accent3)' : 'var(--danger)';
+    const compRate = tasks.length ? Math.round((done.length/tasks.length)*100) : 0;
+
+    return `<div class="team-card" style="--tc:${clr.bar}">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${clr.bar};"></div>
+      <div class="team-card-name">
+        <div class="team-dot" style="background:${clr.dot};box-shadow:0 0 6px ${clr.dot}"></div>
+        ${teamName}
+      </div>
+      <div class="team-card-rows">
+        <div class="team-card-row">
+          <span class="tc-label">Members</span>
+          <span class="tc-val" style="color:${clr.kpi}">${members.length}</span>
+        </div>
+        <div class="team-card-row">
+          <span class="tc-label">Total Tasks</span>
+          <span class="tc-val">${tasks.length}</span>
+        </div>
+        <div class="team-card-row">
+          <span class="tc-label">Completed</span>
+          <span class="tc-val" style="color:var(--accent2)">${done.length}</span>
+        </div>
+        <div class="team-card-row">
+          <span class="tc-label">Pending</span>
+          <span class="tc-val" style="color:var(--accent3)">${pending.length}</span>
+        </div>
+        <div class="team-card-row">
+          <span class="tc-label">Missed</span>
+          <span class="tc-val" style="color:var(--danger)">${missed.length}</span>
+        </div>
+        <div class="team-card-row">
+          <span class="tc-label">Completion</span>
+          <span class="tc-val" style="color:${compRate>=80?'var(--accent2)':compRate>=50?'var(--accent3)':'var(--danger)'}">${compRate}%</span>
+        </div>
+      </div>
+      <div class="team-card-kpi">
+        <span class="kpi-label">Avg KPI</span>
+        <span class="kpi-score" style="color:${kpiColor}">${avgKpi !== null ? avgKpi : '—'}</span>
+      </div>
+      <div class="team-card-members">
+        ${members.slice(0,6).map(m=>`<span class="team-member-chip">${m.name.split(' ')[0]}</span>`).join('')}
+        ${members.length>6?`<span class="team-member-chip" style="color:var(--accent)">+${members.length-6} more</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  wrap.style.display = 'block';
 }
 
 function removeEmp(id) {
@@ -801,11 +1002,11 @@ async function addAoW() {
   renderAoWTable(); populateDropdowns();
   document.getElementById('aow-area').value = '';
   document.getElementById('aow-emp').value  = '';
-  toast('Assigning area...');
+  toast('Saving area to database...');
   try {
-    await gasPost({action:'addAoW',empId,name,area});
-    toast('✓ Area assigned in Google Sheet');
-  } catch(e) { toast('Saved locally. Sheet sync failed.','var(--accent3)'); }
+    await dbPost({action:'addAoW',empId,name,area});
+    toast('✓ Area saved to database');
+  } catch(e) { toast('Saved locally. Database sync failed.','var(--accent3)'); }
 }
 
 function renderAoWTable() {
@@ -854,17 +1055,17 @@ async function assignTask() {
     workAssigned:work,targetDate:target,userRemarks:'',completedDate:'',
     status:'Pending',kpi:'',score:'',adminRemarks:''});
   renderTaskTable(); renderDashboard();
-  toast('Assigning task...');
+  toast('Saving task to database...');
   try {
-    const r = await gasPost({action:'assignTask',empId,name,area,taskType:ttype,
+    const r = await dbPost({action:'assignTask',empId,name,area,taskType:ttype,
       taskName:tname,workAssigned:work,targetDate:target});
-    // Update the local ID with the one returned from sheet if available
+    // Update the local ID with the one returned from database if available
     if (r?.result && typeof r.result === 'string' && r.result.startsWith('T')) {
       const t = DB.tasks.find(x=>x.id===id);
       if(t) t.id = r.result;
     }
-    toast('✓ Task assigned to Google Sheet');
-  } catch(e) { toast('Saved locally. Sheet sync failed.','var(--accent3)'); }
+    toast('✓ Task saved to database');
+  } catch(e) { toast('Saved locally. Database sync failed.','var(--accent3)'); }
   ['t-name','t-work','t-target'].forEach(x=>document.getElementById(x).value='');
   document.getElementById('t-emp').value='';
   document.getElementById('t-area').innerHTML='<option>— Select employee first —</option>';
@@ -972,7 +1173,7 @@ function sendReminder() {
   const id  = document.getElementById('rem-task').value;
   const msg = document.getElementById('rem-msg').value.trim();
   if (!id||!msg) { toast('Select a task and write a message','var(--danger)'); return; }
-  toast('⊙ Reminder logged (connect email via GAS to send)','var(--accent3)');
+  toast('⊙ Reminder logged (connect email API to send)','var(--accent3)');
   document.getElementById('rem-msg').value='';
 }
 
@@ -1038,11 +1239,11 @@ async function submitUpdate() {
   const t = DB.tasks.find(x=>x.id===id);
   if (t) { t.userRemarks=remarks; t.completedDate=date; }
   recalcStatuses(); loadEmpTasks(); closeModal('update-modal');
-  toast('Submitting to Google Sheet...');
+  toast('Saving to database...');
   try {
-    await gasPost({action:'updateTask',taskId:id,userRemarks:remarks,completedDate:date});
-    toast('✓ Task updated in Google Sheet');
-  } catch(e) { toast('Updated locally. Sheet sync failed.','var(--accent3)'); }
+    await dbPost({action:'updateTask',taskId:id,userRemarks:remarks,completedDate:date});
+    toast('✓ Task updated in database');
+  } catch(e) { toast('Updated locally. Database sync failed.','var(--accent3)'); }
   renderDashboard(); renderStatusTable();
 }
 
@@ -1052,11 +1253,11 @@ async function submitRemark() {
   const t      = DB.tasks.find(x=>x.id===id);
   if (t) t.adminRemarks = remark;
   renderTaskTable(); renderStatusTable(); closeModal('remark-modal');
-  toast('Saving remark...');
+  toast('Saving remark to database...');
   try {
-    await gasPost({action:'adminRemark',taskId:id,remark});
-    toast('✓ Remark saved to Google Sheet');
-  } catch(e) { toast('Saved locally. Sheet sync failed.','var(--accent3)'); }
+    await dbPost({action:'adminRemark',taskId:id,remark});
+    toast('✓ Remark saved to database');
+  } catch(e) { toast('Saved locally. Database sync failed.','var(--accent3)'); }
 }
 
 // ══════════════════════════════════════════════════
@@ -1134,6 +1335,234 @@ function calcAvgByType(tasks, type) {
 }
 
 // ══════════════════════════════════════════════════
+// STAT CARD DETAIL MODAL
+// ══════════════════════════════════════════════════
+function openStatModal(type) {
+  recalcStatuses();
+  const tasks = DB.tasks;
+  const done  = tasks.filter(t=>t.status==='Completed');
+  const pend  = tasks.filter(t=>t.status==='Pending');
+  const miss  = tasks.filter(t=>t.status==='Missed');
+
+  const iconMap  = {total:'◆',completed:'✓',pending:'◎',missed:'⚠',kpi:'◈',team:'◉'};
+  const titleMap = {total:'Total Tasks',completed:'Completed Tasks',pending:'Pending Tasks',missed:'Missed Tasks',kpi:'KPI Summary',team:'Team Overview'};
+  const subMap   = {
+    total:'All assigned tasks across the team',
+    completed:'Tasks finished within or after target date',
+    pending:'Tasks still in progress',
+    missed:'Tasks past their target date without completion',
+    kpi:'Key Performance Index breakdown by employee',
+    team:'Employee roster and individual task load'
+  };
+
+  document.getElementById('stat-modal-icon').textContent  = iconMap[type];
+  document.getElementById('stat-modal-title').textContent = titleMap[type];
+  document.getElementById('stat-modal-sub').textContent   = subMap[type];
+
+  let summaryHTML = '';
+  let bodyHTML    = '';
+
+  // ── HELPER: mini bar ──
+  const mBar = (pct, clr) => {
+    const p = Math.min(parseInt(pct)||0,100);
+    return `<div class="mini-bar-wrap"><div class="mini-bar"><div class="mini-bar-fill" style="width:${p}%;background:${clr}"></div></div><span style="font-family:var(--mono);font-size:11px;color:${clr};min-width:28px">${p}</span></div>`;
+  };
+
+  // ── TOTAL TASKS ──
+  if (type === 'total') {
+    const daily   = tasks.filter(t=>t.taskType==='Daily').length;
+    const weekly  = tasks.filter(t=>t.taskType==='Weekly').length;
+    const monthly = tasks.filter(t=>t.taskType==='Monthly').length;
+    summaryHTML = `
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent)">${tasks.length}</div><div class="sms-lbl">Total</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent)">${daily}</div><div class="sms-lbl">Daily</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent2)">${weekly}</div><div class="sms-lbl">Weekly</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent3)">${monthly}</div><div class="sms-lbl">Monthly</div></div>`;
+    const rows = DB.staff.map(s => {
+      const st = tasks.filter(t=>t.empId===s.empId);
+      const d=st.filter(t=>t.taskType==='Daily').length, w=st.filter(t=>t.taskType==='Weekly').length, m=st.filter(t=>t.taskType==='Monthly').length;
+      const compRate = st.length ? Math.round((st.filter(t=>t.status==='Completed').length/st.length)*100) : 0;
+      const clr = compRate>=80?'var(--accent2)':compRate>=50?'var(--accent3)':'var(--danger)';
+      return `<tr>
+        <td><strong>${s.name}</strong><br><span style="font-size:10px;color:var(--muted)">${s.empId}</span></td>
+        <td style="font-family:var(--mono);font-weight:600;color:var(--accent)">${st.length}</td>
+        <td style="font-family:var(--mono)">${d}</td>
+        <td style="font-family:var(--mono)">${w}</td>
+        <td style="font-family:var(--mono)">${m}</td>
+        <td>${mBar(compRate, clr)}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="6" class="empty-state"><p>No data</p></td></tr>';
+    bodyHTML = `<div class="stat-modal-section">Per Employee Breakdown</div>
+      <div style="overflow-x:auto"><table class="stat-detail-table">
+        <thead><tr><th>Employee</th><th>Total</th><th>Daily</th><th>Weekly</th><th>Monthly</th><th>Completion</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+  }
+
+  // ── COMPLETED ──
+  else if (type === 'completed') {
+    const onTime = done.filter(t=>new Date(t.completedDate)<=new Date(t.targetDate));
+    const late   = done.filter(t=>new Date(t.completedDate)>new Date(t.targetDate));
+    summaryHTML = `
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent2)">${done.length}</div><div class="sms-lbl">Total Done</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent2)">${onTime.length}</div><div class="sms-lbl">On Time</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent3)">${late.length}</div><div class="sms-lbl">Late</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent2)">${tasks.length?Math.round((done.length/tasks.length)*100):0}%</div><div class="sms-lbl">Rate</div></div>`;
+    const rows = done.sort((a,b)=>(b.completedDate||'').localeCompare(a.completedDate||'')).map(t=>{
+      const isLate = t.completedDate && t.targetDate && new Date(t.completedDate)>new Date(t.targetDate);
+      return `<tr>
+        <td style="font-family:var(--mono);font-size:10px;color:var(--muted)">${t.id}</td>
+        <td><strong>${t.taskName}</strong></td>
+        <td style="color:var(--muted);font-size:11px">${t.name}</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--accent3)">${t.taskType}</td>
+        <td style="font-family:var(--mono);font-size:11px">${t.targetDate}</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--accent2)">${t.completedDate}</td>
+        <td><span style="font-size:10px;padding:2px 7px;border-radius:10px;${isLate?'background:#2a2010;color:var(--accent3);border:1px solid #3a2e15':'background:#1a3328;color:var(--accent2);border:1px solid #244030'}">${isLate?'Late':'On Time'}</span></td>
+        <td>${kpiBar(t.kpi)}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="8" class="empty-state"><p>No completed tasks</p></td></tr>';
+    bodyHTML = `<div class="stat-modal-section">Completed Task List</div>
+      <div style="overflow-x:auto"><table class="stat-detail-table">
+        <thead><tr><th>ID</th><th>Task</th><th>Employee</th><th>Type</th><th>Target</th><th>Completed</th><th>Timing</th><th>KPI</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+  }
+
+  // ── PENDING ──
+  else if (type === 'pending') {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const urgent = pend.filter(t=>{ const d=new Date(t.targetDate); return d>=today && (d-today)/(1000*60*60*24)<=3; });
+    summaryHTML = `
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent3)">${pend.length}</div><div class="sms-lbl">Pending</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--danger)">${urgent.length}</div><div class="sms-lbl">Due ≤ 3 Days</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent)">${pend.filter(t=>t.taskType==='Daily').length}</div><div class="sms-lbl">Daily</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent2)">${pend.filter(t=>t.taskType==='Weekly').length}</div><div class="sms-lbl">Weekly</div></div>`;
+    const rows = pend.sort((a,b)=>(a.targetDate||'').localeCompare(b.targetDate||'')).map(t=>{
+      const daysLeft = t.targetDate ? Math.ceil((new Date(t.targetDate)-today)/(1000*60*60*24)) : null;
+      const urgClr   = daysLeft!==null && daysLeft<=1?'var(--danger)':daysLeft<=3?'var(--accent3)':'var(--muted)';
+      return `<tr>
+        <td style="font-family:var(--mono);font-size:10px;color:var(--muted)">${t.id}</td>
+        <td><strong>${t.taskName}</strong></td>
+        <td style="color:var(--muted);font-size:11px">${t.name}</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--accent3)">${t.taskType}</td>
+        <td style="font-family:var(--mono);font-size:11px">${t.targetDate}</td>
+        <td style="font-family:var(--mono);font-size:11px;color:${urgClr};font-weight:600">${daysLeft!==null?(daysLeft===0?'Today':daysLeft===1?'Tomorrow':daysLeft>0?daysLeft+'d left':'Overdue'):'—'}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="6" class="empty-state"><p>No pending tasks</p></td></tr>';
+    bodyHTML = `<div class="stat-modal-section">Pending Task List · Sorted by Due Date</div>
+      <div style="overflow-x:auto"><table class="stat-detail-table">
+        <thead><tr><th>ID</th><th>Task</th><th>Employee</th><th>Type</th><th>Target Date</th><th>Due In</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+  }
+
+  // ── MISSED ──
+  else if (type === 'missed') {
+    const byEmp = {};
+    miss.forEach(t=>{ byEmp[t.empId]=(byEmp[t.empId]||0)+1; });
+    const worst = Object.entries(byEmp).sort((a,b)=>b[1]-a[1]).slice(0,1)[0];
+    const worstName = worst ? (DB.staff.find(s=>s.empId===worst[0])?.name||worst[0]) : '—';
+    summaryHTML = `
+      <div class="sms-chip"><div class="sms-val" style="color:var(--danger)">${miss.length}</div><div class="sms-lbl">Missed</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent3)">${miss.filter(t=>t.taskType==='Daily').length}</div><div class="sms-lbl">Daily</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent3)">${miss.filter(t=>t.taskType==='Weekly').length}</div><div class="sms-lbl">Weekly</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--danger);font-size:14px;margin-top:2px">${worstName}</div><div class="sms-lbl">Most Missed</div></div>`;
+    const rows = miss.sort((a,b)=>(a.targetDate||'').localeCompare(b.targetDate||'')).map(t=>{
+      const daysOver = t.targetDate ? Math.ceil((new Date()-new Date(t.targetDate))/(1000*60*60*24)) : null;
+      return `<tr>
+        <td style="font-family:var(--mono);font-size:10px;color:var(--muted)">${t.id}</td>
+        <td><strong>${t.taskName}</strong></td>
+        <td style="color:var(--muted);font-size:11px">${t.name}</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--accent3)">${t.taskType}</td>
+        <td style="font-family:var(--mono);font-size:11px">${t.targetDate}</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--danger);font-weight:600">${daysOver!==null?daysOver+'d overdue':'—'}</td>
+        <td style="font-size:11px;color:var(--muted);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.workAssigned||'—'}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="7" class="empty-state"><p>No missed tasks</p></td></tr>';
+    bodyHTML = `<div class="stat-modal-section">Missed Task List · Sorted by Target Date</div>
+      <div style="overflow-x:auto"><table class="stat-detail-table">
+        <thead><tr><th>ID</th><th>Task</th><th>Employee</th><th>Type</th><th>Target Date</th><th>Overdue By</th><th>Work Assigned</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+  }
+
+  // ── KPI ──
+  else if (type === 'kpi') {
+    const kpis   = done.map(t=>parseInt(t.kpi)||0);
+    const avg    = kpis.length?Math.round(kpis.reduce((a,b)=>a+b)/kpis.length):0;
+    const top    = done.filter(t=>parseInt(t.kpi)===100).length;
+    const mid    = done.filter(t=>{const k=parseInt(t.kpi);return k>=70&&k<100;}).length;
+    const low    = done.filter(t=>parseInt(t.kpi)<70).length;
+    summaryHTML = `
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent)">${avg||'—'}</div><div class="sms-lbl">Team Avg</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent2)">${top}</div><div class="sms-lbl">Score 100</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent3)">${mid}</div><div class="sms-lbl">Score 70–99</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--danger)">${low}</div><div class="sms-lbl">Score &lt;70</div></div>`;
+    const rows = DB.staff.map(s=>{
+      const st   = tasks.filter(t=>t.empId===s.empId);
+      const sc   = st.filter(t=>t.status==='Completed');
+      const kv   = sc.length?Math.round(sc.map(t=>parseInt(t.kpi)||0).reduce((a,b)=>a+b)/sc.length):null;
+      const dkpi = calcAvgByType(st,'Daily');
+      const wkpi = calcAvgByType(st,'Weekly');
+      const mkpi = calcAvgByType(st,'Monthly');
+      const clr  = kv===null?'var(--muted)':kv>=90?'var(--accent2)':kv>=70?'var(--accent3)':'var(--danger)';
+      return `<tr>
+        <td><strong>${s.name}</strong><br><span style="font-size:10px;color:var(--muted)">${s.designation||s.empId}</span></td>
+        <td style="font-family:var(--mono)">${sc.length}/${st.length}</td>
+        <td>${dkpi!==''?mBar(dkpi,'var(--accent)'):'<span style="color:var(--muted)">—</span>'}</td>
+        <td>${wkpi!==''?mBar(wkpi,'var(--accent2)'):'<span style="color:var(--muted)">—</span>'}</td>
+        <td>${mkpi!==''?mBar(mkpi,'var(--accent3)'):'<span style="color:var(--muted)">—</span>'}</td>
+        <td><span style="font-family:var(--mono);font-size:16px;font-weight:700;color:${clr}">${kv!==null?kv:'—'}</span></td>
+      </tr>`;
+    }).join('')||'<tr><td colspan="6" class="empty-state"><p>No data</p></td></tr>';
+    bodyHTML = `<div class="stat-modal-section">KPI per Employee</div>
+      <div style="overflow-x:auto"><table class="stat-detail-table">
+        <thead><tr><th>Employee</th><th>Done/Total</th><th>Daily KPI</th><th>Weekly KPI</th><th>Monthly KPI</th><th>Overall</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+  }
+
+  // ── TEAM ──
+  else if (type === 'team') {
+    const teams = {};
+    DB.staff.forEach(s=>{ const tn=(s.team||'Unassigned').trim(); if(!teams[tn]) teams[tn]=[]; teams[tn].push(s); });
+    summaryHTML = `
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent2)">${DB.staff.length}</div><div class="sms-lbl">Total Staff</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent)">${Object.keys(teams).length}</div><div class="sms-lbl">Teams</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent3)">${DB.staff.filter(s=>tasks.some(t=>t.empId===s.empId&&t.status==='Pending')).length}</div><div class="sms-lbl">Have Pending</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent2)">${DB.staff.filter(s=>!tasks.some(t=>t.empId===s.empId)).length}</div><div class="sms-lbl">No Tasks</div></div>`;
+    const rows = DB.staff.map(s=>{
+      const st   = tasks.filter(t=>t.empId===s.empId);
+      const sc   = st.filter(t=>t.status==='Completed');
+      const sp   = st.filter(t=>t.status==='Pending');
+      const sm   = st.filter(t=>t.status==='Missed');
+      const kv   = sc.length?Math.round(sc.map(t=>parseInt(t.kpi)||0).reduce((a,b)=>a+b)/sc.length):null;
+      const clr  = kv===null?'var(--muted)':kv>=90?'var(--accent2)':kv>=70?'var(--accent3)':'var(--danger)';
+      return `<tr>
+        <td><strong>${s.name}</strong></td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--accent)">${s.empId}</td>
+        <td style="font-size:11px;color:var(--muted)">${s.designation||'—'}</td>
+        <td><span style="font-size:11px;background:#1a2240;color:var(--accent);padding:2px 7px;border-radius:4px">${s.team||'—'}</span></td>
+        <td style="font-family:var(--mono)">${st.length}</td>
+        <td style="font-family:var(--mono);color:var(--accent2)">${sc.length}</td>
+        <td style="font-family:var(--mono);color:var(--accent3)">${sp.length}</td>
+        <td style="font-family:var(--mono);color:var(--danger)">${sm.length}</td>
+        <td><span style="font-family:var(--mono);font-weight:700;color:${clr}">${kv!==null?kv:'—'}</span></td>
+      </tr>`;
+    }).join('')||'<tr><td colspan="9" class="empty-state"><p>No staff</p></td></tr>';
+    bodyHTML = `<div class="stat-modal-section">Employee Directory with Task Load</div>
+      <div style="overflow-x:auto"><table class="stat-detail-table">
+        <thead><tr><th>Name</th><th>Emp ID</th><th>Designation</th><th>Team</th><th>Total</th><th>Done</th><th>Pending</th><th>Missed</th><th>KPI</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+  }
+
+  document.getElementById('stat-modal-summary').innerHTML = summaryHTML;
+  document.getElementById('stat-modal-body').innerHTML    = bodyHTML;
+  document.getElementById('stat-modal').classList.add('open');
+}
+
+// ══════════════════════════════════════════════════
 // POPULATE DROPDOWNS
 // ══════════════════════════════════════════════════
 function populateDropdowns() {
@@ -1147,7 +1576,7 @@ function populateDropdowns() {
 // ══════════════════════════════════════════════════
 // AUTO-REFRESH every 5 minutes (only when logged in)
 // ══════════════════════════════════════════════════
-setInterval(() => { if(sheetConnected && currentUser) fullSync(); }, 5 * 60 * 1000);
+setInterval(() => { if(dbConnected && currentUser) fullSync(); }, 5 * 60 * 1000);
 
 // ══════════════════════════════════════════════════
 // AUTH — users & login logic
@@ -1217,14 +1646,15 @@ function onLoginSuccess() {
     showPage('dashboard');
     fullSync();
   } else {
-    // Employee: hide admin nav, show only My Tasks
+    // Employee: hide admin nav, show only My Tasks + Dashboard
     document.getElementById('admin-nav').style.display = 'none';
     document.getElementById('emp-nav-grp').textContent = 'My Account';
     document.getElementById('emp-selector-section').style.display = 'none';
-    // Auto-set employee in selector
-    showPage('emp');
+    document.getElementById('nav-emp-dash').style.display = 'flex';
+    // Start on employee dashboard
+    showPage('emp-dash');
     fullSync().then(() => {
-      loadEmpTasksForId(currentUser.empId);
+      renderEmpDashboard();
     });
   }
 }
@@ -1237,6 +1667,7 @@ function doLogout() {
   document.getElementById('login-error').classList.remove('show');
   document.getElementById('topbar-avatar').textContent = '?';
   document.getElementById('topbar-username').textContent = '';
+  document.getElementById('nav-emp-dash').style.display = 'none';
 }
 
 function showPage(page) {
@@ -1283,21 +1714,100 @@ function loadEmpTasksForId(empId) {
   </tr>`).join('');
 }
 
+// Admin view of employee tasks — auto-loads all tasks, selector still works
+function renderAdminEmpView() {
+  recalcStatuses();
+  const selEl = document.getElementById('emp-view-sel');
+  const empId = selEl ? selEl.value : '';
+  const tasks = empId ? DB.tasks.filter(t => t.empId === empId) : DB.tasks;
+  const title = document.getElementById('emp-tasks-title');
+  if (title) title.textContent = empId ? `Tasks for ${(DB.staff.find(s=>s.empId===empId)||{}).name||empId}` : 'All Employee Tasks';
+  document.getElementById('emp-task-section').style.display = 'block';
+  const tb = document.getElementById('emp-task-table');
+  if (!tasks.length) {
+    tb.innerHTML = '<tr><td colspan="9" class="empty-state"><div class="ei">◌</div><p>No tasks found</p></td></tr>';
+    return;
+  }
+  tb.innerHTML = tasks.map(t => `<tr>
+    <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${t.id}</td>
+    <td><strong>${t.taskName}</strong><br><span style="font-size:11px;color:var(--muted)">${t.name}</span></td>
+    <td style="font-size:12px">${t.area}</td>
+    <td style="font-size:11px;color:var(--accent3);font-family:var(--mono)">${t.taskType}</td>
+    <td style="font-size:12px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.workAssigned||'—'}</td>
+    <td style="font-family:var(--mono);font-size:12px">${t.targetDate}</td>
+    <td>${statusBadge(t.status)}</td>
+    <td>${kpiBar(t.kpi)}</td>
+    <td><button class="btn btn-ghost btn-sm" onclick="openRemarkModal('${t.id}')">+ Remark</button></td>
+  </tr>`).join('');
+}
+
 // Override loadEmpTasks so it respects employee login restriction
 const _origLoadEmpTasks = loadEmpTasks;
 function loadEmpTasks() {
   if (currentUser && currentUser.role === 'employee') {
     loadEmpTasksForId(currentUser.empId);
   } else {
-    _origLoadEmpTasks();
+    renderAdminEmpView();
   }
+}
+
+// ══════════════════════════════════════════════════
+// EMPLOYEE DASHBOARD
+// ══════════════════════════════════════════════════
+function renderEmpDashboard() {
+  if (!currentUser || currentUser.role !== 'employee') return;
+  recalcStatuses();
+  const empId = currentUser.empId;
+  const emp   = DB.staff.find(s => s.empId === empId);
+  const tasks = DB.tasks.filter(t => t.empId === empId);
+  const done  = tasks.filter(t => t.status === 'Completed');
+  const pend  = tasks.filter(t => t.status === 'Pending');
+  const miss  = tasks.filter(t => t.status === 'Missed');
+  const kpis  = done.map(t => parseInt(t.kpi)||0);
+  const avg   = kpis.length ? Math.round(kpis.reduce((a,b)=>a+b,0)/kpis.length) : 0;
+  const kpiClr = avg>=90?'var(--accent2)':avg>=70?'var(--accent3)':avg>0?'var(--danger)':'var(--muted)';
+
+  document.getElementById('ed-name').textContent    = emp ? emp.name : empId;
+  document.getElementById('ed-desig').textContent   = emp ? (emp.designation||'Employee') : '';
+  document.getElementById('ed-total').textContent   = tasks.length;
+  document.getElementById('ed-done').textContent    = done.length;
+  document.getElementById('ed-pending').textContent = pend.length;
+  document.getElementById('ed-missed').textContent  = miss.length;
+  document.getElementById('ed-kpi').textContent     = avg || '—';
+  document.getElementById('ed-kpi').style.color     = kpiClr;
+
+  // Completion rate bar
+  const rate = tasks.length ? Math.round((done.length/tasks.length)*100) : 0;
+  document.getElementById('ed-rate-bar').style.width = rate + '%';
+  document.getElementById('ed-rate-num').textContent = rate + '%';
+
+  // Recent tasks (last 5)
+  const recent = [...tasks].sort((a,b) => (b.targetDate||'').localeCompare(a.targetDate||'')).slice(0,5);
+  const rt = document.getElementById('ed-recent-tasks');
+  rt.innerHTML = recent.length ? recent.map(t => `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+    <div>
+      <div style="font-size:13px;font-weight:600">${t.taskName}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">${t.taskType} · Target: ${t.targetDate}</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">${statusBadge(t.status)}${t.status!=='Completed'?`<button class="btn btn-success btn-sm" onclick="openUpdateModal('${t.id}');showPage('emp')">✓</button>`:''}</div>
+  </div>`).join('') : '<div class="empty-state"><div class="ei">◌</div><p>No tasks yet</p></div>';
+
+  // KPI breakdown by type
+  ['Daily','Weekly','Monthly'].forEach(type => {
+    const tt = tasks.filter(x => x.taskType === type);
+    const tc = tt.filter(x => x.status === 'Completed');
+    const kv = tc.length ? Math.round(tc.map(x=>parseInt(x.kpi)||0).reduce((a,b)=>a+b)/tc.length) : 0;
+    const id = 'ed-kpi-' + type.toLowerCase();
+    const el = document.getElementById(id);
+    if (el) { el.querySelector('.kpi-type-val').textContent = kv || '—'; el.querySelector('.kpi-type-count').textContent = tt.length + ' tasks'; }
+  });
 }
 
 // Override navigation: employees can only reach 'emp' page
 document.querySelectorAll('.nav-item').forEach(el => {
   el.addEventListener('click', () => {
     const page = el.dataset.page;
-    if (currentUser && currentUser.role === 'employee' && page !== 'emp') return;
+    if (currentUser && currentUser.role === 'employee' && page !== 'emp' && page !== 'emp-dash') return;
     document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
     document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
     el.classList.add('active');
@@ -1306,7 +1816,8 @@ document.querySelectorAll('.nav-item').forEach(el => {
     if (page === 'status')    renderStatusTable();
     if (page === 'reminders') renderReminders();
     if (page === 'assign')    renderTaskTable();
-    if (page === 'emp')       loadEmpTasks();
+    if (page === 'emp')       { if (currentUser && currentUser.role === 'employee') { loadEmpTasksForId(currentUser.empId); } else { renderAdminEmpView(); } }
+    if (page === 'emp-dash')  renderEmpDashboard();
   });
 });
 
@@ -1319,10 +1830,30 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('emp-selector-section').style.display = 'none';
   document.getElementById('emp-task-section').style.display = 'block';
   // Keep login screen visible (default)
-  // Hide GAS loader immediately — login screen is shown instead
+  // Hide loader immediately — login screen is shown instead
   const lo = document.getElementById('loading-overlay');
   if (lo) { lo.style.display = 'none'; }
 });
 </script>
+<!-- ══ STAT DETAIL MODAL ══ -->
+<div class="modal-overlay" id="stat-modal">
+  <div class="modal stat-modal-inner">
+    <div class="modal-title">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div id="stat-modal-icon" style="font-size:18px"></div>
+        <div>
+          <div id="stat-modal-title" style="font-size:16px;font-weight:700;"></div>
+          <div id="stat-modal-sub" style="font-size:12px;color:var(--muted);font-weight:400;margin-top:1px;"></div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal('stat-modal')">×</button>
+    </div>
+    <!-- Summary strip -->
+    <div id="stat-modal-summary" class="stat-modal-summary"></div>
+    <!-- Content -->
+    <div id="stat-modal-body"></div>
+  </div>
+</div>
+
 </body>
 </html>
