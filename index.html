@@ -180,7 +180,33 @@ tbody td{padding:10px 12px;vertical-align:middle;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
 
-/* CLICKABLE STAT CARDS */
+/* CLICKABLE TABLE ROWS */
+.row-clickable{cursor:pointer;}
+.row-clickable:hover{background:#1e2538 !important;}
+.row-clickable:hover td{color:var(--text);}
+
+/* TASK DETAIL MODAL */
+.task-detail-modal{width:min(620px,96vw);max-height:90vh;overflow-y:auto;}
+.tdm-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+.tdm-title{font-size:17px;font-weight:700;line-height:1.3;flex:1;}
+.tdm-meta{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap;}
+.tdm-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;}
+.tdm-field{padding:11px 14px;border-bottom:1px solid var(--border);}
+.tdm-field:nth-last-child(-n+2){border-bottom:none;}
+.tdm-field:nth-child(odd){border-right:1px solid var(--border);}
+.tdm-field-label{font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;}
+.tdm-field-val{font-size:13px;font-weight:500;}
+.tdm-section{background:#111420;border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px;}
+.tdm-section-label{font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+.tdm-section-text{font-size:13px;line-height:1.6;color:var(--text);}
+.tdm-kpi-row{display:flex;align-items:center;gap:16px;background:#111420;border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px;}
+.tdm-kpi-score{font-size:36px;font-weight:700;font-family:var(--mono);line-height:1;}
+.tdm-kpi-info{flex:1;}
+.tdm-kpi-label{font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
+.tdm-kpi-sub{font-size:12px;color:var(--muted);margin-top:3px;}
+.tdm-actions{display:flex;gap:8px;flex-wrap:wrap;padding-top:4px;}
+
+
 .stat-card-clickable{cursor:pointer;transition:all .2s;}
 .stat-card-clickable:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.35);border-color:rgba(255,255,255,.12);}
 .stat-hint{font-size:10px;color:var(--muted);margin-top:8px;font-family:var(--mono);opacity:0;transition:opacity .2s;letter-spacing:.3px;}
@@ -463,7 +489,32 @@ tbody td{padding:10px 12px;vertical-align:middle;}
     <div class="btn-row"><button class="btn btn-primary" onclick="assignTask()">◆ Assign Task</button></div>
   </div>
   <div class="section">
-    <div class="section-title">All Tasks <span class="badge" id="task-count">0 tasks</span></div>
+    <div class="section-title" style="justify-content:space-between;align-items:center;">
+      <div style="display:flex;align-items:center;gap:8px;">All Tasks <span class="badge" id="task-count">0 tasks</span></div>
+      <button class="btn btn-ghost btn-sm" onclick="exportTasksExcel()" style="display:flex;align-items:center;gap:5px;">⬇ Export Excel</button>
+    </div>
+    <!-- Filters -->
+    <div class="form-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr));margin-bottom:14px;">
+      <div class="form-group">
+        <label>Team</label>
+        <select id="tf-team" onchange="renderTaskTable()"><option value="">All Teams</option></select>
+      </div>
+      <div class="form-group">
+        <label>Employee</label>
+        <select id="tf-emp" onchange="renderTaskTable()"><option value="">All Employees</option></select>
+      </div>
+      <div class="form-group">
+        <label>From Date</label>
+        <input type="date" id="tf-from" onchange="renderTaskTable()"/>
+      </div>
+      <div class="form-group">
+        <label>To Date</label>
+        <input type="date" id="tf-to" onchange="renderTaskTable()"/>
+      </div>
+      <div class="form-group" style="align-self:flex-end;">
+        <button class="btn btn-ghost btn-sm" onclick="clearTaskFilters()" style="width:100%">✕ Clear</button>
+      </div>
+    </div>
     <div class="inner-tabs">
       <div class="inner-tab active" onclick="filterTasks('all',this)">All</div>
       <div class="inner-tab" onclick="filterTasks('Daily',this)">Daily</div>
@@ -472,7 +523,7 @@ tbody td{padding:10px 12px;vertical-align:middle;}
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Task ID</th><th>Date</th><th>Employee</th><th>Area</th><th>Type</th><th>Task Name</th><th>Target</th><th>Status</th><th>KPI</th><th>Admin</th></tr></thead>
+        <thead><tr><th>Task ID</th><th>Assigned Date</th><th>Employee</th><th>Team</th><th>Area</th><th>Type</th><th>Task Name</th><th>Target Date</th><th>Status</th><th>KPI</th><th>Admin</th></tr></thead>
         <tbody id="task-table"></tbody>
       </table>
     </div>
@@ -744,6 +795,7 @@ function fmtDate(v) {
   if (typeof v === 'string' && v.match(/^\d{4}-\d{2}-\d{2}/)) return v.slice(0,10);
   const d = new Date(v);
   if (isNaN(d)) return String(v);
+  // Return YYYY-MM-DD for internal storage; display via formatDate()
   return d.toISOString().slice(0,10);
 }
 
@@ -828,9 +880,15 @@ function kpiBar(k) {
 function todayStr() { return new Date().toISOString().slice(0,10); }
 function formatDate(d) {
   if (!d) return '—';
-  const dt = new Date(d);
-  if (isNaN(dt)) return d;
-  return dt.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+  // Strip time portion if present (e.g. 2026-03-11T10:27:20.000Z → 2026-03-11)
+  const s = typeof d === 'string' ? d.slice(0,10) : d;
+  const parts = String(s).split('-');
+  if (parts.length === 3) return parts[2]+'/'+parts[1]+'/'+parts[0];
+  const dt = new Date(s);
+  if (isNaN(dt)) return String(d);
+  const dd = String(dt.getDate()).padStart(2,'0');
+  const mm = String(dt.getMonth()+1).padStart(2,'0');
+  return dd+'/'+mm+'/'+dt.getFullYear();
 }
 
 // ══════════════════════════════════════════════════
@@ -1082,22 +1140,53 @@ function filterTasks(f, el) {
 
 function renderTaskTable() {
   recalcStatuses();
-  const tasks = taskFilter==='all' ? DB.tasks : DB.tasks.filter(t=>t.taskType===taskFilter);
-  const tb    = document.getElementById('task-table');
-  if (!tasks.length) { tb.innerHTML='<tr><td colspan="10" class="empty-state"><div class="ei">◌</div><p>No tasks yet</p></td></tr>'; return; }
-  tb.innerHTML = tasks.map(t=>`<tr>
+  populateTaskFilters();
+  let tasks = taskFilter==='all' ? [...DB.tasks] : DB.tasks.filter(t=>t.taskType===taskFilter);
+  // Apply extra filters
+  const fTeam = document.getElementById('tf-team')?.value||'';
+  const fEmp  = document.getElementById('tf-emp')?.value||'';
+  const fFrom = document.getElementById('tf-from')?.value||'';
+  const fTo   = document.getElementById('tf-to')?.value||'';
+  if (fTeam) tasks = tasks.filter(t=>{ const s=DB.staff.find(x=>x.empId===t.empId); return (s?.team||'')=== fTeam; });
+  if (fEmp)  tasks = tasks.filter(t=>t.empId===fEmp);
+  if (fFrom) tasks = tasks.filter(t=>t.assignedDate>=fFrom);
+  if (fTo)   tasks = tasks.filter(t=>t.assignedDate<=fTo);
+  const tb = document.getElementById('task-table');
+  if (!tasks.length) { tb.innerHTML='<tr><td colspan="11" class="empty-state"><div class="ei">◌</div><p>No tasks match filters</p></td></tr>'; return; }
+  tb.innerHTML = tasks.map(t=>{
+    const emp  = DB.staff.find(s=>s.empId===t.empId);
+    const team = emp?.team||'—';
+    return `<tr>
     <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${t.id}</td>
-    <td style="font-size:12px;color:var(--muted)">${t.assignedDate}</td>
+    <td style="font-size:12px;color:var(--muted)">${formatDate(t.assignedDate)}</td>
     <td><strong>${t.name}</strong><br><span style="font-size:11px;color:var(--muted)">${t.empId}</span></td>
+    <td><span style="font-size:11px;background:#1a2240;color:var(--accent);padding:2px 7px;border-radius:4px">${team}</span></td>
     <td style="font-size:12px">${t.area}</td>
     <td><span style="font-family:var(--mono);font-size:11px;color:var(--accent3)">${t.taskType}</span></td>
     <td><strong>${t.taskName}</strong></td>
-    <td style="font-family:var(--mono);font-size:12px">${t.targetDate}</td>
+    <td style="font-family:var(--mono);font-size:12px">${formatDate(t.targetDate)}</td>
     <td>${statusBadge(t.status)}</td>
     <td>${kpiBar(t.kpi)}</td>
     <td><button class="btn btn-ghost btn-sm" onclick="openRemarkModal('${t.id}')">+ Remark</button></td>
-  </tr>`).join('');
+  </tr>`;}).join('');
   updateTaskCount();
+}
+
+function populateTaskFilters() {
+  const teamSel = document.getElementById('tf-team');
+  const empSel  = document.getElementById('tf-emp');
+  if (!teamSel || !empSel) return;
+  const curTeam = teamSel.value;
+  const curEmp  = empSel.value;
+  const teams   = [...new Set(DB.staff.map(s=>s.team||'').filter(Boolean))].sort();
+  teamSel.innerHTML = '<option value="">All Teams</option>' + teams.map(t=>`<option value="${t}" ${t===curTeam?'selected':''}>${t}</option>`).join('');
+  const emps = DB.staff.map(s=>`<option value="${s.empId}" ${s.empId===curEmp?'selected':''}>${s.name}</option>`).join('');
+  empSel.innerHTML = '<option value="">All Employees</option>' + emps;
+}
+
+function clearTaskFilters() {
+  ['tf-team','tf-emp','tf-from','tf-to'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  renderTaskTable();
 }
 
 function updateTaskCount() {
@@ -1126,18 +1215,18 @@ function renderStatusTable() {
 
   const tb = document.getElementById('status-table');
   if (!tasks.length) { tb.innerHTML='<tr><td colspan="11" class="empty-state"><div class="ei">◌</div><p>No tasks match filter</p></td></tr>'; return; }
-  tb.innerHTML = tasks.map(t=>`<tr>
+  tb.innerHTML = tasks.map(t=>`<tr class="row-clickable" onclick="openTaskDetailModal('${t.id}')">
     <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${t.id}</td>
     <td><strong>${t.name}</strong></td>
     <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.taskName}</td>
     <td style="font-size:11px;color:var(--accent3);font-family:var(--mono)">${t.taskType}</td>
-    <td style="font-family:var(--mono);font-size:12px">${t.targetDate}</td>
-    <td style="font-family:var(--mono);font-size:12px;color:var(--accent2)">${t.completedDate||'—'}</td>
+    <td style="font-family:var(--mono);font-size:12px">${formatDate(t.targetDate)}</td>
+    <td style="font-family:var(--mono);font-size:12px;color:var(--accent2)">${formatDate(t.completedDate)||'—'}</td>
     <td>${statusBadge(t.status)}</td>
     <td>${kpiBar(t.kpi)}</td>
     <td style="font-family:var(--mono);font-size:12px;color:var(--accent)">${t.score||'—'}</td>
     <td style="font-size:12px;color:var(--muted);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.userRemarks||'—'}</td>
-    <td><button class="btn btn-ghost btn-sm" onclick="openRemarkModal('${t.id}')">Remark</button></td>
+    <td onclick="event.stopPropagation()"><button class="btn btn-ghost btn-sm" onclick="openRemarkModal('${t.id}')">Remark</button></td>
   </tr>`).join('');
 }
 
@@ -1156,7 +1245,7 @@ function renderReminders() {
   list.innerHTML = pending.slice(0,10).map(t=>`<div class="reminder-card">
     <div class="reminder-info">
       <div class="reminder-task">${t.taskName} <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">${t.id}</span></div>
-      <div class="reminder-emp">${t.name} · Target: ${t.targetDate}</div>
+      <div class="reminder-emp">${t.name} · Target: ${formatDate(t.targetDate)}</div>
     </div>
     ${statusBadge(t.status)}
     <button class="btn btn-warning btn-sm" onclick="quickRemind('${t.id}')">⊙ Remind</button>
@@ -1186,27 +1275,11 @@ function quickRemind(id) {
 // EMPLOYEE VIEW
 // ══════════════════════════════════════════════════
 function loadEmpTasks() {
-  const empId = document.getElementById('emp-view-sel').value;
-  if (!empId) { toast('Select an employee','var(--danger)'); return; }
-  recalcStatuses();
-  const tasks = DB.tasks.filter(t=>t.empId===empId);
-  document.getElementById('emp-task-section').style.display = 'block';
-  const tb = document.getElementById('emp-task-table');
-  if (!tasks.length) { tb.innerHTML='<tr><td colspan="9" class="empty-state"><div class="ei">◌</div><p>No tasks assigned to this employee</p></td></tr>'; return; }
-  tb.innerHTML = tasks.map(t=>`<tr>
-    <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${t.id}</td>
-    <td><strong>${t.taskName}</strong></td>
-    <td style="font-size:12px">${t.area}</td>
-    <td style="font-size:11px;color:var(--accent3);font-family:var(--mono)">${t.taskType}</td>
-    <td style="font-size:12px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.workAssigned||'—'}</td>
-    <td style="font-family:var(--mono);font-size:12px">${t.targetDate}</td>
-    <td>${statusBadge(t.status)}</td>
-    <td>${kpiBar(t.kpi)}</td>
-    <td>${t.status!=='Completed'
-      ? `<button class="btn btn-success btn-sm" onclick="openUpdateModal('${t.id}')">✓ Update</button>`
-      : `<span style="color:var(--accent2);font-size:12px">✓ Done</span>`
-    }</td>
-  </tr>`).join('');
+  if (currentUser && currentUser.role === 'employee') {
+    loadEmpTasksForId(currentUser.empId);
+  } else {
+    renderAdminEmpView();
+  }
 }
 
 // ══════════════════════════════════════════════════
@@ -1230,6 +1303,144 @@ function openRemarkModal(id) {
 }
 
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ══════════════════════════════════════════════════
+// TASK DETAIL POPUP
+// ══════════════════════════════════════════════════
+function openTaskDetailModal(id) {
+  const t   = DB.tasks.find(x => x.id === id);
+  if (!t) return;
+  const emp = DB.staff.find(s => s.empId === t.empId);
+  const team = emp?.team || '—';
+
+  // KPI colour
+  const kpiVal = t.kpi !== '' && t.kpi !== undefined ? parseInt(t.kpi) : null;
+  const kpiClr = kpiVal === null ? 'var(--muted)'
+               : kpiVal >= 90   ? 'var(--accent2)'
+               : kpiVal >= 70   ? 'var(--accent3)'
+               :                  'var(--danger)';
+
+  // Days overdue / days left
+  let timeInfo = '';
+  if (t.status === 'Completed' && t.completedDate && t.targetDate) {
+    const diff = Math.ceil((new Date(t.completedDate) - new Date(t.targetDate)) / (1000*60*60*24));
+    timeInfo = diff < 0  ? `<span style="color:var(--accent2);font-size:11px">✓ Completed ${Math.abs(diff)}d early</span>`
+             : diff === 0? `<span style="color:var(--accent2);font-size:11px">✓ Completed on target date</span>`
+             :              `<span style="color:var(--accent3);font-size:11px">⚠ Completed ${diff}d late</span>`;
+  } else if (t.status === 'Missed') {
+    const diff = Math.ceil((new Date() - new Date(t.targetDate)) / (1000*60*60*24));
+    timeInfo = `<span style="color:var(--danger);font-size:11px">⚠ ${diff}d overdue</span>`;
+  } else if (t.status === 'Pending' && t.targetDate) {
+    const diff = Math.ceil((new Date(t.targetDate) - new Date()) / (1000*60*60*24));
+    timeInfo = diff === 0 ? `<span style="color:var(--danger);font-size:11px">⚡ Due today</span>`
+             : diff === 1 ? `<span style="color:var(--accent3);font-size:11px">⚡ Due tomorrow</span>`
+             : diff > 0   ? `<span style="color:var(--muted);font-size:11px">◎ ${diff}d remaining</span>`
+             :              `<span style="color:var(--danger);font-size:11px">⚠ Overdue</span>`;
+  }
+
+  // Is employee view
+  const isEmp = currentUser && currentUser.role === 'employee';
+
+  const html = `
+    <div class="tdm-header">
+      <div style="flex:1">
+        <div class="tdm-title">${t.taskName}</div>
+        <div class="tdm-meta">
+          ${statusBadge(t.status)}
+          <span style="font-size:11px;font-family:var(--mono);color:var(--muted)">${t.id}</span>
+          <span style="font-size:11px;font-family:var(--mono);color:var(--accent3)">${t.taskType}</span>
+          ${timeInfo}
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal('task-detail-modal')" style="flex-shrink:0">×</button>
+    </div>
+
+    <!-- Key Fields Grid -->
+    <div class="tdm-grid">
+      <div class="tdm-field">
+        <div class="tdm-field-label">Employee</div>
+        <div class="tdm-field-val">${t.name}<br><span style="font-size:11px;color:var(--muted);font-family:var(--mono)">${t.empId}</span></div>
+      </div>
+      <div class="tdm-field">
+        <div class="tdm-field-label">Team</div>
+        <div class="tdm-field-val"><span style="background:#1a2240;color:var(--accent);padding:2px 9px;border-radius:4px;font-size:12px">${team}</span></div>
+      </div>
+      <div class="tdm-field">
+        <div class="tdm-field-label">Area of Work</div>
+        <div class="tdm-field-val">${t.area || '—'}</div>
+      </div>
+      <div class="tdm-field">
+        <div class="tdm-field-label">Task Type</div>
+        <div class="tdm-field-val" style="color:var(--accent3);font-family:var(--mono)">${t.taskType}</div>
+      </div>
+      <div class="tdm-field">
+        <div class="tdm-field-label">Assigned Date</div>
+        <div class="tdm-field-val" style="font-family:var(--mono)">${formatDate(t.assignedDate) || '—'}</div>
+      </div>
+      <div class="tdm-field">
+        <div class="tdm-field-label">Target Date</div>
+        <div class="tdm-field-val" style="font-family:var(--mono)">${formatDate(t.targetDate) || '—'}</div>
+      </div>
+      ${t.completedDate ? `
+      <div class="tdm-field">
+        <div class="tdm-field-label">Completed Date</div>
+        <div class="tdm-field-val" style="font-family:var(--mono);color:var(--accent2)">${formatDate(t.completedDate)}</div>
+      </div>
+      <div class="tdm-field">
+        <div class="tdm-field-label">Score</div>
+        <div class="tdm-field-val" style="font-family:var(--mono);color:var(--accent)">${t.score || '—'}</div>
+      </div>` : ''}
+    </div>
+
+    <!-- KPI -->
+    ${kpiVal !== null ? `
+    <div class="tdm-kpi-row">
+      <div class="tdm-kpi-score" style="color:${kpiClr}">${kpiVal}</div>
+      <div class="tdm-kpi-info">
+        <div class="tdm-kpi-label">KPI Score</div>
+        <div class="tdm-kpi-sub">${kpiVal === 100 ? 'Excellent — completed before target' : kpiVal === 90 ? 'Good — completed on target date' : kpiVal === 70 ? 'Average — completed after target' : kpiVal === 0 ? 'Missed — no completion recorded' : ''}</div>
+        <div style="margin-top:8px;background:#1a1e2a;border-radius:4px;height:6px;overflow:hidden;width:100%">
+          <div style="height:100%;width:${kpiVal}%;background:${kpiClr};border-radius:4px;transition:width .4s"></div>
+        </div>
+      </div>
+    </div>` : ''}
+
+    <!-- Work Assigned -->
+    ${t.workAssigned ? `
+    <div class="tdm-section">
+      <div class="tdm-section-label">Work Assigned</div>
+      <div class="tdm-section-text">${t.workAssigned}</div>
+    </div>` : ''}
+
+    <!-- User Remarks -->
+    ${t.userRemarks ? `
+    <div class="tdm-section">
+      <div class="tdm-section-label">Employee Remarks</div>
+      <div class="tdm-section-text">${t.userRemarks}</div>
+    </div>` : ''}
+
+    <!-- Admin Remarks -->
+    ${t.adminRemarks ? `
+    <div class="tdm-section" style="border-color:#243060">
+      <div class="tdm-section-label" style="color:var(--accent)">Admin Remarks</div>
+      <div class="tdm-section-text">${t.adminRemarks}</div>
+    </div>` : ''}
+
+    <!-- Actions -->
+    <div class="tdm-actions">
+      ${t.status !== 'Completed' && isEmp
+        ? `<button class="btn btn-success btn-sm" onclick="closeModal('task-detail-modal');openUpdateModal('${t.id}')">✓ Mark Complete</button>`
+        : ''}
+      ${!isEmp
+        ? `<button class="btn btn-ghost btn-sm" onclick="closeModal('task-detail-modal');openRemarkModal('${t.id}')">+ Add Remark</button>`
+        : ''}
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('task-detail-modal')">Close</button>
+    </div>
+  `;
+
+  document.getElementById('tdm-content').innerHTML = html;
+  document.getElementById('task-detail-modal').classList.add('open');
+}
 
 async function submitUpdate() {
   const id      = document.getElementById('modal-task-id').value;
@@ -1378,23 +1589,24 @@ function openStatModal(type) {
       <div class="sms-chip"><div class="sms-val" style="color:var(--accent)">${daily}</div><div class="sms-lbl">Daily</div></div>
       <div class="sms-chip"><div class="sms-val" style="color:var(--accent2)">${weekly}</div><div class="sms-lbl">Weekly</div></div>
       <div class="sms-chip"><div class="sms-val" style="color:var(--accent3)">${monthly}</div><div class="sms-lbl">Monthly</div></div>`;
-    const rows = DB.staff.map(s => {
-      const st = tasks.filter(t=>t.empId===s.empId);
-      const d=st.filter(t=>t.taskType==='Daily').length, w=st.filter(t=>t.taskType==='Weekly').length, m=st.filter(t=>t.taskType==='Monthly').length;
-      const compRate = st.length ? Math.round((st.filter(t=>t.status==='Completed').length/st.length)*100) : 0;
-      const clr = compRate>=80?'var(--accent2)':compRate>=50?'var(--accent3)':'var(--danger)';
+    const rows = tasks.sort((a,b)=>(b.assignedDate||'').localeCompare(a.assignedDate||'')).map(t => {
+      const emp = DB.staff.find(s=>s.empId===t.empId);
+      const team = emp?.team||'—';
       return `<tr>
-        <td><strong>${s.name}</strong><br><span style="font-size:10px;color:var(--muted)">${s.empId}</span></td>
-        <td style="font-family:var(--mono);font-weight:600;color:var(--accent)">${st.length}</td>
-        <td style="font-family:var(--mono)">${d}</td>
-        <td style="font-family:var(--mono)">${w}</td>
-        <td style="font-family:var(--mono)">${m}</td>
-        <td>${mBar(compRate, clr)}</td>
+        <td style="font-family:var(--mono);font-size:10px;color:var(--muted)">${t.id}</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${formatDate(t.assignedDate)}</td>
+        <td><strong>${t.name}</strong><br><span style="font-size:10px;color:var(--muted)">${t.empId}</span></td>
+        <td><span style="font-size:10px;background:#1a2240;color:var(--accent);padding:1px 6px;border-radius:4px">${team}</span></td>
+        <td style="font-size:11px;color:var(--muted)">${t.area}</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--accent3)">${t.taskType}</td>
+        <td><strong style="font-size:12px">${t.taskName}</strong></td>
+        <td style="font-family:var(--mono);font-size:11px">${formatDate(t.targetDate)}</td>
+        <td>${statusBadge(t.status)}</td>
       </tr>`;
-    }).join('') || '<tr><td colspan="6" class="empty-state"><p>No data</p></td></tr>';
-    bodyHTML = `<div class="stat-modal-section">Per Employee Breakdown</div>
+    }).join('') || '<tr><td colspan="9" class="empty-state"><p>No tasks assigned yet</p></td></tr>';
+    bodyHTML = `<div class="stat-modal-section">All Assigned Tasks · Sorted by Latest First</div>
       <div style="overflow-x:auto"><table class="stat-detail-table">
-        <thead><tr><th>Employee</th><th>Total</th><th>Daily</th><th>Weekly</th><th>Monthly</th><th>Completion</th></tr></thead>
+        <thead><tr><th>Task ID</th><th>Assigned</th><th>Employee</th><th>Team</th><th>Area</th><th>Type</th><th>Task Name</th><th>Target Date</th><th>Status</th></tr></thead>
         <tbody>${rows}</tbody>
       </table></div>`;
   }
@@ -1415,8 +1627,8 @@ function openStatModal(type) {
         <td><strong>${t.taskName}</strong></td>
         <td style="color:var(--muted);font-size:11px">${t.name}</td>
         <td style="font-family:var(--mono);font-size:11px;color:var(--accent3)">${t.taskType}</td>
-        <td style="font-family:var(--mono);font-size:11px">${t.targetDate}</td>
-        <td style="font-family:var(--mono);font-size:11px;color:var(--accent2)">${t.completedDate}</td>
+        <td style="font-family:var(--mono);font-size:11px">${formatDate(t.targetDate)}</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--accent2)">${formatDate(t.completedDate)}</td>
         <td><span style="font-size:10px;padding:2px 7px;border-radius:10px;${isLate?'background:#2a2010;color:var(--accent3);border:1px solid #3a2e15':'background:#1a3328;color:var(--accent2);border:1px solid #244030'}">${isLate?'Late':'On Time'}</span></td>
         <td>${kpiBar(t.kpi)}</td>
       </tr>`;
@@ -1445,7 +1657,7 @@ function openStatModal(type) {
         <td><strong>${t.taskName}</strong></td>
         <td style="color:var(--muted);font-size:11px">${t.name}</td>
         <td style="font-family:var(--mono);font-size:11px;color:var(--accent3)">${t.taskType}</td>
-        <td style="font-family:var(--mono);font-size:11px">${t.targetDate}</td>
+        <td style="font-family:var(--mono);font-size:11px">${formatDate(t.targetDate)}</td>
         <td style="font-family:var(--mono);font-size:11px;color:${urgClr};font-weight:600">${daysLeft!==null?(daysLeft===0?'Today':daysLeft===1?'Tomorrow':daysLeft>0?daysLeft+'d left':'Overdue'):'—'}</td>
       </tr>`;
     }).join('') || '<tr><td colspan="6" class="empty-state"><p>No pending tasks</p></td></tr>';
@@ -1474,7 +1686,7 @@ function openStatModal(type) {
         <td><strong>${t.taskName}</strong></td>
         <td style="color:var(--muted);font-size:11px">${t.name}</td>
         <td style="font-family:var(--mono);font-size:11px;color:var(--accent3)">${t.taskType}</td>
-        <td style="font-family:var(--mono);font-size:11px">${t.targetDate}</td>
+        <td style="font-family:var(--mono);font-size:11px">${formatDate(t.targetDate)}</td>
         <td style="font-family:var(--mono);font-size:11px;color:var(--danger);font-weight:600">${daysOver!==null?daysOver+'d overdue':'—'}</td>
         <td style="font-size:11px;color:var(--muted);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.workAssigned||'—'}</td>
       </tr>`;
@@ -1560,6 +1772,48 @@ function openStatModal(type) {
   document.getElementById('stat-modal-summary').innerHTML = summaryHTML;
   document.getElementById('stat-modal-body').innerHTML    = bodyHTML;
   document.getElementById('stat-modal').classList.add('open');
+}
+
+// ══════════════════════════════════════════════════
+// EXPORT TASKS TO EXCEL (CSV-based, opens in Excel)
+// ══════════════════════════════════════════════════
+function exportTasksExcel() {
+  recalcStatuses();
+  // Apply same filters as current view
+  let tasks = taskFilter==='all' ? [...DB.tasks] : DB.tasks.filter(t=>t.taskType===taskFilter);
+  const fTeam = document.getElementById('tf-team')?.value||'';
+  const fEmp  = document.getElementById('tf-emp')?.value||'';
+  const fFrom = document.getElementById('tf-from')?.value||'';
+  const fTo   = document.getElementById('tf-to')?.value||'';
+  if (fTeam) tasks = tasks.filter(t=>{ const s=DB.staff.find(x=>x.empId===t.empId); return (s?.team||'')===fTeam; });
+  if (fEmp)  tasks = tasks.filter(t=>t.empId===fEmp);
+  if (fFrom) tasks = tasks.filter(t=>t.assignedDate>=fFrom);
+  if (fTo)   tasks = tasks.filter(t=>t.assignedDate<=fTo);
+
+  const headers = ['Task ID','Assigned Date','Employee Name','Emp ID','Team','Area of Work','Task Type','Task Name','Work Assigned','Target Date','Completed Date','Status','KPI','Score','User Remarks','Admin Remarks'];
+  const esc = v => '"' + String(v||'').replace(/"/g,'""') + '"';
+  const rows = tasks.map(t => {
+    const emp = DB.staff.find(s=>s.empId===t.empId);
+    return [
+      t.id, formatDate(t.assignedDate), t.name, t.empId,
+      emp?.team||'', t.area, t.taskType, t.taskName, t.workAssigned||'',
+      formatDate(t.targetDate), formatDate(t.completedDate)||'',
+      t.status, t.kpi!==''?t.kpi:'', t.score||'',
+      t.userRemarks||'', t.adminRemarks||''
+    ].map(esc).join(',');
+  });
+
+  const csv = [headers.map(esc).join(','), ...rows].join('\r\n');
+  const BOM = '\uFEFF'; // UTF-8 BOM so Excel reads it correctly
+  const blob = new Blob([BOM+csv], {type:'text/csv;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const dateStr = formatDate(todayStr());
+  a.href     = url;
+  a.download = `Tasks_Export_${dateStr.replace(/\//g,'-')}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('✓ Exported ' + tasks.length + ' tasks to Excel');
 }
 
 // ══════════════════════════════════════════════════
@@ -1698,16 +1952,16 @@ function loadEmpTasksForId(empId) {
     tb.innerHTML = '<tr><td colspan="9" class="empty-state"><div class="ei">◌</div><p>No tasks assigned yet</p></td></tr>';
     return;
   }
-  tb.innerHTML = tasks.map(t => `<tr>
+  tb.innerHTML = tasks.map(t => `<tr class="row-clickable" onclick="openTaskDetailModal('${t.id}')">
     <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${t.id}</td>
     <td><strong>${t.taskName}</strong></td>
     <td style="font-size:12px">${t.area}</td>
     <td style="font-size:11px;color:var(--accent3);font-family:var(--mono)">${t.taskType}</td>
     <td style="font-size:12px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.workAssigned||'—'}</td>
-    <td style="font-family:var(--mono);font-size:12px">${t.targetDate}</td>
+    <td style="font-family:var(--mono);font-size:12px">${formatDate(t.targetDate)}</td>
     <td>${statusBadge(t.status)}</td>
     <td>${kpiBar(t.kpi)}</td>
-    <td>${t.status!=='Completed'
+    <td onclick="event.stopPropagation()">${t.status!=='Completed'
       ? `<button class="btn btn-success btn-sm" onclick="openUpdateModal('${t.id}')">✓ Update</button>`
       : `<span style="color:var(--accent2);font-size:12px">✓ Done</span>`
     }</td>
@@ -1728,27 +1982,17 @@ function renderAdminEmpView() {
     tb.innerHTML = '<tr><td colspan="9" class="empty-state"><div class="ei">◌</div><p>No tasks found</p></td></tr>';
     return;
   }
-  tb.innerHTML = tasks.map(t => `<tr>
+  tb.innerHTML = tasks.map(t => `<tr class="row-clickable" onclick="openTaskDetailModal('${t.id}')">
     <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${t.id}</td>
     <td><strong>${t.taskName}</strong><br><span style="font-size:11px;color:var(--muted)">${t.name}</span></td>
     <td style="font-size:12px">${t.area}</td>
     <td style="font-size:11px;color:var(--accent3);font-family:var(--mono)">${t.taskType}</td>
     <td style="font-size:12px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.workAssigned||'—'}</td>
-    <td style="font-family:var(--mono);font-size:12px">${t.targetDate}</td>
+    <td style="font-family:var(--mono);font-size:12px">${formatDate(t.targetDate)}</td>
     <td>${statusBadge(t.status)}</td>
     <td>${kpiBar(t.kpi)}</td>
-    <td><button class="btn btn-ghost btn-sm" onclick="openRemarkModal('${t.id}')">+ Remark</button></td>
+    <td onclick="event.stopPropagation()"><button class="btn btn-ghost btn-sm" onclick="openRemarkModal('${t.id}')">+ Remark</button></td>
   </tr>`).join('');
-}
-
-// Override loadEmpTasks so it respects employee login restriction
-const _origLoadEmpTasks = loadEmpTasks;
-function loadEmpTasks() {
-  if (currentUser && currentUser.role === 'employee') {
-    loadEmpTasksForId(currentUser.empId);
-  } else {
-    renderAdminEmpView();
-  }
 }
 
 // ══════════════════════════════════════════════════
@@ -1787,7 +2031,7 @@ function renderEmpDashboard() {
   rt.innerHTML = recent.length ? recent.map(t => `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
     <div>
       <div style="font-size:13px;font-weight:600">${t.taskName}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:2px">${t.taskType} · Target: ${t.targetDate}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">${t.taskType} · Target: ${formatDate(t.targetDate)}</div>
     </div>
     <div style="display:flex;align-items:center;gap:10px">${statusBadge(t.status)}${t.status!=='Completed'?`<button class="btn btn-success btn-sm" onclick="openUpdateModal('${t.id}');showPage('emp')">✓</button>`:''}</div>
   </div>`).join('') : '<div class="empty-state"><div class="ei">◌</div><p>No tasks yet</p></div>';
@@ -1852,6 +2096,13 @@ window.addEventListener('DOMContentLoaded', () => {
     <div id="stat-modal-summary" class="stat-modal-summary"></div>
     <!-- Content -->
     <div id="stat-modal-body"></div>
+  </div>
+</div>
+
+<!-- ══ TASK DETAIL MODAL ══ -->
+<div class="modal-overlay" id="task-detail-modal">
+  <div class="modal task-detail-modal">
+    <div id="tdm-content"></div>
   </div>
 </div>
 
