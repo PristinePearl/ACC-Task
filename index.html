@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ACC TASK MANAGER</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0d0f14;--surface:#151820;--card:#1c2030;--border:#272b3a;
+  --accent:#4f8ef7;--accent2:#38d9a9;--accent3:#f5a623;--danger:#f06464;
+  --text:#e8eaf0;--muted:#7a809a;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;display:flex;flex-direction:column;}
+
+/* LOADING OVERLAY */
+#loading-overlay{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .4s;}
+#loading-overlay.hide{opacity:0;pointer-events:none;}
+.loader-ring{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-text{font-size:13px;color:var(--muted);font-family:var(--mono);}
+.loader-brand{font-size:18px;font-weight:700;color:var(--text);}
+
+/* TOPBAR */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:100;}
+.topbar-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;letter-spacing:.3px;}
+.topbar-brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);}
+.topbar-meta{font-size:12px;color:var(--muted);font-family:var(--mono);}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.sync-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:6px;font-size:12px;font-family:var(--mono);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;}
+.sync-btn:hover{border-color:var(--accent2);color:var(--accent2);}
+.sync-btn.syncing{border-color:var(--accent3);color:var(--accent3);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.gs-dot{width:7px;height:7px;border-radius:50%;background:var(--accent2);box-shadow:0 0 6px var(--accent2);}
+.gs-dot.red{background:var(--danger);box-shadow:0 0 6px var(--danger);}
+.gs-label{font-size:11px;color:var(--muted);font-family:var(--mono);}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;}
+
+/* SIDEBAR */
+.sidebar{width:210px;background:var(--surface);border-right:1px solid var(--border);padding:18px 0;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;flex-shrink:0;}
+.nav-grp{padding:0 14px 8px;font-size:10px;font-family:var(--mono);color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:6px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;cursor:pointer;border-left:3px solid transparent;transition:all .2s;color:var(--muted);user-select:none;}
+.nav-item:hover{background:#1c2030;color:var(--text);}
+.nav-item.active{border-left-color:var(--accent);background:#1a2240;color:var(--accent);font-weight:600;}
+.nav-item .ni{font-size:15px;}
+.nav-divider{border:none;border-top:1px solid var(--border);margin:10px 0;}
+
+/* MAIN */
+.main{flex:1;padding:28px;overflow-y:auto;min-height:calc(100vh - 58px);}
+.page{display:none;}
+.page.active{display:block;animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* HEADER */
+.page-header{margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.page-title{font-size:22px;font-weight:700;letter-spacing:-.3px;}
+.page-sub{font-size:13px;color:var(--muted);margin-top:3px;}
+
+/* STAT CARDS */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:14px;margin-bottom:26px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.stat-card.blue::before{background:var(--accent);}
+.stat-card.green::before{background:var(--accent2);}
+.stat-card.orange::before{background:var(--accent3);}
+.stat-card.red::before{background:var(--danger);}
+.stat-label{font-size:11px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;}
+.stat-value{font-size:30px;font-weight:700;margin-top:6px;line-height:1;}
+.stat-value.blue{color:var(--accent);}
+.stat-value.green{color:var(--accent2);}
+.stat-value.orange{color:var(--accent3);}
+.stat-value.red{color:var(--danger);}
+.stat-delta{font-size:11px;color:var(--muted);margin-top:4px;}
+
+/* SECTION */
+.section{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px;}
+.section-title{font-size:13px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.section-title .badge{font-size:10px;background:#1a2240;color:var(--accent);padding:2px 8px;border-radius:20px;font-family:var(--mono);}
+.section-title .badge-green{background:#1a3328;color:var(--accent2);}
+
+/* FORMS */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group.full{grid-column:1/-1;}
+label{font-size:12px;color:var(--muted);font-weight:500;}
+input,select,textarea{background:#111420;border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px;font-family:var(--font);outline:none;transition:border-color .2s;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+input[readonly]{opacity:.6;cursor:default;}
+textarea{resize:vertical;min-height:72px;}
+select option{background:#111420;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .18s;font-family:var(--font);}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#3a7de8;}
+.btn-success{background:var(--accent2);color:#0d2a22;}
+.btn-success:hover{background:#2cc49a;}
+.btn-warning{background:var(--accent3);color:#2a1f00;}
+.btn-warning:hover{opacity:.9;}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-danger:hover{opacity:.9;}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);}
+.btn-ghost:hover{color:var(--text);border-color:var(--text);}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{text-align:left;padding:10px 12px;font-size:11px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);background:#111420;white-space:nowrap;}
+tbody tr{border-bottom:1px solid #1a1e2a;transition:background .15s;}
+tbody tr:hover{background:#181d2a;}
+tbody td{padding:10px 12px;vertical-align:middle;}
+
+/* BADGES */
+.badge-status{font-size:11px;padding:3px 10px;border-radius:20px;font-family:var(--mono);font-weight:500;white-space:nowrap;}
+.badge-completed{background:#1a3328;color:var(--accent2);border:1px solid #244030;}
+.badge-pending{background:#2a2010;color:var(--accent3);border:1px solid #3a2e15;}
+.badge-missed{background:#2a1515;color:var(--danger);border:1px solid #3a2020;}
+
+/* KPI BAR */
+.kpi-bar-wrap{display:flex;align-items:center;gap:8px;}
+.kpi-bar{height:5px;width:70px;background:#1a1e2a;border-radius:3px;overflow:hidden;}
+.kpi-bar-fill{height:100%;border-radius:3px;}
+.kpi-num{font-family:var(--mono);font-size:12px;font-weight:500;min-width:28px;}
+
+/* ALERT */
+.alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px;}
+.alert-info{background:#1a2240;border:1px solid #243060;color:#a0b4f0;}
+.alert-warn{background:#2a2010;border:1px solid #3a2e15;color:#f5c97a;}
+.alert-success{background:#1a3328;border:1px solid #244030;color:#6ee3bc;}
+
+/* REMINDER CARD */
+.reminder-card{background:#111420;border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.reminder-info{flex:1;}
+.reminder-task{font-weight:600;font-size:13px;}
+.reminder-emp{font-size:12px;color:var(--muted);margin-top:2px;}
+
+/* CHART */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.chart-box{background:#111420;border:1px solid var(--border);border-radius:8px;padding:16px;}
+.chart-title{font-size:12px;color:var(--muted);font-family:var(--mono);margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px;}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:120px;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;}
+.bar-fill{width:100%;border-radius:4px 4px 0 0;min-height:4px;transition:height .4s ease;}
+.bar-label{font-size:10px;color:var(--muted);font-family:var(--mono);text-align:center;}
+.bar-val{font-size:10px;font-family:var(--mono);}
+
+/* PERF */
+.perf-score{display:flex;align-items:center;gap:8px;}
+.perf-ring{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-family:var(--mono);font-weight:600;border:2px solid;}
+
+/* INNER TABS */
+.inner-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px;overflow-x:auto;}
+.inner-tab{padding:9px 18px;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;color:var(--muted);transition:all .18s;white-space:nowrap;}
+.inner-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px;width:min(520px,95vw);max-height:90vh;overflow-y:auto;animation:fadeIn .2s ease;}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;}
+.modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--accent2);color:var(--accent2);padding:12px 20px;border-radius:8px;font-size:13px;z-index:1000;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;max-width:320px;}
+#toast.show{opacity:1;transform:translateY(0);}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty-state .ei{font-size:32px;margin-bottom:8px;}
+.empty-state p{font-size:13px;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
+
+@media(max-width:700px){
+  .sidebar{display:none;}
+  .chart-grid{grid-template-columns:1fr;}
+  .form-grid{grid-template-columns:1fr;}
+  .topbar-meta{display:none;}
+}
+
+/* ══ LOGIN SCREEN ══ */
+#login-screen{
+  position:fixed;inset:0;background:var(--bg);z-index:99999;
+  display:flex;align-items:center;justify-content:center;
+  animation:fadeIn .3s ease;
+}
+#login-screen.hidden{display:none;}
+.login-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:40px 36px;width:min(420px,94vw);
+}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;}
+.login-logo .dot{width:11px;height:11px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);}
+.login-logo-text{font-size:17px;font-weight:700;letter-spacing:.2px;}
+.login-title{font-size:22px;font-weight:700;margin-bottom:4px;}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:28px;}
+.login-field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.login-field label{font-size:12px;color:var(--muted);font-weight:500;}
+.login-field input{
+  background:#111420;border:1px solid var(--border);color:var(--text);
+  padding:11px 14px;border-radius:8px;font-size:14px;font-family:var(--font);
+  outline:none;transition:border-color .2s;
+}
+.login-field input:focus{border-color:var(--accent);}
+.login-btn{
+  width:100%;padding:12px;background:var(--accent);color:#fff;border:none;
+  border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;
+  font-family:var(--font);margin-top:8px;transition:background .18s;
+}
+.login-btn:hover{background:#3a7de8;}
+.login-error{
+  background:#2a1515;border:1px solid #3a2020;color:var(--danger);
+  padding:10px 14px;border-radius:8px;font-size:13px;margin-top:14px;
+  display:none;
+}
+.login-error.show{display:block;}
+.login-footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px;font-family:var(--mono);}
+/* logout btn */
+.logout-btn{
+  background:none;border:1px solid var(--border);color:var(--muted);
+  padding:5px 12px;border-radius:6px;font-size:12px;font-family:var(--mono);
+  cursor:pointer;transition:all .2s;
+}
+.logout-btn:hover{border-color:var(--danger);color:var(--danger);}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN SCREEN ══ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="dot"></div>
+      <div class="login-logo-text">ACC TASK MANAGER</div>
+    </div>
+    <div class="login-title">Welcome back</div>
+    <div class="login-sub">Sign in to continue</div>
+    <div class="login-field">
+      <label>Username / Employee ID</label>
+      <input type="text" id="login-user" placeholder="Enter username or Emp ID" autocomplete="username"/>
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="login-pass" placeholder="Enter password" autocomplete="current-password"/>
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign In →</button>
+    <div class="login-error" id="login-error">Incorrect username or password. Please try again.</div>
+    <div class="login-footer">Accounts Department · Internal Portal</div>
+  </div>
+</div>
+
+
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay">
+  <div class="loader-brand">ACC TASK MANAGER</div>
+  <div class="loader-ring"></div>
+  <div class="loader-text" id="load-msg">Connecting to Google Sheets...</div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="dot"></div>
+    ACC Task Manager
+  </div>
+  <div class="topbar-meta" id="clock"></div>
+  <div class="topbar-right">
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div class="gs-dot" id="gs-dot"></div>
+      <span class="gs-label" id="gs-label">Connecting...</span>
+    </div>
+    <button class="sync-btn" id="sync-btn" onclick="fullSync()">↻ Sync</button>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="avatar" id="topbar-avatar">?</div>
+      <span style="font-size:12px;color:var(--muted);font-family:var(--mono)" id="topbar-username"></span>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">⏻ Logout</button>
+  </div>
+</div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="main-sidebar">
+  <!-- Admin nav (shown only to admin) -->
+  <div id="admin-nav">
+    <div class="nav-grp">Manager</div>
+    <div class="nav-item active" data-page="dashboard"><span class="ni">◈</span> Dashboard</div>
+    <div class="nav-item" data-page="team"><span class="ni">◎</span> Team Master</div>
+    <div class="nav-item" data-page="aow"><span class="ni">◉</span> Area of Work</div>
+    <div class="nav-item" data-page="assign"><span class="ni">◆</span> Task Assignment</div>
+    <div class="nav-item" data-page="status"><span class="ni">◇</span> Task Status</div>
+    <div class="nav-item" data-page="reminders"><span class="ni">◍</span> Reminders</div>
+    <hr class="nav-divider"/>
+  </div>
+  <!-- Employee nav (always shown) -->
+  <div id="emp-nav">
+    <div class="nav-grp" id="emp-nav-grp">Employee</div>
+    <div class="nav-item" data-page="emp" id="nav-my-tasks"><span class="ni">▷</span> My Tasks</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- ══ DASHBOARD ══ -->
+<div class="page active" id="page-dashboard">
+  <div class="page-header">
+    <div><div class="page-title">Performance Dashboard</div><div class="page-sub">Accounts Department · Live Data</div></div>
+    <button class="btn btn-ghost btn-sm" onclick="fullSync()">↻ Refresh</button>
+  </div>
+  <div class="stat-grid">
+    <div class="stat-card blue"><div class="stat-label">Total Tasks</div><div class="stat-value blue" id="s-total">—</div><div class="stat-delta">All assigned</div></div>
+    <div class="stat-card green"><div class="stat-label">Completed</div><div class="stat-value green" id="s-done">—</div><div class="stat-delta">On time / Late</div></div>
+    <div class="stat-card orange"><div class="stat-label">Pending</div><div class="stat-value orange" id="s-pending">—</div><div class="stat-delta">In progress</div></div>
+    <div class="stat-card red"><div class="stat-label">Missed</div><div class="stat-value red" id="s-missed">—</div><div class="stat-delta">Past target date</div></div>
+    <div class="stat-card blue"><div class="stat-label">Avg KPI</div><div class="stat-value blue" id="s-kpi">—</div><div class="stat-delta">Team average</div></div>
+    <div class="stat-card green"><div class="stat-label">Team Size</div><div class="stat-value green" id="s-team">—</div><div class="stat-delta">Active employees</div></div>
+  </div>
+  <div class="chart-grid">
+    <div class="chart-box"><div class="chart-title">KPI by Employee</div><div class="bar-chart" id="kpi-chart"><div style="color:var(--muted);font-size:13px;align-self:center">Loading...</div></div></div>
+    <div class="chart-box"><div class="chart-title">Tasks by Type</div><div class="bar-chart" id="type-chart"><div style="color:var(--muted);font-size:13px;align-self:center">Loading...</div></div></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Employee Performance Summary <span class="badge">Live from DB Sheet</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Employee</th><th>Tasks</th><th>Completed</th><th>Missed</th><th>Daily KPI</th><th>Weekly KPI</th><th>Monthly KPI</th><th>Overall</th></tr></thead>
+        <tbody id="perf-table"><tr><td colspan="8" class="empty-state"><div class="ei">◌</div><p>Loading performance data...</p></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TEAM MASTER ══ -->
+<div class="page" id="page-team">
+  <div class="page-header">
+    <div><div class="page-title">Team Master</div><div class="page-sub">Employee records · STAFF Sheet</div></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Add New Employee</div>
+    <div class="form-grid">
+      <div class="form-group"><label>EMP ID *</label><input id="emp-id" placeholder="e.g. 17518"/></div>
+      <div class="form-group"><label>Full Name *</label><input id="emp-name" placeholder="Employee name"/></div>
+      <div class="form-group"><label>Designation</label><input id="emp-desig" placeholder="e.g. Accounts Executive"/></div>
+      <div class="form-group"><label>Team</label><input id="emp-team" placeholder="e.g. Accounts"/></div>
+      <div class="form-group"><label>Date of Joining</label><input type="date" id="emp-doj"/></div>
+      <div class="form-group"><label>Email</label><input type="email" id="emp-email" placeholder="emp@company.com"/></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="addEmployee()">＋ Add Employee</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">Employee List <span class="badge" id="emp-count">0 staff</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>EMP ID</th><th>Name</th><th>Designation</th><th>Team</th><th>DOJ</th><th>Email</th><th></th></tr></thead>
+        <tbody id="emp-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ AREA OF WORK ══ -->
+<div class="page" id="page-aow">
+  <div class="page-header">
+    <div><div class="page-title">Area of Work</div><div class="page-sub">Assign responsibilities · AREA_OF_WORK Sheet</div></div>
+  </div>
+  <div class="alert alert-info">⊙ Employees only receive tasks from their assigned responsibility areas.</div>
+  <div class="section">
+    <div class="section-title">Assign Area of Work</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Employee *</label><select id="aow-emp"><option value="">— Select Employee —</option></select></div>
+      <div class="form-group"><label>Area of Work *</label><input id="aow-area" placeholder="e.g. Banking, GST, Payroll"/></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="addAoW()">＋ Assign</button></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Responsibility Matrix <span class="badge" id="aow-count">0 assignments</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>EMP ID</th><th>Name</th><th>Area of Work</th><th></th></tr></thead>
+        <tbody id="aow-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TASK ASSIGNMENT ══ -->
+<div class="page" id="page-assign">
+  <div class="page-header">
+    <div><div class="page-title">Task Assignment</div><div class="page-sub">Create and assign tasks · TASK Sheet</div></div>
+  </div>
+  <div class="section">
+    <div class="section-title">New Task</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Employee *</label><select id="t-emp" onchange="fillAreaFromEmp()"><option value="">— Select Employee —</option></select></div>
+      <div class="form-group"><label>Area of Work</label><select id="t-area"><option>— Select employee first —</option></select></div>
+      <div class="form-group"><label>Task Type *</label><select id="t-type"><option>Daily</option><option>Weekly</option><option>Monthly</option></select></div>
+      <div class="form-group"><label>Task Name *</label><input id="t-name" placeholder="e.g. Bank Reconciliation"/></div>
+      <div class="form-group full"><label>Work Assigned</label><textarea id="t-work" placeholder="Describe the work to be completed..."></textarea></div>
+      <div class="form-group"><label>Target Date *</label><input type="date" id="t-target"/></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="assignTask()">◆ Assign Task</button></div>
+  </div>
+  <div class="section">
+    <div class="section-title">All Tasks <span class="badge" id="task-count">0 tasks</span></div>
+    <div class="inner-tabs">
+      <div class="inner-tab active" onclick="filterTasks('all',this)">All</div>
+      <div class="inner-tab" onclick="filterTasks('Daily',this)">Daily</div>
+      <div class="inner-tab" onclick="filterTasks('Weekly',this)">Weekly</div>
+      <div class="inner-tab" onclick="filterTasks('Monthly',this)">Monthly</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Task ID</th><th>Date</th><th>Employee</th><th>Area</th><th>Type</th><th>Task Name</th><th>Target</th><th>Status</th><th>KPI</th><th>Admin</th></tr></thead>
+        <tbody id="task-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TASK STATUS ══ -->
+<div class="page" id="page-status">
+  <div class="page-header">
+    <div><div class="page-title">Task Status Monitor</div><div class="page-sub">Real-time tracking and review</div></div>
+    <button class="btn btn-ghost btn-sm" onclick="renderStatusTable()">↻ Refresh</button>
+  </div>
+  <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="stat-card green"><div class="stat-label">Completed</div><div class="stat-value green" id="st-done">—</div></div>
+    <div class="stat-card orange"><div class="stat-label">Pending</div><div class="stat-value orange" id="st-pend">—</div></div>
+    <div class="stat-card red"><div class="stat-label">Missed</div><div class="stat-value red" id="st-miss">—</div></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Filter</div>
+    <div class="form-grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">
+      <div class="form-group"><label>Employee</label><select id="flt-emp"><option value="">All</option></select></div>
+      <div class="form-group"><label>Status</label><select id="flt-status"><option value="">All</option><option>Completed</option><option>Pending</option><option>Missed</option></select></div>
+      <div class="form-group"><label>Task Type</label><select id="flt-type"><option value="">All</option><option>Daily</option><option>Weekly</option><option>Monthly</option></select></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-ghost btn-sm" onclick="renderStatusTable()">⊙ Apply</button></div>
+  </div>
+  <div class="section">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Task ID</th><th>Employee</th><th>Task Name</th><th>Type</th><th>Target</th><th>Completed</th><th>Status</th><th>KPI</th><th>Score</th><th>User Remarks</th><th>Action</th></tr></thead>
+        <tbody id="status-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REMINDERS ══ -->
+<div class="page" id="page-reminders">
+  <div class="page-header">
+    <div><div class="page-title">Reminders</div><div class="page-sub">Send task alerts and deadline notifications</div></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Send Reminder</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Select Task</label><select id="rem-task" onchange="fillRemEmp()"><option value="">— Select Pending Task —</option></select></div>
+      <div class="form-group"><label>Employee</label><input id="rem-emp-name" readonly style="background:#0d0f14"/></div>
+      <div class="form-group full"><label>Message *</label><textarea id="rem-msg" placeholder="e.g. Please submit the bank reconciliation report before 5 PM today."></textarea></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-warning" onclick="sendReminder()">⊙ Send Reminder</button></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Tasks Needing Attention</div>
+    <div id="reminder-list"></div>
+  </div>
+</div>
+
+<!-- ══ EMPLOYEE VIEW ══ -->
+<div class="page" id="page-emp">
+  <div class="page-header">
+    <div>
+      <div class="page-title">My Tasks</div>
+      <div class="page-sub" id="emp-page-sub">Employee task update portal</div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="loadEmpTasks()">↻ Refresh</button>
+  </div>
+  <!-- Admin-only employee selector (hidden for emp login) -->
+  <div class="section" id="emp-selector-section">
+    <div class="section-title">Select Employee</div>
+    <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+      <div class="form-group" style="flex:1;min-width:200px;">
+        <label>Employee</label>
+        <select id="emp-view-sel"><option value="">— Select Employee —</option></select>
+      </div>
+      <button class="btn btn-ghost" onclick="loadEmpTasks()">⊙ Load Tasks</button>
+    </div>
+  </div>
+  <div id="emp-task-section">
+    <div class="section">
+      <div class="section-title" id="emp-tasks-title">Assigned Tasks</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Task ID</th><th>Task Name</th><th>Area</th><th>Type</th><th>Work Assigned</th><th>Target</th><th>Status</th><th>KPI</th><th>Update</th></tr></thead>
+          <tbody id="emp-task-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- ══ UPDATE MODAL ══ -->
+<div class="modal-overlay" id="update-modal">
+  <div class="modal">
+    <div class="modal-title">Update Task Completion <button class="modal-close" onclick="closeModal('update-modal')">×</button></div>
+    <input type="hidden" id="modal-task-id"/>
+    <div class="form-group" style="margin-bottom:14px"><label>User Remarks *</label><textarea id="modal-remarks" placeholder="Describe what was completed..."></textarea></div>
+    <div class="form-group" style="margin-bottom:20px"><label>Completed Date *</label><input type="date" id="modal-date"/></div>
+    <div class="btn-row">
+      <button class="btn btn-success" onclick="submitUpdate()">✓ Submit Update</button>
+      <button class="btn btn-ghost" onclick="closeModal('update-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADMIN REMARK MODAL ══ -->
+<div class="modal-overlay" id="remark-modal">
+  <div class="modal">
+    <div class="modal-title">Admin Remarks <button class="modal-close" onclick="closeModal('remark-modal')">×</button></div>
+    <input type="hidden" id="remark-task-id"/>
+    <div id="remark-task-info" style="background:#111420;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;color:var(--muted);"></div>
+    <div class="form-group" style="margin-bottom:20px"><label>Admin Remarks</label><textarea id="remark-text" placeholder="e.g. Good work. Approved."></textarea></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="submitRemark()">Save Remark</button>
+      <button class="btn btn-ghost" onclick="closeModal('remark-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+// CONFIG — Your Google Apps Script Web App URL
+// ══════════════════════════════════════════════════
+const GAS_URL = 'https://script.google.com/macros/s/AKfycby_j29z-w7L4w0FqVYy-VHYtXnuhO9QhPPWUGZ3b02bOgXeH--qrqDW0EyY-iYRVMMD/exec';
+
+// ══════════════════════════════════════════════════
+// IN-MEMORY DATA STORE
+// ══════════════════════════════════════════════════
+let DB = { staff: [], aow: [], tasks: [] };
+let sheetConnected = false;
+
+// ══════════════════════════════════════════════════
+// GAS API
+// ══════════════════════════════════════════════════
+async function gasGet() {
+  const r = await fetch(GAS_URL);
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
+async function gasPost(payload) {
+  const r = await fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload)
+  });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
+// ══════════════════════════════════════════════════
+// FULL SYNC — load all data from Google Sheets
+// ══════════════════════════════════════════════════
+async function fullSync() {
+  setSyncState(true);
+  try {
+    setLoadMsg('Loading data from Google Sheets...');
+    const res = await gasGet();
+    const d = res.result || res;
+
+    if (d.staff && Array.isArray(d.staff)) {
+      DB.staff = d.staff.map(s => ({
+        empId:       String(s.EMP_ID   || s.empId   || ''),
+        name:        String(s.NAME     || s.name     || ''),
+        designation: String(s.DESIGNATION || s.designation || ''),
+        team:        String(s.TEAM     || s.team     || ''),
+        doj:         String(s.DOJ      || s.doj      || ''),
+        email:       String(s.EMAIL    || s.email    || '')
+      })).filter(s => s.empId && s.name);
+    }
+
+    if (d.aow && Array.isArray(d.aow)) {
+      DB.aow = d.aow.map(a => ({
+        empId: String(a.EMP_ID || a.empId || ''),
+        name:  String(a.NAME   || a.name  || ''),
+        area:  String(a.AREA_OF_WORK || a.area || '')
+      })).filter(a => a.empId);
+    }
+
+    if (d.tasks && Array.isArray(d.tasks)) {
+      DB.tasks = d.tasks.map(t => ({
+        id:           String(t.TASK_ID        || t.id           || ''),
+        assignedDate: String(t.ASSIGNED_DATE  || t.assignedDate || ''),
+        empId:        String(t.EMP_ID         || t.empId        || ''),
+        name:         String(t.NAME           || t.name         || ''),
+        area:         String(t.AREA_OF_WORK   || t.area         || ''),
+        taskType:     String(t.TASK_TYPE      || t.taskType     || ''),
+        taskName:     String(t.TASK_NAME      || t.taskName     || ''),
+        workAssigned: String(t.WORK_ASSIGNED  || t.workAssigned || ''),
+        targetDate:   fmtDate(t.TARGET_DATE   || t.targetDate   || ''),
+        userRemarks:  String(t.USER_REMARKS   || t.userRemarks  || ''),
+        completedDate:fmtDate(t.COMPLETED_DATE|| t.completedDate|| ''),
+        status:       String(t.STATUS         || t.status       || 'Pending'),
+        kpi:          t.KPI  !== undefined ? t.KPI  : (t.kpi  !== undefined ? t.kpi  : ''),
+        score:        t.SCORE!== undefined ? t.SCORE: (t.score!== undefined ? t.score: ''),
+        adminRemarks: String(t.ADMIN_REMARKS  || t.adminRemarks || '')
+      })).filter(t => t.id);
+    }
+
+    recalcStatuses();
+    setConnected(true);
+    refreshAllViews();
+    toast('✓ Synced with Google Sheets');
+  } catch(e) {
+    setConnected(false);
+    toast('✕ Sync failed: ' + e.message, 'var(--danger)');
+    console.error(e);
+  }
+  setSyncState(false);
+  hideLoader();
+}
+
+function fmtDate(v) {
+  if (!v) return '';
+  if (typeof v === 'string' && v.match(/^\d{4}-\d{2}-\d{2}/)) return v.slice(0,10);
+  const d = new Date(v);
+  if (isNaN(d)) return String(v);
+  return d.toISOString().slice(0,10);
+}
+
+function setLoadMsg(m) { document.getElementById('load-msg').textContent = m; }
+function hideLoader() {
+  const o = document.getElementById('loading-overlay');
+  o.classList.add('hide');
+  setTimeout(()=>{ o.style.display='none'; }, 400);
+}
+function setSyncState(on) {
+  const b = document.getElementById('sync-btn');
+  b.classList.toggle('syncing', on);
+  b.textContent = on ? '↻ Syncing…' : '↻ Sync';
+}
+function setConnected(ok) {
+  sheetConnected = ok;
+  document.getElementById('gs-dot').className = 'gs-dot' + (ok ? '' : ' red');
+  document.getElementById('gs-label').textContent = ok ? 'Live · Google Sheets' : 'Offline';
+}
+
+// ══════════════════════════════════════════════════
+// CLOCK
+// ══════════════════════════════════════════════════
+function updateClock() {
+  const n = new Date();
+  document.getElementById('clock').textContent =
+    n.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) +
+    ' · ' + n.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+}
+setInterval(updateClock, 1000); updateClock();
+
+// Navigation handled in auth block below
+
+// ══════════════════════════════════════════════════
+// REFRESH ALL VIEWS
+// ══════════════════════════════════════════════════
+function refreshAllViews() {
+  populateDropdowns();
+  renderEmpTable();
+  renderAoWTable();
+  renderTaskTable();
+  renderDashboard();
+  renderStatusTable();
+  renderReminders();
+}
+
+// ══════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════
+let toastTimer;
+function toast(msg, clr='var(--accent2)') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.borderColor = clr; t.style.color = clr;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+// ══════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════
+function statusBadge(s) {
+  const m = {Completed:'badge-completed',Pending:'badge-pending',Missed:'badge-missed'};
+  return `<span class="badge-status ${m[s]||'badge-pending'}">${s||'Pending'}</span>`;
+}
+function kpiBar(k) {
+  if (k===''||k===undefined||k===null) return `<span style="color:var(--muted);font-size:12px">—</span>`;
+  const pct = parseInt(k)||0;
+  const clr = pct>=90?'var(--accent2)':pct>=70?'var(--accent3)':'var(--danger)';
+  return `<div class="kpi-bar-wrap"><div class="kpi-bar"><div class="kpi-bar-fill" style="width:${pct}%;background:${clr}"></div></div><span class="kpi-num" style="color:${clr}">${pct}</span></div>`;
+}
+function todayStr() { return new Date().toISOString().slice(0,10); }
+function formatDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  if (isNaN(dt)) return d;
+  return dt.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+// ══════════════════════════════════════════════════
+// KPI / STATUS CALCULATION
+// ══════════════════════════════════════════════════
+function recalcStatuses() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  DB.tasks.forEach(t => {
+    if (t.completedDate && t.completedDate !== '') {
+      const cd = new Date(t.completedDate); const td = new Date(t.targetDate);
+      t.status = 'Completed';
+      if      (cd < td)   { t.kpi = 100; t.score = '1.0'; }
+      else if (+cd === +td){ t.kpi = 90;  t.score = '0.9'; }
+      else                 { t.kpi = 70;  t.score = '0.7'; }
+    } else if (t.targetDate && new Date(t.targetDate) < today) {
+      t.status = 'Missed'; t.kpi = 0; t.score = '0.0';
+    } else {
+      t.status = 'Pending'; t.kpi = ''; t.score = '';
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════
+// TEAM MASTER
+// ══════════════════════════════════════════════════
+async function addEmployee() {
+  const id    = document.getElementById('emp-id').value.trim();
+  const name  = document.getElementById('emp-name').value.trim();
+  const desig = document.getElementById('emp-desig').value.trim();
+  const team  = document.getElementById('emp-team').value;
+  const doj   = document.getElementById('emp-doj').value;
+  const email = document.getElementById('emp-email').value.trim();
+  if (!id||!name) { toast('EMP ID and Name are required','var(--danger)'); return; }
+  if (DB.staff.find(s=>s.empId===id)) { toast('EMP ID already exists','var(--accent3)'); return; }
+  DB.staff.push({empId:id,name,designation:desig,team,doj,email});
+  renderEmpTable(); populateDropdowns(); renderDashboard();
+  toast('Adding employee to sheet...');
+  try {
+    await gasPost({action:'addStaff',empId:id,name,designation:desig,team,doj,email});
+    toast('✓ Employee added to Google Sheet');
+  } catch(e) { toast('Saved locally. Sheet sync failed.','var(--accent3)'); }
+  ['emp-id','emp-name','emp-desig','emp-email','emp-doj'].forEach(x=>document.getElementById(x).value='');
+}
+
+function renderEmpTable() {
+  const tb = document.getElementById('emp-table');
+  if (!DB.staff.length) { tb.innerHTML='<tr><td colspan="7" class="empty-state"><div class="ei">◌</div><p>No employees yet</p></td></tr>'; return; }
+  tb.innerHTML = DB.staff.map(s=>`<tr>
+    <td><span style="font-family:var(--mono);font-size:12px;color:var(--accent)">${s.empId}</span></td>
+    <td><strong>${s.name}</strong></td>
+    <td style="color:var(--muted);font-size:12px">${s.designation||'—'}</td>
+    <td style="font-size:12px">${s.team||'—'}</td>
+    <td style="font-size:12px;color:var(--muted)">${formatDate(s.doj)}</td>
+    <td style="font-size:12px">${s.email||'—'}</td>
+    <td><button class="btn btn-ghost btn-sm" onclick="removeEmp('${s.empId}')">✕</button></td>
+  </tr>`).join('');
+  document.getElementById('emp-count').textContent = DB.staff.length+' staff';
+}
+
+function removeEmp(id) {
+  DB.staff = DB.staff.filter(s=>s.empId!==id);
+  renderEmpTable(); populateDropdowns(); renderDashboard();
+  toast('Removed from local view','var(--danger)');
+}
+
+// ══════════════════════════════════════════════════
+// AREA OF WORK
+// ══════════════════════════════════════════════════
+async function addAoW() {
+  const sel   = document.getElementById('aow-emp');
+  const empId = sel.value;
+  const area  = document.getElementById('aow-area').value.trim();
+  if (!empId) { toast('Select an employee','var(--danger)'); return; }
+  if (!area)  { toast('Enter an area of work','var(--danger)'); return; }
+  const emp = DB.staff.find(s=>s.empId===empId);
+  const name = emp?.name || '';
+  DB.aow.push({empId,name,area});
+  renderAoWTable(); populateDropdowns();
+  document.getElementById('aow-area').value = '';
+  document.getElementById('aow-emp').value  = '';
+  toast('Assigning area...');
+  try {
+    await gasPost({action:'addAoW',empId,name,area});
+    toast('✓ Area assigned in Google Sheet');
+  } catch(e) { toast('Saved locally. Sheet sync failed.','var(--accent3)'); }
+}
+
+function renderAoWTable() {
+  const tb = document.getElementById('aow-table');
+  if (!DB.aow.length) { tb.innerHTML='<tr><td colspan="4" class="empty-state"><div class="ei">◌</div><p>No assignments yet</p></td></tr>'; return; }
+  tb.innerHTML = DB.aow.map((a,i)=>`<tr>
+    <td style="font-family:var(--mono);color:var(--accent);font-size:12px">${a.empId}</td>
+    <td><strong>${a.name}</strong></td>
+    <td><span style="background:#1a2240;color:var(--accent);padding:3px 10px;border-radius:4px;font-size:12px">${a.area}</span></td>
+    <td><button class="btn btn-ghost btn-sm" onclick="removeAoW(${i})">✕</button></td>
+  </tr>`).join('');
+  document.getElementById('aow-count').textContent = DB.aow.length+' assignments';
+}
+
+function removeAoW(i) {
+  DB.aow.splice(i,1); renderAoWTable(); toast('Removed','var(--danger)');
+}
+
+// ══════════════════════════════════════════════════
+// TASK ASSIGNMENT
+// ══════════════════════════════════════════════════
+function fillAreaFromEmp() {
+  const empId = document.getElementById('t-emp').value;
+  const areas = DB.aow.filter(a=>a.empId===empId);
+  const sel   = document.getElementById('t-area');
+  sel.innerHTML = areas.length
+    ? areas.map(a=>`<option>${a.area}</option>`).join('')
+    : '<option>— No area assigned —</option>';
+}
+
+async function assignTask() {
+  const empSel = document.getElementById('t-emp');
+  const empId  = empSel.value;
+  if (!empId) { toast('Select an employee','var(--danger)'); return; }
+  const emp    = DB.staff.find(s=>s.empId===empId);
+  const name   = emp?.name||'Unknown';
+  const area   = document.getElementById('t-area').value;
+  const ttype  = document.getElementById('t-type').value;
+  const tname  = document.getElementById('t-name').value.trim();
+  const work   = document.getElementById('t-work').value.trim();
+  const target = document.getElementById('t-target').value;
+  if (!tname||!target) { toast('Task Name and Target Date required','var(--danger)'); return; }
+  const id = 'T'+String(Date.now()).slice(-6);
+  const today = todayStr();
+  DB.tasks.push({id,assignedDate:today,empId,name,area,taskType:ttype,taskName:tname,
+    workAssigned:work,targetDate:target,userRemarks:'',completedDate:'',
+    status:'Pending',kpi:'',score:'',adminRemarks:''});
+  renderTaskTable(); renderDashboard();
+  toast('Assigning task...');
+  try {
+    const r = await gasPost({action:'assignTask',empId,name,area,taskType:ttype,
+      taskName:tname,workAssigned:work,targetDate:target});
+    // Update the local ID with the one returned from sheet if available
+    if (r?.result && typeof r.result === 'string' && r.result.startsWith('T')) {
+      const t = DB.tasks.find(x=>x.id===id);
+      if(t) t.id = r.result;
+    }
+    toast('✓ Task assigned to Google Sheet');
+  } catch(e) { toast('Saved locally. Sheet sync failed.','var(--accent3)'); }
+  ['t-name','t-work','t-target'].forEach(x=>document.getElementById(x).value='');
+  document.getElementById('t-emp').value='';
+  document.getElementById('t-area').innerHTML='<option>— Select employee first —</option>';
+  renderTaskTable(); updateTaskCount();
+}
+
+let taskFilter = 'all';
+function filterTasks(f, el) {
+  taskFilter = f;
+  document.querySelectorAll('.inner-tab').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  renderTaskTable();
+}
+
+function renderTaskTable() {
+  recalcStatuses();
+  const tasks = taskFilter==='all' ? DB.tasks : DB.tasks.filter(t=>t.taskType===taskFilter);
+  const tb    = document.getElementById('task-table');
+  if (!tasks.length) { tb.innerHTML='<tr><td colspan="10" class="empty-state"><div class="ei">◌</div><p>No tasks yet</p></td></tr>'; return; }
+  tb.innerHTML = tasks.map(t=>`<tr>
+    <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${t.id}</td>
+    <td style="font-size:12px;color:var(--muted)">${t.assignedDate}</td>
+    <td><strong>${t.name}</strong><br><span style="font-size:11px;color:var(--muted)">${t.empId}</span></td>
+    <td style="font-size:12px">${t.area}</td>
+    <td><span style="font-family:var(--mono);font-size:11px;color:var(--accent3)">${t.taskType}</span></td>
+    <td><strong>${t.taskName}</strong></td>
+    <td style="font-family:var(--mono);font-size:12px">${t.targetDate}</td>
+    <td>${statusBadge(t.status)}</td>
+    <td>${kpiBar(t.kpi)}</td>
+    <td><button class="btn btn-ghost btn-sm" onclick="openRemarkModal('${t.id}')">+ Remark</button></td>
+  </tr>`).join('');
+  updateTaskCount();
+}
+
+function updateTaskCount() {
+  document.getElementById('task-count').textContent = DB.tasks.length+' tasks';
+}
+
+// ══════════════════════════════════════════════════
+// TASK STATUS
+// ══════════════════════════════════════════════════
+function renderStatusTable() {
+  recalcStatuses();
+  const fEmp = document.getElementById('flt-emp')?.value || '';
+  const fSt  = document.getElementById('flt-status')?.value || '';
+  const fTy  = document.getElementById('flt-type')?.value || '';
+  let tasks  = [...DB.tasks];
+  if (fEmp) tasks = tasks.filter(t=>t.empId===fEmp);
+  if (fSt)  tasks = tasks.filter(t=>t.status===fSt);
+  if (fTy)  tasks = tasks.filter(t=>t.taskType===fTy);
+
+  const done = DB.tasks.filter(t=>t.status==='Completed').length;
+  const pend = DB.tasks.filter(t=>t.status==='Pending').length;
+  const miss = DB.tasks.filter(t=>t.status==='Missed').length;
+  document.getElementById('st-done').textContent = done;
+  document.getElementById('st-pend').textContent = pend;
+  document.getElementById('st-miss').textContent = miss;
+
+  const tb = document.getElementById('status-table');
+  if (!tasks.length) { tb.innerHTML='<tr><td colspan="11" class="empty-state"><div class="ei">◌</div><p>No tasks match filter</p></td></tr>'; return; }
+  tb.innerHTML = tasks.map(t=>`<tr>
+    <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${t.id}</td>
+    <td><strong>${t.name}</strong></td>
+    <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.taskName}</td>
+    <td style="font-size:11px;color:var(--accent3);font-family:var(--mono)">${t.taskType}</td>
+    <td style="font-family:var(--mono);font-size:12px">${t.targetDate}</td>
+    <td style="font-family:var(--mono);font-size:12px;color:var(--accent2)">${t.completedDate||'—'}</td>
+    <td>${statusBadge(t.status)}</td>
+    <td>${kpiBar(t.kpi)}</td>
+    <td style="font-family:var(--mono);font-size:12px;color:var(--accent)">${t.score||'—'}</td>
+    <td style="font-size:12px;color:var(--muted);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.userRemarks||'—'}</td>
+    <td><button class="btn btn-ghost btn-sm" onclick="openRemarkModal('${t.id}')">Remark</button></td>
+  </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+// REMINDERS
+// ══════════════════════════════════════════════════
+function renderReminders() {
+  const pending = DB.tasks.filter(t=>t.status==='Pending'||t.status==='Missed');
+  const sel = document.getElementById('rem-task');
+  if (sel) {
+    sel.innerHTML = '<option value="">— Select Pending Task —</option>' +
+      pending.map(t=>`<option value="${t.id}">${t.id} · ${t.taskName} (${t.name})</option>`).join('');
+  }
+  const list = document.getElementById('reminder-list');
+  if (!list) return;
+  list.innerHTML = pending.slice(0,10).map(t=>`<div class="reminder-card">
+    <div class="reminder-info">
+      <div class="reminder-task">${t.taskName} <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">${t.id}</span></div>
+      <div class="reminder-emp">${t.name} · Target: ${t.targetDate}</div>
+    </div>
+    ${statusBadge(t.status)}
+    <button class="btn btn-warning btn-sm" onclick="quickRemind('${t.id}')">⊙ Remind</button>
+  </div>`).join('') || '<div class="empty-state"><div class="ei">✓</div><p>No pending or missed tasks.</p></div>';
+}
+
+function fillRemEmp() {
+  const id = document.getElementById('rem-task').value;
+  const t  = DB.tasks.find(x=>x.id===id);
+  document.getElementById('rem-emp-name').value = t ? t.name : '';
+}
+
+function sendReminder() {
+  const id  = document.getElementById('rem-task').value;
+  const msg = document.getElementById('rem-msg').value.trim();
+  if (!id||!msg) { toast('Select a task and write a message','var(--danger)'); return; }
+  toast('⊙ Reminder logged (connect email via GAS to send)','var(--accent3)');
+  document.getElementById('rem-msg').value='';
+}
+
+function quickRemind(id) {
+  const t = DB.tasks.find(x=>x.id===id);
+  if (t) toast(`Reminder sent to ${t.name}`,'var(--accent3)');
+}
+
+// ══════════════════════════════════════════════════
+// EMPLOYEE VIEW
+// ══════════════════════════════════════════════════
+function loadEmpTasks() {
+  const empId = document.getElementById('emp-view-sel').value;
+  if (!empId) { toast('Select an employee','var(--danger)'); return; }
+  recalcStatuses();
+  const tasks = DB.tasks.filter(t=>t.empId===empId);
+  document.getElementById('emp-task-section').style.display = 'block';
+  const tb = document.getElementById('emp-task-table');
+  if (!tasks.length) { tb.innerHTML='<tr><td colspan="9" class="empty-state"><div class="ei">◌</div><p>No tasks assigned to this employee</p></td></tr>'; return; }
+  tb.innerHTML = tasks.map(t=>`<tr>
+    <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${t.id}</td>
+    <td><strong>${t.taskName}</strong></td>
+    <td style="font-size:12px">${t.area}</td>
+    <td style="font-size:11px;color:var(--accent3);font-family:var(--mono)">${t.taskType}</td>
+    <td style="font-size:12px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.workAssigned||'—'}</td>
+    <td style="font-family:var(--mono);font-size:12px">${t.targetDate}</td>
+    <td>${statusBadge(t.status)}</td>
+    <td>${kpiBar(t.kpi)}</td>
+    <td>${t.status!=='Completed'
+      ? `<button class="btn btn-success btn-sm" onclick="openUpdateModal('${t.id}')">✓ Update</button>`
+      : `<span style="color:var(--accent2);font-size:12px">✓ Done</span>`
+    }</td>
+  </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+// MODALS
+// ══════════════════════════════════════════════════
+function openUpdateModal(id) {
+  document.getElementById('modal-task-id').value = id;
+  document.getElementById('modal-remarks').value = '';
+  document.getElementById('modal-date').value    = todayStr();
+  document.getElementById('update-modal').classList.add('open');
+}
+
+function openRemarkModal(id) {
+  const t = DB.tasks.find(x=>x.id===id);
+  document.getElementById('remark-task-id').value = id;
+  document.getElementById('remark-text').value    = t?.adminRemarks||'';
+  document.getElementById('remark-task-info').innerHTML =
+    `<strong>${t?.taskName||''}</strong> &nbsp;·&nbsp; ${t?.name||''} &nbsp;·&nbsp; ${statusBadge(t?.status||'Pending')}
+     ${t?.userRemarks ? `<div style="margin-top:8px;color:var(--text)">Employee note: ${t.userRemarks}</div>` : ''}`;
+  document.getElementById('remark-modal').classList.add('open');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+async function submitUpdate() {
+  const id      = document.getElementById('modal-task-id').value;
+  const remarks = document.getElementById('modal-remarks').value.trim();
+  const date    = document.getElementById('modal-date').value;
+  if (!remarks||!date) { toast('Fill all fields','var(--danger)'); return; }
+  const t = DB.tasks.find(x=>x.id===id);
+  if (t) { t.userRemarks=remarks; t.completedDate=date; }
+  recalcStatuses(); loadEmpTasks(); closeModal('update-modal');
+  toast('Submitting to Google Sheet...');
+  try {
+    await gasPost({action:'updateTask',taskId:id,userRemarks:remarks,completedDate:date});
+    toast('✓ Task updated in Google Sheet');
+  } catch(e) { toast('Updated locally. Sheet sync failed.','var(--accent3)'); }
+  renderDashboard(); renderStatusTable();
+}
+
+async function submitRemark() {
+  const id     = document.getElementById('remark-task-id').value;
+  const remark = document.getElementById('remark-text').value.trim();
+  const t      = DB.tasks.find(x=>x.id===id);
+  if (t) t.adminRemarks = remark;
+  renderTaskTable(); renderStatusTable(); closeModal('remark-modal');
+  toast('Saving remark...');
+  try {
+    await gasPost({action:'adminRemark',taskId:id,remark});
+    toast('✓ Remark saved to Google Sheet');
+  } catch(e) { toast('Saved locally. Sheet sync failed.','var(--accent3)'); }
+}
+
+// ══════════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════════
+function renderDashboard() {
+  recalcStatuses();
+  const tasks = DB.tasks;
+  const done  = tasks.filter(t=>t.status==='Completed');
+  const pend  = tasks.filter(t=>t.status==='Pending');
+  const miss  = tasks.filter(t=>t.status==='Missed');
+  const kpis  = done.map(t=>parseInt(t.kpi)||0);
+  const avg   = kpis.length ? Math.round(kpis.reduce((a,b)=>a+b,0)/kpis.length) : 0;
+  document.getElementById('s-total').textContent   = tasks.length;
+  document.getElementById('s-done').textContent    = done.length;
+  document.getElementById('s-pending').textContent = pend.length;
+  document.getElementById('s-missed').textContent  = miss.length;
+  document.getElementById('s-kpi').textContent     = avg||'—';
+  document.getElementById('s-team').textContent    = DB.staff.length;
+
+  // KPI bar chart
+  const colors = ['var(--accent)','var(--accent2)','var(--accent3)','var(--danger)','#a78bfa','#f472b6'];
+  const empKpis = {};
+  DB.staff.forEach(s=>{ empKpis[s.empId]={name:s.name,vals:[]}; });
+  tasks.forEach(t=>{ if(t.kpi!==''&&empKpis[t.empId]) empKpis[t.empId].vals.push(parseInt(t.kpi)||0); });
+  const empArr = Object.values(empKpis);
+  document.getElementById('kpi-chart').innerHTML = empArr.slice(0,6).map((e,i)=>{
+    const a = e.vals.length ? Math.round(e.vals.reduce((x,y)=>x+y)/e.vals.length) : 0;
+    return `<div class="bar-col">
+      <div class="bar-val" style="color:${colors[i%6]}">${a||'—'}</div>
+      <div class="bar-fill" style="height:${a*1.1}px;background:${colors[i%6]};opacity:.85"></div>
+      <div class="bar-label">${e.name.split(' ')[0]}</div>
+    </div>`;
+  }).join('') || '<div style="color:var(--muted);font-size:13px;align-self:center">No data yet</div>';
+
+  // Type chart
+  const daily   = tasks.filter(t=>t.taskType==='Daily').length;
+  const weekly  = tasks.filter(t=>t.taskType==='Weekly').length;
+  const monthly = tasks.filter(t=>t.taskType==='Monthly').length;
+  const maxT    = Math.max(daily,weekly,monthly,1);
+  document.getElementById('type-chart').innerHTML = [
+    ['Daily',daily,'var(--accent)'],['Weekly',weekly,'var(--accent2)'],['Monthly',monthly,'var(--accent3)']
+  ].map(([l,v,c])=>`<div class="bar-col">
+    <div class="bar-val" style="color:${c}">${v}</div>
+    <div class="bar-fill" style="height:${(v/maxT)*110}px;background:${c};opacity:.85"></div>
+    <div class="bar-label">${l}</div>
+  </div>`).join('');
+
+  // Perf table
+  const pt = document.getElementById('perf-table');
+  pt.innerHTML = DB.staff.map(s=>{
+    const st   = tasks.filter(t=>t.empId===s.empId);
+    const sc   = st.filter(t=>t.status==='Completed');
+    const sm   = st.filter(t=>t.status==='Missed');
+    const dkpi = calcAvgByType(st,'Daily');
+    const wkpi = calcAvgByType(st,'Weekly');
+    const mkpi = calcAvgByType(st,'Monthly');
+    const ov   = sc.length ? Math.round(sc.map(t=>parseInt(t.kpi)||0).reduce((a,b)=>a+b)/sc.length) : 0;
+    const clr  = ov>=90?'var(--accent2)':ov>=70?'var(--accent3)':ov>0?'var(--danger)':'var(--muted)';
+    return `<tr>
+      <td><strong>${s.name}</strong><br><span style="font-size:11px;color:var(--muted)">${s.designation||''}</span></td>
+      <td style="font-family:var(--mono)">${st.length}</td>
+      <td style="font-family:var(--mono);color:var(--accent2)">${sc.length}</td>
+      <td style="font-family:var(--mono);color:var(--danger)">${sm.length}</td>
+      <td>${kpiBar(dkpi)}</td><td>${kpiBar(wkpi)}</td><td>${kpiBar(mkpi)}</td>
+      <td><div class="perf-score"><div class="perf-ring" style="color:${clr};border-color:${clr}">${ov||'—'}</div></div></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" class="empty-state"><div class="ei">◌</div><p>Add employees to see performance</p></td></tr>';
+}
+
+function calcAvgByType(tasks, type) {
+  const t = tasks.filter(x=>x.taskType===type&&x.kpi!=='');
+  if (!t.length) return '';
+  return Math.round(t.map(x=>parseInt(x.kpi)||0).reduce((a,b)=>a+b)/t.length);
+}
+
+// ══════════════════════════════════════════════════
+// POPULATE DROPDOWNS
+// ══════════════════════════════════════════════════
+function populateDropdowns() {
+  const opts = DB.staff.map(s=>`<option value="${s.empId}">${s.name} · ${s.empId}</option>`).join('');
+  ['aow-emp','t-emp','emp-view-sel','flt-emp'].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '<option value="">— Select —</option>' + opts;
+  });
+}
+
+// ══════════════════════════════════════════════════
+// AUTO-REFRESH every 5 minutes (only when logged in)
+// ══════════════════════════════════════════════════
+setInterval(() => { if(sheetConnected && currentUser) fullSync(); }, 5 * 60 * 1000);
+
+// ══════════════════════════════════════════════════
+// AUTH — users & login logic
+// ══════════════════════════════════════════════════
+const USERS = {
+  admin: [
+    { username: 'Shan', password: 'Shan#pearl', role: 'admin', displayName: 'Shan', empId: null }
+  ],
+  employees: [
+    '17863','16890','18107','16711','17571',
+    '17490','17992','16308','17518','18071',
+    '17470','17983','18070','18060'
+  ]
+};
+
+let currentUser = null; // { username, role, displayName, empId }
+
+function doLogin() {
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-error');
+  err.classList.remove('show');
+
+  // Check admin
+  const adminMatch = USERS.admin.find(a => a.username === u && a.password === p);
+  if (adminMatch) {
+    currentUser = { username: u, role: 'admin', displayName: u, empId: null };
+    onLoginSuccess();
+    return;
+  }
+
+  // Check employee: username = empId, password = empId
+  if (USERS.employees.includes(u) && p === u) {
+    currentUser = { username: u, role: 'employee', displayName: u, empId: u };
+    onLoginSuccess();
+    return;
+  }
+
+  err.classList.add('show');
+  document.getElementById('login-pass').value = '';
+}
+
+// Allow Enter key on login form
+document.addEventListener('DOMContentLoaded', () => {
+  ['login-user','login-pass'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+  });
+});
+
+function onLoginSuccess() {
+  // Hide login screen
+  document.getElementById('login-screen').classList.add('hidden');
+
+  // Update topbar
+  const initials = currentUser.displayName.slice(0,2).toUpperCase();
+  document.getElementById('topbar-avatar').textContent = initials;
+  document.getElementById('topbar-username').textContent = currentUser.displayName;
+
+  if (currentUser.role === 'admin') {
+    // Show full sidebar
+    document.getElementById('admin-nav').style.display = 'block';
+    document.getElementById('emp-nav-grp').textContent = 'Employee';
+    document.getElementById('emp-selector-section').style.display = 'block';
+    // Start on dashboard
+    showPage('dashboard');
+    fullSync();
+  } else {
+    // Employee: hide admin nav, show only My Tasks
+    document.getElementById('admin-nav').style.display = 'none';
+    document.getElementById('emp-nav-grp').textContent = 'My Account';
+    document.getElementById('emp-selector-section').style.display = 'none';
+    // Auto-set employee in selector
+    showPage('emp');
+    fullSync().then(() => {
+      loadEmpTasksForId(currentUser.empId);
+    });
+  }
+}
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-error').classList.remove('show');
+  document.getElementById('topbar-avatar').textContent = '?';
+  document.getElementById('topbar-username').textContent = '';
+}
+
+function showPage(page) {
+  document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+  const navEl = document.querySelector(`.nav-item[data-page="${page}"]`);
+  if (navEl) navEl.classList.add('active');
+  const pageEl = document.getElementById('page-' + page);
+  if (pageEl) pageEl.classList.add('active');
+}
+
+// Load tasks auto-filtered to a specific empId (used on employee login)
+function loadEmpTasksForId(empId) {
+  const sel = document.getElementById('emp-view-sel');
+  if (sel) sel.value = empId;
+  const emp = DB.staff.find(s => s.empId === empId);
+  const name = emp ? emp.name : empId;
+  const sub = document.getElementById('emp-page-sub');
+  if (sub) sub.textContent = `${name} · ${empId}`;
+  const title = document.getElementById('emp-tasks-title');
+  if (title) title.textContent = `Tasks for ${name}`;
+
+  recalcStatuses();
+  const tasks = DB.tasks.filter(t => t.empId === empId);
+  document.getElementById('emp-task-section').style.display = 'block';
+  const tb = document.getElementById('emp-task-table');
+  if (!tasks.length) {
+    tb.innerHTML = '<tr><td colspan="9" class="empty-state"><div class="ei">◌</div><p>No tasks assigned yet</p></td></tr>';
+    return;
+  }
+  tb.innerHTML = tasks.map(t => `<tr>
+    <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${t.id}</td>
+    <td><strong>${t.taskName}</strong></td>
+    <td style="font-size:12px">${t.area}</td>
+    <td style="font-size:11px;color:var(--accent3);font-family:var(--mono)">${t.taskType}</td>
+    <td style="font-size:12px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.workAssigned||'—'}</td>
+    <td style="font-family:var(--mono);font-size:12px">${t.targetDate}</td>
+    <td>${statusBadge(t.status)}</td>
+    <td>${kpiBar(t.kpi)}</td>
+    <td>${t.status!=='Completed'
+      ? `<button class="btn btn-success btn-sm" onclick="openUpdateModal('${t.id}')">✓ Update</button>`
+      : `<span style="color:var(--accent2);font-size:12px">✓ Done</span>`
+    }</td>
+  </tr>`).join('');
+}
+
+// Override loadEmpTasks so it respects employee login restriction
+const _origLoadEmpTasks = loadEmpTasks;
+function loadEmpTasks() {
+  if (currentUser && currentUser.role === 'employee') {
+    loadEmpTasksForId(currentUser.empId);
+  } else {
+    _origLoadEmpTasks();
+  }
+}
+
+// Override navigation: employees can only reach 'emp' page
+document.querySelectorAll('.nav-item').forEach(el => {
+  el.addEventListener('click', () => {
+    const page = el.dataset.page;
+    if (currentUser && currentUser.role === 'employee' && page !== 'emp') return;
+    document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('page-' + page).classList.add('active');
+    if (page === 'dashboard') renderDashboard();
+    if (page === 'status')    renderStatusTable();
+    if (page === 'reminders') renderReminders();
+    if (page === 'assign')    renderTaskTable();
+    if (page === 'emp')       loadEmpTasks();
+  });
+});
+
+// ══════════════════════════════════════════════════
+// INIT — show login first, don't auto-sync
+// ══════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  // Hide app content until login
+  document.getElementById('admin-nav').style.display = 'none';
+  document.getElementById('emp-selector-section').style.display = 'none';
+  document.getElementById('emp-task-section').style.display = 'block';
+  // Keep login screen visible (default)
+  // Hide GAS loader immediately — login screen is shown instead
+  const lo = document.getElementById('loading-overlay');
+  if (lo) { lo.style.display = 'none'; }
+});
+</script>
+</body>
+</html>
