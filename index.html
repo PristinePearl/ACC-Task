@@ -228,12 +228,165 @@ tbody td{padding:10px 12px;vertical-align:middle;}
 .mini-bar{height:4px;width:60px;background:#1a1e2a;border-radius:2px;overflow:hidden;}
 .mini-bar-fill{height:100%;border-radius:2px;}
 
-@media(max-width:700px){
-  .sidebar{display:none;}
-  .chart-grid{grid-template-columns:1fr;}
-  .form-grid{grid-template-columns:1fr;}
+/* ══════════════════════════════════════════
+   HAMBURGER MENU BUTTON
+══════════════════════════════════════════ */
+.hamburger{
+  display:none;background:none;border:1px solid var(--border);
+  color:var(--muted);width:36px;height:36px;border-radius:7px;
+  cursor:pointer;font-size:16px;align-items:center;justify-content:center;
+  transition:all .2s;flex-shrink:0;
+}
+.hamburger:hover{border-color:var(--accent);color:var(--accent);}
+
+/* Mobile sidebar overlay */
+.sidebar-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
+  z-index:200;backdrop-filter:blur(2px);
+}
+.sidebar-overlay.open{display:block;}
+
+/* ══════════════════════════════════════════
+   TABLET (≤900px)
+══════════════════════════════════════════ */
+@media(max-width:900px){
+  .topbar{padding:0 16px;}
   .topbar-meta{display:none;}
+  .chart-grid{grid-template-columns:1fr;}
+  #page-emp-dash .chart-grid{grid-template-columns:1fr 1fr;}
+  .form-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));}
+  .stat-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));}
+  .main{padding:20px;}
+}
+
+/* ══════════════════════════════════════════
+   MOBILE (≤700px) — Full responsive overhaul
+══════════════════════════════════════════ */
+@media(max-width:700px){
+
+  /* Hamburger visible */
+  .hamburger{display:flex;}
+
+  /* Topbar */
+  .topbar{padding:0 12px;height:52px;gap:8px;}
+  .topbar-brand{font-size:13px;gap:7px;}
+  .topbar-brand .dot{width:7px;height:7px;}
+  .topbar-meta{display:none;}
+  .topbar-right{gap:6px;}
+  .sync-btn{padding:4px 8px;font-size:11px;}
+  .gs-label{display:none;}
+  #topbar-username{display:none;}
+  .logout-btn{padding:4px 8px;font-size:11px;}
+  .avatar{width:28px;height:28px;font-size:11px;}
+
+  /* Sidebar — slide-in drawer on mobile */
+  .sidebar{
+    display:block !important;
+    position:fixed;top:0;left:-220px;
+    width:220px;height:100vh;
+    z-index:300;transition:left .28s cubic-bezier(.4,0,.2,1);
+    padding-top:60px;
+    box-shadow:none;
+  }
+  .sidebar.mobile-open{
+    left:0;
+    box-shadow:4px 0 24px rgba(0,0,0,.5);
+  }
+
+  /* Layout */
+  .layout{flex-direction:column;}
+  .main{
+    padding:14px;
+    min-height:calc(100vh - 52px);
+  }
+
+  /* Pages */
+  .page-header{flex-direction:column;align-items:flex-start;gap:8px;}
+  .page-title{font-size:18px;}
+  .page-sub{font-size:12px;}
+
+  /* Stat grid — 2 cols on mobile */
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;}
+  .stat-value{font-size:24px;}
+  .stat-card{padding:14px;}
+
+  /* Charts */
+  .chart-grid{grid-template-columns:1fr;gap:12px;}
   #page-emp-dash .chart-grid{grid-template-columns:1fr;}
+
+  /* Forms */
+  .form-grid{grid-template-columns:1fr;}
+  .form-group.full{grid-column:1;}
+
+  /* Tables — horizontal scroll */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  table{min-width:560px;}
+  tbody td{padding:8px 10px;font-size:12px;}
+  thead th{padding:8px 10px;}
+
+  /* Section */
+  .section{padding:14px;margin-bottom:14px;}
+  .section-title{font-size:12px;}
+
+  /* Buttons */
+  .btn-row{flex-wrap:wrap;gap:8px;}
+  .btn{padding:8px 14px;font-size:12px;}
+
+  /* Modal */
+  .modal{padding:20px;width:min(96vw,460px);border-radius:10px;}
+  .modal-title{font-size:14px;}
+  .stat-modal-inner{width:96vw;}
+  .task-detail-modal{width:96vw;}
+  .tdm-grid{grid-template-columns:1fr;}
+  .tdm-field:nth-child(odd){border-right:none;}
+  .tdm-field:nth-last-child(-n+2){border-bottom:1px solid var(--border);}
+  .tdm-field:last-child{border-bottom:none;}
+
+  /* Inner tabs — scrollable */
+  .inner-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .inner-tab{padding:8px 14px;font-size:12px;}
+
+  /* Stat modal summary chips */
+  .stat-modal-summary{gap:6px;}
+  .sms-chip{min-width:80px;padding:10px 10px;}
+  .sms-chip .sms-val{font-size:18px;}
+
+  /* Team cards */
+  .team-cards-grid{grid-template-columns:1fr;}
+
+  /* KPI box in emp dash */
+  .kpi-type-val{font-size:28px !important;}
+
+  /* Login card */
+  .login-card{padding:28px 20px;}
+  .login-title{font-size:18px;}
+
+  /* Toast */
+  #toast{bottom:16px;right:12px;left:12px;max-width:none;font-size:12px;}
+
+  /* Reminder card */
+  .reminder-card{flex-direction:column;align-items:flex-start;}
+
+  /* Page header buttons */
+  .page-header .btn{font-size:11px;padding:6px 10px;}
+
+  /* Completion rate bar */
+  #page-emp-dash .section > div{flex-wrap:wrap;}
+
+  /* Status table stat-grid */
+  #page-status .stat-grid{grid-template-columns:repeat(3,1fr);}
+}
+
+/* ══════════════════════════════════════════
+   SMALL MOBILE (≤400px)
+══════════════════════════════════════════ */
+@media(max-width:400px){
+  .stat-grid{grid-template-columns:repeat(2,1fr);}
+  .topbar-brand{font-size:12px;}
+  .sync-btn{display:none;}
+  #page-status .stat-grid{grid-template-columns:1fr;}
+  .stat-card{padding:12px;}
+  .stat-value{font-size:22px;}
 }
 
 /* TEAM SUMMARY CARDS */
@@ -332,11 +485,17 @@ tbody td{padding:10px 12px;vertical-align:middle;}
   <div class="loader-text" id="load-msg">Connecting to Database...</div>
 </div>
 
+<!-- Mobile Sidebar Overlay -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
+
 <!-- TOPBAR -->
 <div class="topbar">
-  <div class="topbar-brand">
-    <div class="dot"></div>
-    ACC Task Manager
+  <div style="display:flex;align-items:center;gap:10px;">
+    <button class="hamburger" id="hamburger-btn" onclick="toggleMobileSidebar()" aria-label="Menu">☰</button>
+    <div class="topbar-brand">
+      <div class="dot"></div>
+      ACC Task Manager
+    </div>
   </div>
   <div class="topbar-meta" id="clock"></div>
   <div class="topbar-right">
@@ -2068,6 +2227,26 @@ document.querySelectorAll('.nav-item').forEach(el => {
 // ══════════════════════════════════════════════════
 // INIT — show login first, don't auto-sync
 // ══════════════════════════════════════════════════
+// ══════════════════════════════════════════════════
+// MOBILE SIDEBAR TOGGLE
+// ══════════════════════════════════════════════════
+function toggleMobileSidebar() {
+  const sidebar = document.getElementById('main-sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  const isOpen = sidebar.classList.contains('mobile-open');
+  if (isOpen) {
+    sidebar.classList.remove('mobile-open');
+    overlay.classList.remove('open');
+  } else {
+    sidebar.classList.add('mobile-open');
+    overlay.classList.add('open');
+  }
+}
+function closeMobileSidebar() {
+  document.getElementById('main-sidebar').classList.remove('mobile-open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   // Hide app content until login
   document.getElementById('admin-nav').style.display = 'none';
@@ -2077,6 +2256,13 @@ window.addEventListener('DOMContentLoaded', () => {
   // Hide loader immediately — login screen is shown instead
   const lo = document.getElementById('loading-overlay');
   if (lo) { lo.style.display = 'none'; }
+
+  // Close sidebar on nav item click (mobile)
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.addEventListener('click', () => {
+      if (window.innerWidth <= 700) closeMobileSidebar();
+    });
+  });
 });
 </script>
 <!-- ══ STAT DETAIL MODAL ══ -->
