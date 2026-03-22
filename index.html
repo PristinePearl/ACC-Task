@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" type="image/png" href="https://www.pristinepearlpharma.in/images/alt-logo.png">
 <title>ACC TASK MANAGER</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
@@ -835,6 +835,56 @@ tbody td{padding:11px 14px;vertical-align:middle;}
   #page-status .stat-grid{grid-template-columns:1fr;}
   .stat-value{font-size:22px;}
 }
+
+/* ═══ ANALYTICS PAGE STYLES ═══ */
+.analytics-tabs{display:flex;gap:4px;background:#f1f5f9;border:1px solid var(--border);padding:4px;border-radius:12px;margin-bottom:24px;overflow-x:auto;flex-wrap:nowrap;}
+.atab{padding:8px 18px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);transition:all .18s ease;white-space:nowrap;}
+.atab:hover{color:var(--text2);}
+.atab.active{background:#fff;color:var(--accent);box-shadow:var(--shadow);}
+.analytics-panel{display:none;animation:fadeUp .3s ease both;}
+.analytics-panel.active{display:block;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-header{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:6px;}
+.cal-day-name{font-size:10px;font-family:var(--mono);color:var(--muted2);text-align:center;font-weight:700;letter-spacing:.5px;padding:4px 0;}
+.cal-cell{min-height:72px;border-radius:8px;border:1px solid var(--border);background:#fff;padding:5px;position:relative;transition:all .15s ease;}
+.cal-cell:hover{border-color:var(--accent);box-shadow:var(--shadow);}
+.cal-cell.other-month{background:#f9fafd;opacity:.45;}
+.cal-cell.today{border-color:var(--accent);border-width:2px;background:var(--accent-light);}
+.cal-date{font-size:11px;font-weight:700;font-family:var(--mono);color:var(--text2);}
+.cal-date.today-num{color:var(--accent);}
+.cal-task-pip{font-size:9px;padding:1px 4px;border-radius:3px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;line-height:1.4;}
+.cal-more{font-size:9px;color:var(--muted2);font-family:var(--mono);margin-top:1px;font-weight:600;}
+.hist-wrap{display:flex;align-items:flex-end;gap:8px;height:140px;padding:0 4px;}
+.hist-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;height:100%;justify-content:flex-end;}
+.hist-bar{width:100%;border-radius:5px 5px 0 0;min-height:4px;transition:height .7s cubic-bezier(.4,0,.2,1);}
+.hist-bar:hover{filter:brightness(1.08);}
+.hist-lbl{font-size:9px;color:var(--muted2);font-family:var(--mono);text-align:center;font-weight:600;}
+.hist-val{font-size:11px;font-family:var(--mono);font-weight:700;}
+.tcmp-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.tcmp-name{font-weight:700;font-size:13px;min-width:120px;flex-shrink:0;}
+.tcmp-bars{flex:1;display:flex;flex-direction:column;gap:5px;}
+.tcmp-line{display:flex;align-items:center;gap:8px;}
+.tcmp-lbl{font-size:10px;color:var(--muted);font-family:var(--mono);font-weight:600;min-width:68px;}
+.tcmp-track{flex:1;background:#e8ecf4;border-radius:6px;height:7px;overflow:hidden;}
+.tcmp-fill{height:100%;border-radius:6px;transition:width .8s cubic-bezier(.4,0,.2,1);}
+.digest-hdr{background:linear-gradient(135deg,#1e2130 0%,#3b5bdb 60%,#0f9b6e 100%);border-radius:14px;padding:24px 28px;color:#fff;margin-bottom:18px;position:relative;overflow:hidden;}
+.digest-hdr::before{content:'';position:absolute;right:-30px;top:-30px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.07);}
+.digest-hdr::after{content:'';position:absolute;left:-20px;bottom:-40px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.04);}
+.digest-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
+.digest-stat{background:rgba(255,255,255,.14);border-radius:10px;padding:11px 14px;backdrop-filter:blur(8px);}
+.digest-stat-v{font-size:26px;font-weight:800;font-family:var(--mono);letter-spacing:-1px;}
+.digest-stat-l{font-size:9px;opacity:.7;font-family:var(--mono);text-transform:uppercase;letter-spacing:.8px;margin-top:2px;}
+.digest-sec{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px;}
+.digest-sec-ttl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-family:var(--mono);margin-bottom:10px;}
+.digest-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f0f4ff;font-size:13px;}
+.digest-row:last-child{border-bottom:none;}
+.monthly-hdr{background:linear-gradient(135deg,#1e2130,#2d3650);border-radius:12px;padding:24px 28px;color:#fff;margin-bottom:20px;}
+.monthly-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:16px;}
+.mstat{border-radius:10px;padding:13px;text-align:center;}
+.mstat-v{font-size:24px;font-weight:800;font-family:var(--mono);letter-spacing:-1px;}
+.mstat-l{font-size:9px;opacity:.6;font-family:var(--mono);text-transform:uppercase;letter-spacing:.6px;margin-top:2px;}
+.emp-perf-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.emp-kpi-ring{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-family:var(--mono);border:3px solid;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -937,6 +987,9 @@ tbody td{padding:11px 14px;vertical-align:middle;}
     </div>
     <div class="nav-item" data-page="reminders">
       <span class="nav-icon">◍</span><span class="nav-item-label">Reminders</span>
+    </div>
+    <div class="nav-item" data-page="analytics">
+      <span class="nav-icon">◈</span><span class="nav-item-label">Reports & Analytics</span>
     </div>
     <hr class="nav-divider"/>
   </div>
@@ -1231,6 +1284,70 @@ tbody td{padding:11px 14px;vertical-align:middle;}
   <div class="section">
     <div class="section-title">Recent Tasks <span class="badge">Latest 5</span></div>
     <div id="ed-recent-tasks"><div class="empty-state"><div class="ei">◌</div><p>Loading…</p></div></div>
+  </div>
+</div>
+
+
+<!-- REPORTS & ANALYTICS PAGE -->
+<div class="page" id="page-analytics">
+  <div class="page-header">
+    <div class="page-title-wrap">
+      <div class="page-title">Reports & Analytics</div>
+      <div class="page-sub">Insights, summaries and performance exports</div>
+    </div>
+  </div>
+
+  <div class="analytics-tabs">
+    <div class="atab active" data-atab="digest" onclick="switchAnalyticsTab('digest')">📋 Daily Digest</div>
+    <div class="atab" data-atab="monthly" onclick="switchAnalyticsTab('monthly')">📅 Monthly Report</div>
+    <div class="atab" data-atab="histogram" onclick="switchAnalyticsTab('histogram')">📊 Completion Time</div>
+    <div class="atab" data-atab="teamchart" onclick="switchAnalyticsTab('teamchart')">⚖️ Team Comparison</div>
+    <div class="atab" data-atab="calendar" onclick="switchAnalyticsTab('calendar')">🗓️ Calendar</div>
+  </div>
+
+  <div class="analytics-panel active" id="apanel-digest">
+    <div id="digest-wrap"><div class="empty-state"><div class="ei">◌</div><p>Sync data first</p></div></div>
+  </div>
+
+  <div class="analytics-panel" id="apanel-monthly">
+    <div id="monthly-wrap"><div class="empty-state"><div class="ei">◌</div><p>Sync data first</p></div></div>
+  </div>
+
+  <div class="analytics-panel" id="apanel-histogram">
+    <div class="section">
+      <div class="section-title">Task Completion Time Analysis</div>
+      <div id="histogram-wrap"><div class="empty-state"><div class="ei">◌</div><p>Sync data first</p></div></div>
+    </div>
+  </div>
+
+  <div class="analytics-panel" id="apanel-teamchart">
+    <div class="section">
+      <div class="section-title">Team Comparison</div>
+      <div id="teamchart-wrap"><div class="empty-state"><div class="ei">◌</div><p>Sync data first</p></div></div>
+    </div>
+  </div>
+
+  <div class="analytics-panel" id="apanel-calendar">
+    <div class="section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div class="section-title" style="margin-bottom:0">Task Due-Date Calendar</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <button onclick="calNav(-1)" class="btn btn-ghost btn-sm">‹ Prev</button>
+          <div id="cal-month-label" style="font-size:15px;font-weight:700;min-width:150px;text-align:center"></div>
+          <button onclick="calNav(1)" class="btn btn-ghost btn-sm">Next ›</button>
+        </div>
+      </div>
+      <div class="cal-header">
+        <div class="cal-day-name">Sun</div><div class="cal-day-name">Mon</div><div class="cal-day-name">Tue</div>
+        <div class="cal-day-name">Wed</div><div class="cal-day-name">Thu</div><div class="cal-day-name">Fri</div><div class="cal-day-name">Sat</div>
+      </div>
+      <div class="cal-grid" id="cal-grid-wrap"></div>
+      <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><div style="width:10px;height:10px;border-radius:2px;background:#e6f7f2;border:1px solid #a7f3d0"></div>Completed</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><div style="width:10px;height:10px;border-radius:2px;background:#fef3e2;border:1px solid #fde68a"></div>Pending</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><div style="width:10px;height:10px;border-radius:2px;background:#fce8e6;border:1px solid #fecaca"></div>Missed</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1908,3 +2025,1246 @@ window.addEventListener('DOMContentLoaded',()=>{
 </script>
 </body>
 </html>
+<script>
+// ══════════════════════════════════════════════════════════════
+// FEATURE PACK v3 — All 15 enhancements
+// ══════════════════════════════════════════════════════════════
+
+// ── UNDO SYSTEM ──────────────────────────────────────────────
+let undoStack = [];
+let undoTimer = null;
+
+function pushUndo(label, fn) {
+  undoStack.push({ label, fn });
+  showUndoToast(label);
+}
+
+function showUndoToast(label) {
+  clearTimeout(undoTimer);
+  const t = document.getElementById('toast');
+  const dot = document.getElementById('toast-dot');
+  const msgEl = document.getElementById('toast-msg');
+  dot.style.background = 'var(--accent3)';
+  msgEl.innerHTML = `${label} &nbsp;<button onclick="doUndo()" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:2px 8px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:700;margin-left:6px">UNDO</button>`;
+  t.classList.remove('hide'); t.style.opacity = '';
+  t.classList.add('show');
+  undoTimer = setTimeout(() => {
+    undoStack = [];
+    t.classList.remove('show'); t.classList.add('hide');
+    setTimeout(() => { t.style.opacity = '0'; t.classList.remove('hide'); }, 300);
+  }, 5000);
+}
+
+function doUndo() {
+  const action = undoStack.pop();
+  if (action) { action.fn(); toast('✓ Undone', 'var(--accent2)'); }
+}
+
+// Override removeEmp with undo support
+const _origRemoveEmp = window.removeEmp;
+window.removeEmp = function(id) {
+  const removed = DB.staff.find(s => s.empId === id);
+  if (!removed) return;
+  DB.staff = DB.staff.filter(s => s.empId !== id);
+  renderEmpTable(); populateDropdowns(); renderDashboard();
+  pushUndo(`Removed ${removed.name}`, () => {
+    DB.staff.push(removed);
+    renderEmpTable(); populateDropdowns(); renderDashboard();
+  });
+};
+
+// ── TREND INDICATORS ─────────────────────────────────────────
+function calcTrend(tasks, statusFilter) {
+  const now = new Date();
+  const thisWeekStart = new Date(now); thisWeekStart.setDate(now.getDate() - 7);
+  const lastWeekStart = new Date(now); lastWeekStart.setDate(now.getDate() - 14);
+  const thisWeek = tasks.filter(t => {
+    const d = new Date(t.completedDate || t.assignedDate);
+    return d >= thisWeekStart && (!statusFilter || t.status === statusFilter);
+  }).length;
+  const lastWeek = tasks.filter(t => {
+    const d = new Date(t.completedDate || t.assignedDate);
+    return d >= lastWeekStart && d < thisWeekStart && (!statusFilter || t.status === statusFilter);
+  }).length;
+  if (lastWeek === 0) return null;
+  const pct = Math.round(((thisWeek - lastWeek) / lastWeek) * 100);
+  return { pct, up: pct >= 0 };
+}
+
+function trendBadge(trend) {
+  if (!trend) return '';
+  const clr = trend.up ? '#0f9b6e' : '#d93025';
+  const arrow = trend.up ? '↑' : '↓';
+  return `<div style="font-size:10px;color:${clr};font-weight:700;font-family:var(--mono);margin-top:4px">${arrow} ${Math.abs(trend.pct)}% vs last week</div>`;
+}
+
+// Sparkline mini-chart
+function sparkline(data, color) {
+  if (!data || data.length < 2) return '';
+  const max = Math.max(...data, 1);
+  const w = 60, h = 22;
+  const pts = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - (v / max) * h}`).join(' ');
+  return `<svg width="${w}" height="${h}" style="overflow:visible"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/><circle cx="${(data.length-1)/(data.length-1)*w}" cy="${h-(data[data.length-1]/max)*h}" r="2.5" fill="${color}"/></svg>`;
+}
+
+// ── COUNTDOWN TIMER ──────────────────────────────────────────
+function startCountdowns() {
+  setInterval(() => {
+    document.querySelectorAll('[data-countdown]').forEach(el => {
+      const target = new Date(el.dataset.countdown);
+      const diff = target - new Date();
+      if (diff <= 0) { el.textContent = 'OVERDUE'; el.style.color = 'var(--danger)'; return; }
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    });
+  }, 1000);
+}
+startCountdowns();
+
+// ── HEATMAP CALENDAR ─────────────────────────────────────────
+function buildHeatmap() {
+  const wrap = document.getElementById('heatmap-wrap');
+  if (!wrap) return;
+  const counts = {};
+  DB.tasks.filter(t => t.completedDate).forEach(t => {
+    counts[t.completedDate] = (counts[t.completedDate] || 0) + 1;
+  });
+  const max = Math.max(...Object.values(counts), 1);
+  const weeks = 18;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const startDay = new Date(today);
+  startDay.setDate(today.getDate() - (weeks * 7 - 1));
+  let days = [];
+  for (let i = 0; i < weeks * 7; i++) {
+    const d = new Date(startDay); d.setDate(startDay.getDate() + i);
+    const key = d.toISOString().slice(0,10);
+    days.push({ date: key, count: counts[key] || 0, d });
+  }
+  const monthLabels = [];
+  days.forEach((day, i) => {
+    if (day.d.getDate() === 1 || i === 0) monthLabels.push({ col: Math.floor(i/7), label: day.d.toLocaleString('en',{month:'short'}) });
+  });
+
+  wrap.innerHTML = `
+    <div style="overflow-x:auto;padding-bottom:4px">
+      <div style="position:relative;display:inline-block">
+        <div style="display:flex;gap:1px;margin-top:18px">
+          ${Array.from({length: weeks}, (_, wi) => `
+            <div style="display:flex;flex-direction:column;gap:1px">
+              ${days.slice(wi*7,(wi+1)*7).map(day => {
+                const pct = day.count / max;
+                const bg = day.count === 0 ? '#e8ecf4'
+                  : pct < .25 ? '#bfdbfe'
+                  : pct < .5  ? '#3b82f6'
+                  : pct < .75 ? '#2563eb'
+                  : '#1d4ed8';
+                return `<div title="${day.date}: ${day.count} completions" style="width:12px;height:12px;border-radius:2px;background:${bg};transition:transform .1s ease;cursor:default" onmouseover="this.style.transform='scale(1.3)'" onmouseout="this.style.transform=''"></div>`;
+              }).join('')}
+            </div>
+          `).join('')}
+        </div>
+        <div style="position:absolute;top:0;left:0;display:flex;gap:1px">
+          ${Array.from({length: weeks}, (_, wi) => {
+            const lbl = monthLabels.find(m => m.col === wi);
+            return `<div style="width:13px;font-size:9px;color:var(--muted2);font-family:var(--mono)">${lbl ? lbl.label : ''}</div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:10px;color:var(--muted2)">
+        <span>Less</span>
+        ${['#e8ecf4','#bfdbfe','#3b82f6','#2563eb','#1d4ed8'].map(c=>`<div style="width:11px;height:11px;border-radius:2px;background:${c}"></div>`).join('')}
+        <span>More</span>
+      </div>
+    </div>`;
+}
+
+// ── KPI LEADERBOARD ──────────────────────────────────────────
+function buildLeaderboard() {
+  const wrap = document.getElementById('leaderboard-wrap');
+  if (!wrap) return;
+  const medals = ['🥇','🥈','🥉'];
+  const empScores = DB.staff.map(s => {
+    const tasks = DB.tasks.filter(t => t.empId === s.empId && t.status === 'Completed');
+    const kpis = tasks.map(t => parseInt(t.kpi)||0);
+    const avg = kpis.length ? Math.round(kpis.reduce((a,b)=>a+b,0)/kpis.length) : 0;
+    const streak = calcStreak(s.empId);
+    return { ...s, avg, tasks: tasks.length, streak };
+  }).sort((a,b) => b.avg - a.avg || b.tasks - a.tasks);
+
+  wrap.innerHTML = empScores.length === 0
+    ? '<div class="empty-state"><div class="ei">◌</div><p>No performance data yet</p></div>'
+    : empScores.map((e, i) => {
+      const clr = e.avg >= 90 ? 'var(--accent2)' : e.avg >= 70 ? 'var(--accent3)' : 'var(--danger)';
+      const bar = Math.min(e.avg, 100);
+      return `<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);animation:fadeUp .3s ${i*.05}s ease both">
+        <div style="font-size:${i<3?'22px':'14px'};width:32px;text-align:center;font-weight:800;font-family:var(--mono);color:var(--muted)">${i<3?medals[i]:'#'+(i+1)}</div>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:14px">${e.name} ${e.streak >= 5 ? '<span title="5+ on-time streak">🔥</span>' : ''}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${e.designation||e.team||''} · ${e.tasks} tasks completed</div>
+          <div style="margin-top:6px;background:#e8ecf4;border-radius:10px;height:5px;overflow:hidden">
+            <div style="height:100%;width:${bar}%;background:${clr};border-radius:10px;transition:width .8s cubic-bezier(.4,0,.2,1)"></div>
+          </div>
+        </div>
+        <div style="font-size:28px;font-weight:800;font-family:var(--mono);color:${clr};letter-spacing:-1px;min-width:52px;text-align:right">${e.avg||'—'}</div>
+      </div>`;
+    }).join('');
+}
+
+function calcStreak(empId) {
+  const completed = DB.tasks
+    .filter(t => t.empId === empId && t.status === 'Completed' && t.completedDate && t.targetDate)
+    .filter(t => new Date(t.completedDate) <= new Date(t.targetDate))
+    .sort((a,b) => new Date(b.completedDate) - new Date(a.completedDate));
+  return completed.length;
+}
+
+// ── WORKLOAD BALANCE VIEW ────────────────────────────────────
+function buildWorkloadView() {
+  const wrap = document.getElementById('workload-wrap');
+  if (!wrap) return;
+  const rows = DB.staff.map(s => {
+    const tasks = DB.tasks.filter(t => t.empId === s.empId);
+    const pending = tasks.filter(t => t.status === 'Pending').length;
+    const total = tasks.length;
+    const score = pending;
+    return { ...s, pending, total, score };
+  }).sort((a,b) => b.score - a.score);
+
+  if (!rows.length) { wrap.innerHTML = '<div class="empty-state"><div class="ei">◌</div><p>No employees yet</p></div>'; return; }
+  const maxPending = Math.max(...rows.map(r => r.pending), 1);
+
+  wrap.innerHTML = rows.map((e,i) => {
+    const pct = (e.pending / maxPending) * 100;
+    const status = e.pending === 0 ? { label:'Free', clr:'var(--accent2)', bg:'var(--accent2-light)' }
+      : pct <= 33 ? { label:'Light', clr:'#0891b2', bg:'#e0f7fc' }
+      : pct <= 66 ? { label:'Normal', clr:'var(--accent3)', bg:'var(--accent3-light)' }
+      : { label:'Overloaded', clr:'var(--danger)', bg:'var(--danger-light)' };
+    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);animation:fadeUp .25s ${i*.04}s ease both">
+      <div style="width:130px;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.name}</div>
+      <div style="flex:1;background:#e8ecf4;border-radius:10px;height:8px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${status.clr};border-radius:10px;transition:width .7s cubic-bezier(.4,0,.2,1)"></div>
+      </div>
+      <div style="font-size:11px;font-family:var(--mono);font-weight:700;color:var(--muted2);min-width:28px;text-align:right">${e.pending}</div>
+      <span style="font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700;background:${status.bg};color:${status.clr};min-width:70px;text-align:center">${status.label}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── PROGRESS RING ────────────────────────────────────────────
+function buildProgressRing(pct, elementId, color) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  const r = 52, cx = 60, cy = 60, stroke = 8;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (pct / 100) * circ;
+  el.innerHTML = `
+    <svg width="120" height="120" viewBox="0 0 120 120">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#e8ecf4" stroke-width="${stroke}"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}"
+        stroke-dasharray="${circ}" stroke-dashoffset="${offset}"
+        stroke-linecap="round" transform="rotate(-90 ${cx} ${cy})"
+        style="transition:stroke-dashoffset 1s cubic-bezier(.4,0,.2,1)"/>
+      <text x="${cx}" y="${cy-6}" text-anchor="middle" font-family="var(--mono)" font-size="20" font-weight="800" fill="${color}">${pct}%</text>
+      <text x="${cx}" y="${cy+12}" text-anchor="middle" font-family="var(--font)" font-size="10" fill="var(--muted)" font-weight="600">DONE</text>
+    </svg>`;
+}
+
+// ── ACHIEVEMENT BADGES ───────────────────────────────────────
+const BADGES = [
+  { id:'first_task', icon:'⭐', label:'First Task', desc:'Completed your first task', check: (tasks) => tasks.filter(t=>t.status==='Completed').length >= 1 },
+  { id:'streak5',   icon:'🔥', label:'On Fire',    desc:'5 tasks completed on time', check: (tasks) => tasks.filter(t=>t.status==='Completed'&&t.completedDate&&t.targetDate&&new Date(t.completedDate)<=new Date(t.targetDate)).length >= 5 },
+  { id:'perfect',   icon:'💯', label:'Perfect',    desc:'Scored 100 KPI on a task', check: (tasks) => tasks.some(t=>parseInt(t.kpi)===100) },
+  { id:'speedster', icon:'⚡', label:'Speedster',  desc:'Completed a task 3+ days early', check: (tasks) => tasks.some(t=>t.completedDate&&t.targetDate&&(new Date(t.targetDate)-new Date(t.completedDate))>=259200000) },
+  { id:'tenTasks',  icon:'🏆', label:'Veteran',    desc:'10 tasks completed', check: (tasks) => tasks.filter(t=>t.status==='Completed').length >= 10 },
+  { id:'noMiss',    icon:'🛡️', label:'Reliable',   desc:'No missed tasks', check: (tasks) => tasks.length > 0 && tasks.filter(t=>t.status==='Missed').length === 0 },
+];
+
+function buildBadges(empId, containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const tasks = DB.tasks.filter(t => t.empId === empId);
+  el.innerHTML = BADGES.map(b => {
+    const earned = b.check(tasks);
+    return `<div title="${b.label}: ${b.desc}" style="display:flex;flex-direction:column;align-items:center;gap:4px;opacity:${earned?1:.25};filter:${earned?'none':'grayscale(1)'};transition:all .3s ease;cursor:default">
+      <div style="font-size:26px;${earned?'animation:float 3s ease infinite':''}">${b.icon}</div>
+      <div style="font-size:9px;font-weight:600;color:var(--muted);font-family:var(--mono)">${b.label}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── TASK COMMENTS THREAD ─────────────────────────────────────
+// Store comments in localStorage per task
+function getComments(taskId) {
+  try { return JSON.parse(localStorage.getItem('comments_'+taskId)||'[]'); } catch(e) { return []; }
+}
+function saveComments(taskId, comments) {
+  try { localStorage.setItem('comments_'+taskId, JSON.stringify(comments)); } catch(e) {}
+}
+
+function renderCommentsThread(taskId, containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const comments = getComments(taskId);
+  const isAdmin = currentUser?.role === 'admin';
+  const authorName = isAdmin ? 'Admin' : (DB.staff.find(s=>s.empId===currentUser?.empId)?.name || 'Employee');
+
+  el.innerHTML = `
+    <div style="font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:10px">Comments</div>
+    <div id="comments-list-${taskId}" style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+      ${comments.length ? comments.map(c=>`
+        <div style="display:flex;gap:8px;animation:fadeUp .2s ease">
+          <div style="width:28px;height:28px;border-radius:50%;background:${c.isAdmin?'var(--accent)':'var(--accent2)'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">${c.author.slice(0,2).toUpperCase()}</div>
+          <div style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:8px 10px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
+              <span style="font-size:11px;font-weight:700;color:${c.isAdmin?'var(--accent)':'var(--accent2)'}">${c.author}</span>
+              <span style="font-size:10px;color:var(--muted2);font-family:var(--mono)">${c.time}</span>
+            </div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.5">${c.text}</div>
+          </div>
+        </div>`).join('') : '<div style="text-align:center;color:var(--muted2);font-size:12px;padding:12px">No comments yet</div>'}
+    </div>
+    <div style="display:flex;gap:8px">
+      <input id="comment-input-${taskId}" placeholder="Add a comment…" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:var(--font);outline:none;background:#fafbfd;color:var(--text)"
+        onkeydown="if(event.key==='Enter')postComment('${taskId}','${authorName}',${isAdmin})"/>
+      <button onclick="postComment('${taskId}','${authorName}',${isAdmin})" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">Send</button>
+    </div>`;
+}
+
+function postComment(taskId, author, isAdmin) {
+  const inp = document.getElementById('comment-input-'+taskId);
+  if (!inp || !inp.value.trim()) return;
+  const comments = getComments(taskId);
+  comments.push({ author, text: inp.value.trim(), time: new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}), isAdmin });
+  saveComments(taskId, comments);
+  inp.value = '';
+  renderCommentsThread(taskId, 'comments-thread-'+taskId);
+}
+
+
+// ── TASK TEMPLATES ────────────────────────────────────────────
+let taskTemplates = JSON.parse(localStorage.getItem('taskTemplates')||'[]');
+function saveTemplates() { localStorage.setItem('taskTemplates', JSON.stringify(taskTemplates)); }
+
+function saveAsTemplate() {
+  const name = document.getElementById('t-name').value.trim();
+  const work = document.getElementById('t-work').value.trim();
+  const type = document.getElementById('t-type').value;
+  const area = document.getElementById('t-area').value;
+  if (!name) { toast('Enter a task name first', 'var(--danger)'); return; }
+  taskTemplates.push({ name, work, type, area, id:'TPL'+Date.now() });
+  saveTemplates();
+  renderTemplateList();
+  toast('✓ Template saved', 'var(--accent2)');
+}
+
+function loadTemplate(id) {
+  const tmpl = taskTemplates.find(t => t.id === id);
+  if (!tmpl) return;
+  document.getElementById('t-name').value = tmpl.name;
+  document.getElementById('t-work').value = tmpl.work;
+  document.getElementById('t-type').value = tmpl.type;
+  toast('Template loaded', 'var(--accent)');
+}
+
+function deleteTemplate(id) {
+  taskTemplates = taskTemplates.filter(t => t.id !== id);
+  saveTemplates(); renderTemplateList();
+}
+
+function renderTemplateList() {
+  const wrap = document.getElementById('template-list');
+  if (!wrap) return;
+  wrap.innerHTML = taskTemplates.length === 0
+    ? '<div style="font-size:12px;color:var(--muted2);padding:8px 0">No saved templates</div>'
+    : taskTemplates.map(t => `
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+        <div style="flex:1;font-size:12px;font-weight:600">${t.name} <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">${t.type}</span></div>
+        <button onclick="loadTemplate('${t.id}')" class="btn btn-ghost btn-sm" style="font-size:11px">Use</button>
+        <button onclick="deleteTemplate('${t.id}')" class="btn btn-ghost btn-sm" style="font-size:11px">✕</button>
+      </div>`).join('');
+}
+
+// ── BULK TASK ASSIGNMENT ─────────────────────────────────────
+function renderBulkEmpList() {
+  const wrap = document.getElementById('bulk-emp-list');
+  if (!wrap) return;
+  wrap.innerHTML = DB.staff.map(s => `
+    <label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border)">
+      <input type="checkbox" class="bulk-emp-check" value="${s.empId}" style="width:auto"/>
+      <strong>${s.name}</strong> <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">${s.empId}</span>
+    </label>`).join('');
+}
+
+async function assignBulkTask() {
+  const checks = [...document.querySelectorAll('.bulk-emp-check:checked')];
+  if (!checks.length) { toast('Select at least one employee', 'var(--danger)'); return; }
+  const taskName = document.getElementById('bulk-task-name').value.trim();
+  const work = document.getElementById('bulk-task-work').value.trim();
+  const type = document.getElementById('bulk-task-type').value;
+  const target = document.getElementById('bulk-task-target').value;
+  if (!taskName || !target) { toast('Task Name and Target Date required', 'var(--danger)'); return; }
+  let count = 0;
+  for (const check of checks) {
+    const empId = check.value;
+    const emp = DB.staff.find(s => s.empId === empId);
+    const area = DB.aow.find(a => a.empId === empId)?.area || '';
+    DB.tasks.push({ id:'T'+String(Date.now()+count).slice(-6), assignedDate:todayStr(), empId, name:emp?.name||'', area, taskType:type, taskName, workAssigned:work, targetDate:target, userRemarks:'', completedDate:'', status:'Pending', kpi:'', score:'', adminRemarks:'' });
+    count++;
+    try { await dbPost({ action:'assignTask', empId, name:emp?.name||'', area, taskType:type, taskName, workAssigned:work, targetDate:target }); } catch(e) {}
+  }
+  recalcStatuses(); refreshAllViews();
+  toast(`✓ Assigned to ${count} employees`, 'var(--accent2)');
+  closeModal('bulk-modal');
+}
+
+// ── QUICK COMPLETE ────────────────────────────────────────────
+function quickComplete(taskId, btn) {
+  const t = DB.tasks.find(x => x.id === taskId);
+  if (!t || t.status === 'Completed') return;
+  const remarks = prompt('Quick complete — add a brief note:', 'Completed');
+  if (remarks === null) return;
+  t.userRemarks = remarks || 'Completed';
+  t.completedDate = todayStr();
+  recalcStatuses(); refreshAllViews();
+  toast('✓ Task marked complete', 'var(--accent2)');
+  try { dbPost({ action:'updateTask', taskId, userRemarks:t.userRemarks, completedDate:t.completedDate }); } catch(e) {}
+}
+
+// ── PDF EXPORT ────────────────────────────────────────────────
+function exportPDF() {
+  recalcStatuses();
+  const tasks = DB.tasks;
+  const done = tasks.filter(t => t.status==='Completed');
+  const pend = tasks.filter(t => t.status==='Pending');
+  const miss = tasks.filter(t => t.status==='Missed');
+  const kpis = done.map(t=>parseInt(t.kpi)||0);
+  const avg = kpis.length ? Math.round(kpis.reduce((a,b)=>a+b,0)/kpis.length) : 0;
+  const today = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+
+  const empRows = DB.staff.map(s => {
+    const st = tasks.filter(t => t.empId === s.empId);
+    const sc = st.filter(t => t.status==='Completed');
+    const sm = st.filter(t => t.status==='Missed');
+    const kv = sc.length ? Math.round(sc.map(t=>parseInt(t.kpi)||0).reduce((a,b)=>a+b)/sc.length) : 0;
+    return `<tr style="border-bottom:1px solid #eee"><td style="padding:8px 10px">${s.name}</td><td style="padding:8px 10px">${s.team||'—'}</td><td style="padding:8px 10px;text-align:center">${st.length}</td><td style="padding:8px 10px;text-align:center;color:#0f9b6e;font-weight:700">${sc.length}</td><td style="padding:8px 10px;text-align:center;color:#d93025;font-weight:700">${sm.length}</td><td style="padding:8px 10px;text-align:center;font-weight:800;color:${kv>=90?'#0f9b6e':kv>=70?'#e8840a':'#d93025'}">${kv||'—'}</td></tr>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>ACC Performance Report</title><style>
+    *{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;color:#111;padding:40px;background:#fff}
+    h1{font-size:28px;font-weight:800;letter-spacing:-1px;color:#111}
+    .sub{color:#6b7280;font-size:13px;margin-top:4px}.divider{border:none;border-top:2px solid #f0f0f0;margin:24px 0}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:24px 0}
+    .card{background:#f9fafb;border-radius:12px;padding:18px;border-left:4px solid}
+    .card-title{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#9ca3af;font-weight:600}
+    .card-val{font-size:32px;font-weight:800;margin-top:6px;letter-spacing:-1px}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    thead th{background:#f9fafb;padding:10px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#9ca3af;font-weight:600}
+    .footer{margin-top:40px;text-align:center;font-size:11px;color:#9ca3af}
+    @media print{body{padding:20px}}
+  </style></head><body>
+  <h1>ACC Task Manager</h1>
+  <div class="sub">Performance Report · Generated ${today}</div>
+  <hr class="divider"/>
+  <div class="grid">
+    <div class="card" style="border-color:#3b5bdb"><div class="card-title">Total Tasks</div><div class="card-val" style="color:#3b5bdb">${tasks.length}</div></div>
+    <div class="card" style="border-color:#0f9b6e"><div class="card-title">Completed</div><div class="card-val" style="color:#0f9b6e">${done.length}</div></div>
+    <div class="card" style="border-color:#e8840a"><div class="card-title">Pending</div><div class="card-val" style="color:#e8840a">${pend.length}</div></div>
+    <div class="card" style="border-color:#d93025"><div class="card-title">Missed</div><div class="card-val" style="color:#d93025">${miss.length}</div></div>
+  </div>
+  <div style="margin-bottom:20px;padding:16px;background:#eff4ff;border-radius:10px;display:inline-block">
+    <span style="font-size:12px;color:#6b7280;font-weight:600">TEAM AVG KPI</span>
+    <span style="font-size:36px;font-weight:800;color:#3b5bdb;margin-left:16px;letter-spacing:-1px">${avg || '—'}</span>
+  </div>
+  <hr class="divider"/>
+  <h2 style="font-size:16px;font-weight:700;margin-bottom:14px">Employee Performance</h2>
+  <table><thead><tr><th>Employee</th><th>Team</th><th>Total</th><th>Completed</th><th>Missed</th><th>KPI</th></tr></thead>
+  <tbody>${empRows}</tbody></table>
+  <div class="footer">ACC Task Manager · Accounts Department · ${today}</div>
+  </body></html>`;
+
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const w = window.open(url, '_blank');
+  setTimeout(() => { try { w.print(); } catch(e){} URL.revokeObjectURL(url); }, 800);
+  toast('✓ PDF report opened — use browser print', 'var(--accent2)');
+}
+
+// ── PATCH renderDashboard to add new sections ─────────────────
+const _origRenderDashboard = window.renderDashboard;
+window.renderDashboard = function() {
+  _origRenderDashboard();
+  buildHeatmap();
+  buildLeaderboard();
+  buildWorkloadView();
+  addTrendIndicators();
+};
+
+function addTrendIndicators() {
+  const tasks = DB.tasks;
+  const done = tasks.filter(t => t.status==='Completed');
+  const pend = tasks.filter(t => t.status==='Pending');
+  const miss = tasks.filter(t => t.status==='Missed');
+
+  // Build 7-day daily completion sparkline data
+  const spark = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate()-i); const key = d.toISOString().slice(0,10);
+    spark.push(tasks.filter(t=>t.completedDate===key).length);
+  }
+
+  const el = document.getElementById('dashboard-extras');
+  if (!el) return;
+  const trend = calcTrend(tasks, 'Completed');
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:12px 0;border-top:1px solid var(--border);margin-top:4px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div>
+          <div style="font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.6px;font-weight:600;margin-bottom:3px">7-day trend</div>
+          ${sparkline(spark,'#3b5bdb')}
+        </div>
+        ${trend ? `<div style="font-size:11px;font-weight:700;color:${trend.up?'var(--accent2)':'var(--danger)'}">${trend.up?'↑':'↓'} ${Math.abs(trend.pct)}% completions vs last week</div>` : ''}
+      </div>
+      <button onclick="exportPDF()" class="btn btn-ghost btn-sm" style="display:flex;align-items:center;gap:5px">📄 Export PDF</button>
+    </div>`;
+}
+
+// ── PATCH renderEmpDashboard ──────────────────────────────────
+const _origRenderEmpDashboard = window.renderEmpDashboard;
+window.renderEmpDashboard = function() {
+  _origRenderEmpDashboard();
+  if (!currentUser || currentUser.role !== 'employee') return;
+  const empId = currentUser.empId;
+  const tasks = DB.tasks.filter(t => t.empId === empId);
+  const done = tasks.filter(t => t.status === 'Completed');
+  const rate = tasks.length ? Math.round((done.length/tasks.length)*100) : 0;
+  buildProgressRing(rate, 'emp-progress-ring', rate>=80?'var(--accent2)':rate>=50?'var(--accent3)':'var(--danger)');
+  buildBadges(empId, 'emp-badges');
+};
+
+// ── PATCH openTaskDetailModal to add comments ─────────────────
+const _origOpenTaskDetail = window.openTaskDetailModal;
+window.openTaskDetailModal = function(id) {
+  _origOpenTaskDetail(id);
+  const t = DB.tasks.find(x => x.id === id);
+  if (!t) return;
+  // Inject countdown if due today
+  const today = todayStr();
+  const isToday = t.targetDate === today && t.status === 'Pending';
+  let extraHTML = '';
+  if (isToday) {
+    extraHTML += `<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:18px">⏱</span>
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--danger);font-family:var(--mono);text-transform:uppercase">Due Today · Time Remaining</div>
+        <div data-countdown="${t.targetDate}T23:59:59" style="font-size:20px;font-weight:800;font-family:var(--mono);color:var(--danger);letter-spacing:-1px">--:--:--</div>
+      </div>
+    </div>`;
+  }
+  extraHTML += `<div id="comments-thread-${id}" style="margin-bottom:16px"></div>`;
+  const tdm = document.getElementById('tdm-content');
+  const actions = tdm.querySelector('.tdm-actions');
+  if (actions) actions.insertAdjacentHTML('beforebegin', extraHTML);
+  renderCommentsThread(id, 'comments-thread-'+id);
+};
+
+// ── PATCH loadEmpTasksForId to add drag handles ───────────────
+const _origLoadEmpTasksForId = window.loadEmpTasksForId;
+window.loadEmpTasksForId = function(empId) {
+  _origLoadEmpTasksForId(empId);
+  // Add quick-complete buttons
+  document.querySelectorAll('#emp-task-table tr').forEach(row => {
+    const td = row.querySelector('td:last-child');
+    const updateBtn = td?.querySelector('.btn-success');
+    if (updateBtn) {
+      const taskId = row.querySelector('td')?.textContent;
+      const t = DB.tasks.find(x => x.id === taskId);
+      if (t && t.status !== 'Completed') {
+        const qcBtn = document.createElement('button');
+        qcBtn.className = 'btn btn-ghost btn-sm';
+        qcBtn.style.fontSize = '11px';
+        qcBtn.title = 'Quick complete';
+        qcBtn.textContent = '⚡';
+        qcBtn.onclick = (e) => { e.stopPropagation(); quickComplete(t.id, qcBtn); };
+        td.appendChild(qcBtn);
+      }
+    }
+  });
+};
+
+// ── INJECT NEW DOM SECTIONS ───────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  // 1. Dashboard extras (trend + PDF)
+  const dashPage = document.getElementById('page-dashboard');
+  if (dashPage) {
+    const firstSection = dashPage.querySelector('.section');
+    if (firstSection) {
+      const extrasDiv = document.createElement('div');
+      extrasDiv.id = 'dashboard-extras';
+      firstSection.appendChild(extrasDiv);
+    }
+
+    // Heatmap section
+    const heatSection = document.createElement('div');
+    heatSection.className = 'section';
+    heatSection.innerHTML = `
+      <div class="section-title">Completion Heatmap <span class="badge">Last 18 weeks</span></div>
+      <div id="heatmap-wrap">Loading…</div>`;
+    dashPage.appendChild(heatSection);
+
+    // Leaderboard section
+    const lbSection = document.createElement('div');
+    lbSection.className = 'section';
+    lbSection.innerHTML = `
+      <div class="section-title">🏆 KPI Leaderboard <span class="badge">Top Performers</span></div>
+      <div id="leaderboard-wrap"><div class="empty-state"><div class="ei">◌</div><p>Sync to load</p></div></div>`;
+    dashPage.appendChild(lbSection);
+
+    // Workload section
+    const wlSection = document.createElement('div');
+    wlSection.className = 'section';
+    wlSection.innerHTML = `
+      <div class="section-title">⚖️ Workload Balance <span class="badge">Pending tasks per employee</span></div>
+      <div id="workload-wrap"><div class="empty-state"><div class="ei">◌</div><p>Sync to load</p></div></div>`;
+    dashPage.appendChild(wlSection);
+  }
+
+  // 2. Employee Dashboard — progress ring + badges
+  const empDashPage = document.getElementById('page-emp-dash');
+  if (empDashPage) {
+    const ringSection = document.createElement('div');
+    ringSection.className = 'section';
+    ringSection.style.cssText = 'display:flex;align-items:center;gap:28px;flex-wrap:wrap';
+    ringSection.innerHTML = `
+      <div id="emp-progress-ring"></div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:700;margin-bottom:14px">Achievements</div>
+        <div id="emp-badges" style="display:flex;gap:16px;flex-wrap:wrap"></div>
+      </div>`;
+    const firstStat = empDashPage.querySelector('.stat-grid');
+    if (firstStat) firstStat.insertAdjacentElement('afterend', ringSection);
+  }
+
+  // 3. Task Assignment — templates + bulk + save-as-template
+  const assignPage = document.getElementById('page-assign');
+  if (assignPage) {
+    const firstSection = assignPage.querySelector('.section');
+    if (firstSection) {
+      // Save as template button + template list
+      const btnRow = firstSection.querySelector('.btn-row');
+      if (btnRow) {
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'btn btn-ghost';
+        saveBtn.innerHTML = '📋 Save as Template';
+        saveBtn.onclick = saveAsTemplate;
+        btnRow.appendChild(saveBtn);
+        const bulkBtn = document.createElement('button');
+        bulkBtn.className = 'btn btn-ghost';
+        bulkBtn.innerHTML = '👥 Bulk Assign';
+        bulkBtn.onclick = openBulkModal;
+        btnRow.appendChild(bulkBtn);
+      }
+      // Template list
+      const tmplSection = document.createElement('div');
+      tmplSection.style.cssText = 'margin-top:16px;padding-top:16px;border-top:1px solid var(--border)';
+      tmplSection.innerHTML = `<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.6px">Saved Templates</div><div id="template-list"></div>`;
+      firstSection.appendChild(tmplSection);
+    }
+  }
+
+  // 6. Bulk assign modal
+  const bulkModal = document.createElement('div');
+  bulkModal.className = 'modal-overlay';
+  bulkModal.id = 'bulk-modal';
+  bulkModal.innerHTML = `
+    <div class="modal" style="width:min(560px,96vw)">
+      <div class="modal-title">Bulk Task Assignment <button class="modal-close" onclick="closeModal('bulk-modal')">×</button></div>
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.6px">Select Employees</div>
+      <div id="bulk-emp-list" style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;margin-bottom:16px"></div>
+      <div class="form-grid">
+        <div class="form-group full"><label>Task Name *</label><input id="bulk-task-name" placeholder="e.g. Daily Bank Recon"/></div>
+        <div class="form-group full"><label>Work Description</label><textarea id="bulk-task-work" placeholder="Describe the work…" style="min-height:60px"></textarea></div>
+        <div class="form-group"><label>Task Type</label><select id="bulk-task-type"><option>Daily</option><option>Weekly</option><option>Monthly</option></select></div>
+        <div class="form-group"><label>Target Date *</label><input type="date" id="bulk-task-target"/></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="assignBulkTask()">◆ Assign to Selected</button>
+        <button class="btn btn-ghost" onclick="closeModal('bulk-modal')">Cancel</button>
+      </div>
+    </div>`;
+  document.body.appendChild(bulkModal);
+
+  // Init templates list
+  renderTemplateList();
+});
+
+function openBulkModal() {
+  renderBulkEmpList();
+  document.getElementById('bulk-modal').classList.add('open');
+}
+
+// Run on each full sync
+const _origRefreshAllViews = window.refreshAllViews;
+window.refreshAllViews = function() {
+  _origRefreshAllViews();
+  buildHeatmap();
+  buildLeaderboard();
+  buildWorkloadView();
+  addTrendIndicators();
+  renderTemplateList();
+  if (currentUser?.role === 'employee') {
+    const empId = currentUser.empId;
+    const tasks = DB.tasks.filter(t => t.empId === empId);
+    const done = tasks.filter(t => t.status === 'Completed');
+    const rate = tasks.length ? Math.round((done.length/tasks.length)*100) : 0;
+    buildProgressRing(rate, 'emp-progress-ring', rate>=80?'var(--accent2)':rate>=50?'var(--accent3)':'var(--danger)');
+    buildBadges(empId, 'emp-badges');
+  }
+};
+</script>
+
+<script>
+// ══════════════════════════════════════════════════
+// ANALYTICS MODULE — fully self-contained
+// ══════════════════════════════════════════════════
+
+// ── HELPERS ──────────────────────────────────────
+function getMonthRange(y,m){const s=new Date(y,m,1);const e=new Date(y,m+1,0);return{start:s.toISOString().slice(0,10),end:e.toISOString().slice(0,10)};}
+function daysBetween(a,b){return Math.abs((new Date(b)-new Date(a))/86400000);}
+function mthName(m){return['January','February','March','April','May','June','July','August','September','October','November','December'][m];}
+
+// ── TAB SWITCH ─────────────────────────────────
+function switchAnalyticsTab(id){
+  document.querySelectorAll('.atab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.analytics-panel').forEach(p=>p.classList.remove('active'));
+  const tab=document.querySelector(`[data-atab="${id}"]`);
+  if(tab)tab.classList.add('active');
+  const panel=document.getElementById('apanel-'+id);
+  if(panel)panel.classList.add('active');
+  if(id==='digest')renderDigest();
+  if(id==='monthly')renderMonthly();
+  if(id==='histogram')renderHistogram();
+  if(id==='teamchart')renderTeamChart();
+  if(id==='calendar')renderCalendar();
+}
+
+// ── CALENDAR ──────────────────────────────────
+let calY=new Date().getFullYear(), calM=new Date().getMonth();
+function calNav(d){calM+=d;if(calM>11){calM=0;calY++;}if(calM<0){calM=11;calY--;}renderCalendar();}
+
+function renderCalendar(){
+  const wrap=document.getElementById('cal-grid-wrap');
+  const lbl=document.getElementById('cal-month-label');
+  if(!wrap||!lbl)return;
+  lbl.textContent=mthName(calM)+' '+calY;
+  const now=new Date();now.setHours(0,0,0,0);
+  const first=new Date(calY,calM,1);
+  const last=new Date(calY,calM+1,0);
+  const cells=[];
+  for(let i=0;i<first.getDay();i++){const d=new Date(calY,calM,-(first.getDay()-i-1));cells.push({d,other:true});}
+  for(let d=1;d<=last.getDate();d++)cells.push({d:new Date(calY,calM,d),other:false});
+  while(cells.length%7!==0){const last=cells[cells.length-1].d;const n=new Date(last);n.setDate(last.getDate()+1);cells.push({d:n,other:true});}
+  wrap.innerHTML=cells.map(c=>{
+    const key=c.d.toISOString().slice(0,10);
+    const tasks=DB.tasks.filter(t=>t.targetDate===key);
+    const isToday=c.d.getTime()===now.getTime();
+    const pips=tasks.slice(0,3).map(t=>{
+      const clr=t.status==='Completed'?'#0f9b6e':t.status==='Missed'?'#d93025':'#e8840a';
+      const bg=t.status==='Completed'?'#e6f7f2':t.status==='Missed'?'#fce8e6':'#fef3e2';
+      return`<div class="cal-task-pip" style="color:${clr};background:${bg}">${t.taskName}</div>`;
+    }).join('');
+    return`<div class="cal-cell ${c.other?'other-month':''} ${isToday?'today':''}" title="${key}">
+      <div class="cal-date ${isToday?'today-num':''}">${c.d.getDate()}</div>
+      ${pips}${tasks.length>3?`<div class="cal-more">+${tasks.length-3} more</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ── DAILY DIGEST ─────────────────────────────
+function renderDigest(){
+  const wrap=document.getElementById('digest-wrap');
+  if(!wrap)return;
+  recalcStatuses();
+  const now=new Date();
+  const todayKey=now.toISOString().slice(0,10);
+  const yesterKey=new Date(now-86400000).toISOString().slice(0,10);
+  const todayTasks=DB.tasks.filter(t=>t.targetDate===todayKey&&t.status==='Pending');
+  const yestDone=DB.tasks.filter(t=>t.completedDate===yesterKey);
+  const overdue=DB.tasks.filter(t=>t.status==='Missed');
+  const soon=DB.tasks.filter(t=>{if(t.status!=='Pending')return false;const diff=(new Date(t.targetDate)-now)/86400000;return diff>0&&diff<=3;});
+
+  const row=(t,clr,bg,badge)=>`<div class="digest-row">
+    <div><div style="font-weight:600;font-size:13px">${t.taskName}</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:2px">${t.name} · <span style="font-family:var(--mono);font-size:10px">${t.taskType}</span></div></div>
+    <span style="font-size:10px;padding:3px 9px;border-radius:20px;font-weight:700;background:${bg};color:${clr};font-family:var(--mono);flex-shrink:0">${badge}</span>
+  </div>`;
+
+  const dateLabel=now.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  wrap.innerHTML=`
+    <div class="digest-hdr">
+      <div style="font-size:12px;opacity:.7;font-family:var(--mono);position:relative;z-index:1">${dateLabel}</div>
+      <div style="font-size:22px;font-weight:800;margin-top:4px;letter-spacing:-.5px;position:relative;z-index:1">Morning Briefing</div>
+      <div class="digest-stats" style="position:relative;z-index:1">
+        <div class="digest-stat"><div class="digest-stat-v">${todayTasks.length}</div><div class="digest-stat-l">Due Today</div></div>
+        <div class="digest-stat"><div class="digest-stat-v">${yestDone.length}</div><div class="digest-stat-l">Done Yesterday</div></div>
+        <div class="digest-stat"><div class="digest-stat-v" style="color:#fca5a5">${overdue.length}</div><div class="digest-stat-l">Overdue</div></div>
+      </div>
+    </div>
+    ${todayTasks.length?`<div class="digest-sec"><div class="digest-sec-ttl">⏰ Due Today (${todayTasks.length})</div>${todayTasks.map(t=>row(t,'#e8840a','#fef3e2','TODAY')).join('')}</div>`:''}
+    ${yestDone.length?`<div class="digest-sec"><div class="digest-sec-ttl">✅ Completed Yesterday (${yestDone.length})</div>${yestDone.map(t=>row(t,'#0f9b6e','#e6f7f2','DONE')).join('')}</div>`:''}
+    ${overdue.length?`<div class="digest-sec"><div class="digest-sec-ttl">🔴 Overdue (${overdue.length})</div>${overdue.slice(0,8).map(t=>row(t,'#d93025','#fce8e6','OVERDUE')).join('')}${overdue.length>8?`<div style="text-align:center;font-size:12px;color:var(--muted);padding:8px">+${overdue.length-8} more</div>`:''}</div>`:''}
+    ${soon.length?`<div class="digest-sec"><div class="digest-sec-ttl">⚡ Coming Up — Next 3 days (${soon.length})</div>${soon.map(t=>row(t,'#3b5bdb','#eef2ff',formatDate(t.targetDate))).join('')}</div>`:''}
+    ${!todayTasks.length&&!yestDone.length&&!overdue.length&&!soon.length?'<div class="empty-state"><div class="ei">✓</div><p>All clear — no pending or overdue tasks</p></div>':''}
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+      <button onclick="printDigest()" class="btn btn-primary">🖨️ Print Briefing</button>
+      <button onclick="printDigest()" class="btn btn-ghost">📄 Save as PDF</button>
+    </div>`;
+}
+
+function printDigest(){
+  recalcStatuses();
+  const now=new Date();
+  const todayKey=now.toISOString().slice(0,10);
+  const yesterKey=new Date(now-86400000).toISOString().slice(0,10);
+  const todayTasks=DB.tasks.filter(t=>t.targetDate===todayKey&&t.status==='Pending');
+  const yestDone=DB.tasks.filter(t=>t.completedDate===yesterKey);
+  const overdue=DB.tasks.filter(t=>t.status==='Missed');
+  const dateLabel=now.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>Morning Briefing · ${todayKey}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;color:#111;background:#fff}
+.page{max-width:640px;margin:0 auto;padding:36px 32px}
+.hdr{background:linear-gradient(135deg,#1e2130,#3b5bdb);border-radius:14px;padding:28px;color:#fff;margin-bottom:24px}
+.hdr h1{font-size:24px;font-weight:800;letter-spacing:-.5px;margin-top:4px}
+.hdr .d{font-size:11px;opacity:.6;font-family:monospace}
+.stats{display:flex;gap:10px;margin-top:16px}
+.stat{flex:1;background:rgba(255,255,255,.12);border-radius:9px;padding:12px;text-align:center}
+.stat .v{font-size:28px;font-weight:800;letter-spacing:-1px}
+.stat .l{font-size:9px;opacity:.65;text-transform:uppercase;letter-spacing:.8px;margin-top:2px;font-family:monospace}
+.sec{margin-bottom:20px}
+.sec-t{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#6b7280;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #f0f0f0;font-family:monospace}
+.row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f5}
+.row:last-child{border-bottom:none}
+.rname{font-weight:600;font-size:13px}
+.rsub{font-size:11px;color:#9ca3af;margin-top:1px}
+.badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700;font-family:monospace;flex-shrink:0}
+.footer{text-align:center;font-size:10px;color:#9ca3af;margin-top:36px;padding-top:14px;border-top:1px solid #f0f0f0}
+@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body><div class="page">
+<div class="hdr">
+  <div class="d">${dateLabel}</div>
+  <h1>Morning Briefing</h1>
+  <div class="stats">
+    <div class="stat"><div class="v">${todayTasks.length}</div><div class="l">Due Today</div></div>
+    <div class="stat"><div class="v">${yestDone.length}</div><div class="l">Done Yesterday</div></div>
+    <div class="stat"><div class="v" style="color:#fca5a5">${overdue.length}</div><div class="l">Overdue</div></div>
+  </div>
+</div>
+${todayTasks.length?`<div class="sec"><div class="sec-t">⏰ Due Today</div>${todayTasks.map(t=>`<div class="row"><div><div class="rname">${t.taskName}</div><div class="rsub">${t.name} · ${t.taskType}</div></div><span class="badge" style="background:#fef3e2;color:#e8840a">TODAY</span></div>`).join('')}</div>`:''}
+${yestDone.length?`<div class="sec"><div class="sec-t">✅ Completed Yesterday</div>${yestDone.map(t=>`<div class="row"><div><div class="rname">${t.taskName}</div><div class="rsub">${t.name} · ${t.taskType}</div></div><span class="badge" style="background:#e6f7f2;color:#0f9b6e">DONE</span></div>`).join('')}</div>`:''}
+${overdue.length?`<div class="sec"><div class="sec-t">🔴 Overdue</div>${overdue.slice(0,12).map(t=>`<div class="row"><div><div class="rname">${t.taskName}</div><div class="rsub">${t.name} · ${formatDate(t.targetDate)}</div></div><span class="badge" style="background:#fce8e6;color:#d93025">OVERDUE</span></div>`).join('')}</div>`:''}
+<div class="footer">ACC Task Manager · Accounts Department · ${todayKey}</div>
+</div></body></html>`;
+  const w=window.open('','_blank');
+  w.document.write(html);w.document.close();
+  setTimeout(()=>{try{w.print();}catch(e){}},500);
+  toast('Print dialog opened — save as PDF','var(--accent2)');
+}
+
+// ── MONTHLY REPORT ────────────────────────────
+let repM=new Date().getMonth(), repY=new Date().getFullYear();
+function navReport(d){repM+=d;if(repM>11){repM=0;repY++;}if(repM<0){repM=11;repY--;}renderMonthly();}
+
+function renderMonthly(){
+  const wrap=document.getElementById('monthly-wrap');
+  if(!wrap)return;
+  recalcStatuses();
+  const {start,end}=getMonthRange(repY,repM);
+  const mt=DB.tasks.filter(t=>(t.assignedDate>=start&&t.assignedDate<=end)||(t.targetDate>=start&&t.targetDate<=end));
+  const done=mt.filter(t=>t.status==='Completed');
+  const pend=mt.filter(t=>t.status==='Pending');
+  const miss=mt.filter(t=>t.status==='Missed');
+  const kpis=done.map(t=>parseInt(t.kpi)||0);
+  const avg=kpis.length?Math.round(kpis.reduce((a,b)=>a+b,0)/kpis.length):0;
+  const rate=mt.length?Math.round((done.length/mt.length)*100):0;
+
+  // Weekly bars
+  const mStart=new Date(start);
+  const weeks=[];
+  for(let w=0;w<5;w++){
+    const ws=new Date(mStart);ws.setDate(mStart.getDate()+w*7);
+    const we=new Date(ws);we.setDate(ws.getDate()+6);
+    const wsKey=ws.toISOString().slice(0,10),weKey=we.toISOString().slice(0,10);
+    if(ws.getMonth()===repM)weeks.push({label:'W'+(w+1),val:done.filter(t=>t.completedDate>=wsKey&&t.completedDate<=weKey).length});
+  }
+  const maxW=Math.max(...weeks.map(w=>w.val),1);
+  const weekBars=weeks.map(w=>`<div class="hist-col">
+    <div class="hist-val" style="color:var(--accent)">${w.val}</div>
+    <div class="hist-bar" style="height:${Math.max((w.val/maxW)*100,4)}px;background:linear-gradient(180deg,var(--accent),#5c7cfa)"></div>
+    <div class="hist-lbl">${w.label}</div>
+  </div>`).join('');
+
+  // Employee rows
+  const empRows=DB.staff.map(s=>{
+    const st=mt.filter(t=>t.empId===s.empId);
+    const sc=st.filter(t=>t.status==='Completed');
+    const sm=st.filter(t=>t.status==='Missed');
+    const kv=sc.length?Math.round(sc.map(t=>parseInt(t.kpi)||0).reduce((a,b)=>a+b,0)/sc.length):0;
+    const cr=st.length?Math.round((sc.length/st.length)*100):0;
+    const clr=kv>=90?'var(--accent2)':kv>=70?'var(--accent3)':'var(--danger)';
+    return`<div class="emp-perf-row">
+      <div class="emp-kpi-ring" style="color:${clr};border-color:${clr}">${kv||'—'}</div>
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:13px">${s.name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:1px">${s.team||s.designation||''}</div>
+        <div style="display:flex;gap:14px;margin-top:4px;font-size:11px;font-family:var(--mono)">
+          <span style="color:var(--accent2);font-weight:600">✓ ${sc.length}</span>
+          <span style="color:var(--danger);font-weight:600">✕ ${sm.length}</span>
+          <span style="color:var(--muted)">${st.length} total</span>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:20px;font-weight:800;font-family:var(--mono);color:${clr};letter-spacing:-1px">${cr}%</div>
+        <div style="font-size:10px;color:var(--muted);font-family:var(--mono)">completion</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  wrap.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button onclick="navReport(-1)" class="btn btn-ghost btn-sm">‹</button>
+        <div style="font-size:16px;font-weight:800;letter-spacing:-.3px">${mthName(repM)} ${repY}</div>
+        <button onclick="navReport(1)" class="btn btn-ghost btn-sm">›</button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button onclick="exportMonthlyPDF()" class="btn btn-primary btn-sm">📄 Export PDF</button>
+        <button onclick="exportMonthlyExcel()" class="btn btn-ghost btn-sm">📊 Export Excel</button>
+      </div>
+    </div>
+
+    <div class="monthly-hdr">
+      <div style="font-size:10px;opacity:.45;font-family:var(--mono);letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px">Monthly Performance Report</div>
+      <div style="font-size:22px;font-weight:800;letter-spacing:-.5px">${mthName(repM)} ${repY}</div>
+      <div style="font-size:11px;opacity:.45;margin-top:3px">Accounts Department · ACC Task Manager</div>
+      <div class="monthly-stats">
+        <div class="mstat" style="background:rgba(255,255,255,.1)"><div class="mstat-v">${mt.length}</div><div class="mstat-l" style="color:rgba(255,255,255,.55)">Total</div></div>
+        <div class="mstat" style="background:rgba(15,155,110,.25)"><div class="mstat-v" style="color:#6ee7b7">${done.length}</div><div class="mstat-l" style="color:rgba(110,231,183,.65)">Done</div></div>
+        <div class="mstat" style="background:rgba(232,132,10,.2)"><div class="mstat-v" style="color:#fcd34d">${pend.length}</div><div class="mstat-l" style="color:rgba(252,211,77,.65)">Pending</div></div>
+        <div class="mstat" style="background:rgba(217,48,37,.2)"><div class="mstat-v" style="color:#fca5a5">${miss.length}</div><div class="mstat-l" style="color:rgba(252,165,165,.65)">Missed</div></div>
+        <div class="mstat" style="background:rgba(59,91,219,.3)"><div class="mstat-v" style="color:#a5b4fc">${avg||'—'}</div><div class="mstat-l" style="color:rgba(165,180,252,.65)">Avg KPI</div></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+      <div style="background:var(--accent-light);border-radius:10px;padding:14px;text-align:center">
+        <div style="font-size:26px;font-weight:800;color:var(--accent);font-family:var(--mono);letter-spacing:-1px">${rate}%</div>
+        <div style="font-size:11px;color:var(--accent);font-family:var(--mono);font-weight:600;margin-top:3px">Completion Rate</div>
+      </div>
+      <div style="background:var(--accent2-light);border-radius:10px;padding:14px;text-align:center">
+        <div style="font-size:26px;font-weight:800;color:var(--accent2);font-family:var(--mono);letter-spacing:-1px">${avg||'—'}</div>
+        <div style="font-size:11px;color:var(--accent2);font-family:var(--mono);font-weight:600;margin-top:3px">Average KPI</div>
+      </div>
+      <div style="background:var(--accent3-light);border-radius:10px;padding:14px;text-align:center">
+        <div style="font-size:26px;font-weight:800;color:var(--accent3);font-family:var(--mono);letter-spacing:-1px">${miss.length}</div>
+        <div style="font-size:11px;color:var(--accent3);font-family:var(--mono);font-weight:600;margin-top:3px">Tasks Missed</div>
+      </div>
+    </div>
+
+    <div class="section" style="margin-bottom:16px">
+      <div style="font-size:11px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:12px">Weekly Completion Trend</div>
+      <div class="hist-wrap" style="height:120px">${weekBars||'<div style="color:var(--muted);font-size:12px;align-self:center">No data</div>'}</div>
+    </div>
+
+    <div class="section">
+      <div style="font-size:11px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:12px">Employee Breakdown</div>
+      ${empRows||'<div class="empty-state" style="padding:20px"><p>No employees</p></div>'}
+    </div>`;
+}
+
+function exportMonthlyPDF(){
+  recalcStatuses();
+  const {start,end}=getMonthRange(repY,repM);
+  const mt=DB.tasks.filter(t=>(t.assignedDate>=start&&t.assignedDate<=end)||(t.targetDate>=start&&t.targetDate<=end));
+  const done=mt.filter(t=>t.status==='Completed');
+  const pend=mt.filter(t=>t.status==='Pending');
+  const miss=mt.filter(t=>t.status==='Missed');
+  const kpis=done.map(t=>parseInt(t.kpi)||0);
+  const avg=kpis.length?Math.round(kpis.reduce((a,b)=>a+b,0)/kpis.length):0;
+  const rate=mt.length?Math.round((done.length/mt.length)*100):0;
+  const genDate=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+
+  const empRows=DB.staff.map(s=>{
+    const st=mt.filter(t=>t.empId===s.empId);
+    const sc=st.filter(t=>t.status==='Completed');
+    const sm=st.filter(t=>t.status==='Missed');
+    const kv=sc.length?Math.round(sc.map(t=>parseInt(t.kpi)||0).reduce((a,b)=>a+b,0)/sc.length):0;
+    const cr=st.length?Math.round((sc.length/st.length)*100):0;
+    const clr=kv>=90?'#0f9b6e':kv>=70?'#e8840a':'#d93025';
+    return`<tr style="border-bottom:1px solid #f0f0f0">
+      <td style="padding:9px 10px;font-weight:700">${s.name}</td>
+      <td style="padding:9px 10px;color:#6b7280;font-size:12px">${s.team||s.designation||'—'}</td>
+      <td style="padding:9px 10px;text-align:center;font-family:monospace;font-weight:600">${st.length}</td>
+      <td style="padding:9px 10px;text-align:center;color:#0f9b6e;font-weight:700;font-family:monospace">${sc.length}</td>
+      <td style="padding:9px 10px;text-align:center;color:#d93025;font-weight:700;font-family:monospace">${sm.length}</td>
+      <td style="padding:9px 10px;text-align:center;font-weight:800;color:${clr};font-family:monospace;font-size:15px">${kv||'—'}</td>
+      <td style="padding:9px 10px;text-align:center;font-weight:700;color:${clr}">${cr}%</td>
+    </tr>`;
+  }).join('');
+
+  const taskRows=mt.filter(t=>t.status==='Completed').map(t=>`<tr style="border-bottom:1px solid #f5f5f5">
+    <td style="padding:7px 9px;font-family:monospace;font-size:11px;color:#9ca3af">${t.id}</td>
+    <td style="padding:7px 9px;font-weight:600">${t.taskName}</td>
+    <td style="padding:7px 9px;color:#6b7280">${t.name}</td>
+    <td style="padding:7px 9px;font-family:monospace;font-size:11px">${t.taskType}</td>
+    <td style="padding:7px 9px;font-family:monospace;font-size:11px">${formatDate(t.targetDate)}</td>
+    <td style="padding:7px 9px;font-family:monospace;font-size:11px;color:#0f9b6e">${formatDate(t.completedDate)}</td>
+    <td style="padding:7px 9px;text-align:center;font-weight:800;color:${parseInt(t.kpi)===100?'#0f9b6e':parseInt(t.kpi)>=90?'#0f9b6e':'#e8840a'}">${t.kpi}</td>
+    <td style="padding:7px 9px;font-size:11px;color:#6b7280;max-width:140px">${t.userRemarks||'—'}</td>
+  </tr>`).join('');
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>${mthName(repM)} ${repY} Report</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;color:#111;background:#fff}
+.page{max-width:780px;margin:0 auto;padding:40px 36px}
+.hdr{background:linear-gradient(135deg,#1e2130 0%,#2d3650 50%,#3b5bdb 100%);border-radius:16px;padding:32px;color:#fff;margin-bottom:28px;position:relative;overflow:hidden}
+.hdr::before{content:'';position:absolute;right:-50px;top:-50px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.06)}
+.hdr h1{font-size:28px;font-weight:800;letter-spacing:-1px;position:relative;z-index:1}
+.hdr .sub{font-size:11px;opacity:.5;margin-bottom:4px;position:relative;z-index:1;font-family:monospace;letter-spacing:.5px}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:18px;position:relative;z-index:1}
+.stat{border-radius:10px;padding:13px;text-align:center}
+.stat .v{font-size:24px;font-weight:800;font-family:monospace;letter-spacing:-1px}
+.stat .l{font-size:9px;text-transform:uppercase;letter-spacing:.7px;margin-top:2px;opacity:.6;font-family:monospace}
+.highlights{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}
+.hl{border-radius:10px;padding:16px;text-align:center}
+.hl .v{font-size:28px;font-weight:800;font-family:monospace;letter-spacing:-1px}
+.hl .l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-top:3px;font-family:monospace}
+h2{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#6b7280;margin:24px 0 10px;padding-bottom:6px;border-bottom:2px solid #f0f0f0;font-family:monospace}
+table{width:100%;border-collapse:collapse}
+thead th{background:#f9fafb;padding:9px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:#9ca3af;font-weight:700;border-bottom:1px solid #e5e7eb}
+.footer{text-align:center;font-size:10px;color:#9ca3af;margin-top:40px;padding-top:14px;border-top:1px solid #f0f0f0}
+@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{padding:24px 20px}}
+</style></head><body><div class="page">
+<div class="hdr">
+  <div class="sub">MONTHLY PERFORMANCE REPORT · ACCOUNTS DEPARTMENT</div>
+  <h1>${mthName(repM)} ${repY}</h1>
+  <div style="font-size:11px;opacity:.35;margin-top:5px;position:relative;z-index:1">Generated ${genDate}</div>
+  <div class="stats">
+    <div class="stat" style="background:rgba(255,255,255,.1)"><div class="v">${mt.length}</div><div class="l" style="color:rgba(255,255,255,.55)">Total</div></div>
+    <div class="stat" style="background:rgba(15,155,110,.25)"><div class="v" style="color:#6ee7b7">${done.length}</div><div class="l" style="color:rgba(110,231,183,.6)">Completed</div></div>
+    <div class="stat" style="background:rgba(232,132,10,.2)"><div class="v" style="color:#fcd34d">${pend.length}</div><div class="l" style="color:rgba(252,211,77,.6)">Pending</div></div>
+    <div class="stat" style="background:rgba(217,48,37,.2)"><div class="v" style="color:#fca5a5">${miss.length}</div><div class="l" style="color:rgba(252,165,165,.6)">Missed</div></div>
+    <div class="stat" style="background:rgba(59,91,219,.3)"><div class="v" style="color:#a5b4fc">${avg||'—'}</div><div class="l" style="color:rgba(165,180,252,.6)">Avg KPI</div></div>
+  </div>
+</div>
+<div class="highlights">
+  <div class="hl" style="background:#eef2ff"><div class="v" style="color:#3b5bdb">${rate}%</div><div class="l" style="color:#3b5bdb">Completion Rate</div></div>
+  <div class="hl" style="background:#e6f7f2"><div class="v" style="color:#0f9b6e">${done.length}</div><div class="l" style="color:#0f9b6e">Tasks Completed</div></div>
+  <div class="hl" style="background:#fce8e6"><div class="v" style="color:#d93025">${miss.length}</div><div class="l" style="color:#d93025">Tasks Missed</div></div>
+</div>
+<h2>Employee Performance</h2>
+<table><thead><tr><th>Employee</th><th>Team</th><th>Total</th><th>Done</th><th>Missed</th><th>KPI</th><th>Rate</th></tr></thead>
+<tbody>${empRows||'<tr><td colspan="7" style="padding:16px;text-align:center;color:#9ca3af">No data</td></tr>'}</tbody></table>
+${taskRows?`<h2>Completed Tasks Detail</h2><table><thead><tr><th>Task ID</th><th>Task Name</th><th>Employee</th><th>Type</th><th>Target</th><th>Completed</th><th>KPI</th><th>Remarks</th></tr></thead><tbody>${taskRows}</tbody></table>`:''}
+<div class="footer">ACC Task Manager · Accounts Department · ${mthName(repM)} ${repY}</div>
+</div></body></html>`;
+  const w=window.open('','_blank');
+  w.document.write(html);w.document.close();
+  setTimeout(()=>{try{w.print();}catch(e){}},600);
+  toast('PDF report opened — save with print dialog','var(--accent2)');
+}
+
+function exportMonthlyExcel(){
+  recalcStatuses();
+  const {start,end}=getMonthRange(repY,repM);
+  const mt=DB.tasks.filter(t=>(t.assignedDate>=start&&t.assignedDate<=end)||(t.targetDate>=start&&t.targetDate<=end));
+  const headers=['Task ID','Assigned Date','Employee','Emp ID','Team','Area','Type','Task Name','Target Date','Completed Date','Status','KPI','Score','Remarks'];
+  const esc=v=>'"'+String(v||'').replace(/"/g,'""')+'"';
+  const rows=mt.map(t=>{const emp=DB.staff.find(s=>s.empId===t.empId);return[t.id,formatDate(t.assignedDate),t.name,t.empId,emp?.team||'',t.area,t.taskType,t.taskName,formatDate(t.targetDate),formatDate(t.completedDate)||'',t.status,t.kpi!==''?t.kpi:'',t.score||'',t.userRemarks||''].map(esc).join(',');});
+  const csv=[headers.map(esc).join(','),...rows].join('\r\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`Report_${mthName(repM)}_${repY}.csv`;a.click();
+  URL.revokeObjectURL(url);
+  toast(`✓ Excel exported — ${mthName(repM)} ${repY}`,'var(--accent2)');
+}
+
+// ── COMPLETION TIME HISTOGRAM ─────────────────
+function renderHistogram(){
+  const wrap=document.getElementById('histogram-wrap');
+  if(!wrap)return;
+  recalcStatuses();
+  const comp=DB.tasks.filter(t=>t.status==='Completed'&&t.completedDate&&t.assignedDate);
+  if(!comp.length){wrap.innerHTML='<div class="empty-state"><div class="ei">◌</div><p>No completed tasks to analyse yet</p></div>';return;}
+
+  // By type
+  const byType={Daily:[],Weekly:[],Monthly:[]};
+  comp.forEach(t=>{if(byType[t.taskType])byType[t.taskType].push(daysBetween(t.assignedDate,t.completedDate));});
+  const typeAvg=Object.entries(byType).map(([type,vals])=>({type,avg:vals.length?+(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1):0,count:vals.length}));
+  const maxType=Math.max(...typeAvg.map(x=>x.avg),1);
+  const typeClr={Daily:'#3b5bdb',Weekly:'#0f9b6e',Monthly:'#e8840a'};
+  const typeBars=typeAvg.map(x=>`<div class="hist-col">
+    <div class="hist-val" style="color:${typeClr[x.type]}">${x.avg}d</div>
+    <div class="hist-bar" style="height:${Math.max((x.avg/maxType)*120,4)}px;background:${typeClr[x.type]};opacity:.85"></div>
+    <div class="hist-lbl">${x.type}<br><span style="font-size:8px;color:var(--muted2)">${x.count} tasks</span></div>
+  </div>`).join('');
+
+  // Distribution buckets
+  const bkts=[0,0,0,0,0];
+  comp.forEach(t=>{const d=daysBetween(t.assignedDate,t.completedDate);if(d<=1)bkts[0]++;else if(d<=3)bkts[1]++;else if(d<=7)bkts[2]++;else if(d<=14)bkts[3]++;else bkts[4]++;});
+  const maxBkt=Math.max(...bkts,1);
+  const bktLbls=['Same day','2–3 days','4–7 days','8–14 days','15+ days'];
+  const bktBars=bkts.map((v,i)=>`<div class="hist-col">
+    <div class="hist-val" style="color:var(--accent)">${v}</div>
+    <div class="hist-bar" style="height:${Math.max((v/maxBkt)*120,4)}px;background:linear-gradient(180deg,var(--accent),#5c7cfa);opacity:.8"></div>
+    <div class="hist-lbl">${bktLbls[i]}</div>
+  </div>`).join('');
+
+  // By employee
+  const byEmp=DB.staff.map(s=>{
+    const tasks=comp.filter(t=>t.empId===s.empId);
+    const days=tasks.map(t=>daysBetween(t.assignedDate,t.completedDate));
+    return{name:s.name.split(' ')[0],avg:days.length?+(days.reduce((a,b)=>a+b,0)/days.length).toFixed(1):0,count:days.length};
+  }).filter(e=>e.count>0).sort((a,b)=>a.avg-b.avg);
+  const maxEmp=Math.max(...byEmp.map(e=>e.avg),1);
+  const empClrs=['#3b5bdb','#0f9b6e','#e8840a','#d93025','#7048e8','#c2255c','#0c8599','#5c940d'];
+  const empBars=byEmp.map((e,i)=>`<div class="hist-col">
+    <div class="hist-val" style="color:${empClrs[i%empClrs.length]}">${e.avg}d</div>
+    <div class="hist-bar" style="height:${Math.max((e.avg/maxEmp)*120,4)}px;background:${empClrs[i%empClrs.length]};opacity:.85"></div>
+    <div class="hist-lbl">${e.name}<br><span style="font-size:8px;color:var(--muted2)">${e.count}</span></div>
+  </div>`).join('');
+
+  wrap.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px">
+        <div style="font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:12px">Avg Days to Complete · By Type</div>
+        <div class="hist-wrap" style="height:140px">${typeBars}</div>
+      </div>
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px">
+        <div style="font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:12px">Completion Speed Distribution</div>
+        <div class="hist-wrap" style="height:140px">${bktBars}</div>
+      </div>
+    </div>
+    ${byEmp.length?`<div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px">
+      <div style="font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:12px">Avg Days to Complete · By Employee <span style="font-weight:400;opacity:.7">(lower = faster)</span></div>
+      <div class="hist-wrap" style="height:140px">${empBars}</div>
+    </div>`:''}`;
+}
+
+// ── TEAM COMPARISON ───────────────────────────
+function renderTeamChart(){
+  const wrap=document.getElementById('teamchart-wrap');
+  if(!wrap)return;
+  recalcStatuses();
+  const teams={};
+  DB.staff.forEach(s=>{const tn=(s.team||'Unassigned').trim();if(!teams[tn])teams[tn]=[];teams[tn].push(s);});
+  if(!Object.keys(teams).length){wrap.innerHTML='<div class="empty-state"><div class="ei">◌</div><p>No teams set up yet</p></div>';return;}
+  const tClrs=['#3b5bdb','#0f9b6e','#e8840a','#d93025','#7048e8','#c2255c','#0c8599'];
+  const tData=Object.entries(teams).map(([name,members],i)=>{
+    const ids=members.map(m=>m.empId);
+    const tasks=DB.tasks.filter(t=>ids.includes(t.empId));
+    const done=tasks.filter(t=>t.status==='Completed');
+    const miss=tasks.filter(t=>t.status==='Missed');
+    const kpis=done.map(t=>parseInt(t.kpi)||0);
+    const avgKpi=kpis.length?Math.round(kpis.reduce((a,b)=>a+b,0)/kpis.length):0;
+    const compRate=tasks.length?Math.round((done.length/tasks.length)*100):0;
+    return{name,members:members.length,tasks:tasks.length,done:done.length,miss:miss.length,avgKpi,compRate,color:tClrs[i%tClrs.length]};
+  });
+
+  const best=[...tData].sort((a,b)=>b.avgKpi-a.avgKpi)[0];
+  const fastest=[...tData].sort((a,b)=>b.compRate-a.compRate)[0];
+  const worst=[...tData].sort((a,b)=>b.miss-a.miss)[0];
+  const maxMiss=Math.max(...tData.map(t=>t.miss),1);
+
+  const rows=tData.map(t=>`<div class="tcmp-row">
+    <div class="tcmp-name">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:2px">
+        <div style="width:9px;height:9px;border-radius:50%;background:${t.color};flex-shrink:0"></div>${t.name}
+      </div>
+      <div style="font-size:10px;color:var(--muted2);font-family:var(--mono);margin-left:16px">${t.members} staff · ${t.tasks} tasks</div>
+    </div>
+    <div class="tcmp-bars">
+      <div class="tcmp-line">
+        <div class="tcmp-lbl">KPI Score</div>
+        <div class="tcmp-track"><div class="tcmp-fill" style="width:${t.avgKpi}%;background:${t.color}"></div></div>
+        <div style="font-size:12px;font-family:var(--mono);font-weight:700;color:${t.color};min-width:36px;text-align:right">${t.avgKpi||'—'}</div>
+      </div>
+      <div class="tcmp-line">
+        <div class="tcmp-lbl">Completion</div>
+        <div class="tcmp-track"><div class="tcmp-fill" style="width:${t.compRate}%;background:var(--accent2)"></div></div>
+        <div style="font-size:12px;font-family:var(--mono);font-weight:700;color:var(--accent2);min-width:36px;text-align:right">${t.compRate}%</div>
+      </div>
+      <div class="tcmp-line">
+        <div class="tcmp-lbl">Missed</div>
+        <div class="tcmp-track"><div class="tcmp-fill" style="width:${(t.miss/maxMiss)*100}%;background:var(--danger)"></div></div>
+        <div style="font-size:12px;font-family:var(--mono);font-weight:700;color:var(--danger);min-width:36px;text-align:right">${t.miss}</div>
+      </div>
+    </div>
+  </div>`).join('');
+
+  wrap.innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px">
+      <div style="background:var(--accent-light);border:1px solid var(--accent-mid);border-radius:var(--radius-lg);padding:14px;text-align:center">
+        <div style="font-size:9px;font-family:var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.8px;font-weight:700">Highest KPI</div>
+        <div style="font-size:16px;font-weight:800;color:var(--accent);margin-top:4px">${best?.name||'—'}</div>
+        <div style="font-size:22px;font-weight:800;font-family:var(--mono);color:var(--accent);letter-spacing:-1px">${best?.avgKpi||'—'}</div>
+      </div>
+      <div style="background:var(--accent2-light);border:1px solid rgba(15,155,110,.2);border-radius:var(--radius-lg);padding:14px;text-align:center">
+        <div style="font-size:9px;font-family:var(--mono);color:var(--accent2);text-transform:uppercase;letter-spacing:.8px;font-weight:700">Best Completion</div>
+        <div style="font-size:16px;font-weight:800;color:var(--accent2);margin-top:4px">${fastest?.name||'—'}</div>
+        <div style="font-size:22px;font-weight:800;font-family:var(--mono);color:var(--accent2);letter-spacing:-1px">${fastest?.compRate||0}%</div>
+      </div>
+      <div style="background:var(--danger-light);border:1px solid rgba(217,48,37,.15);border-radius:var(--radius-lg);padding:14px;text-align:center">
+        <div style="font-size:9px;font-family:var(--mono);color:var(--danger);text-transform:uppercase;letter-spacing:.8px;font-weight:700">Most Missed</div>
+        <div style="font-size:16px;font-weight:800;color:var(--danger);margin-top:4px">${worst?.name||'—'}</div>
+        <div style="font-size:22px;font-weight:800;font-family:var(--mono);color:var(--danger);letter-spacing:-1px">${worst?.miss||0}</div>
+      </div>
+    </div>
+    <div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px">${rows}</div>`;
+}
+
+// ── WIRE UP NAV ───────────────────────────────
+// Patch the existing nav click handler to handle analytics page
+const _origNavSetup = window.addEventListener;
+document.querySelector('[data-page="analytics"]')?.addEventListener('click', () => {
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelector('[data-page="analytics"]').classList.add('active');
+  document.getElementById('page-analytics').classList.add('active');
+  switchAnalyticsTab('digest');
+  if(window.innerWidth<=700){
+    document.getElementById('main-sidebar').classList.remove('mobile-open');
+    document.getElementById('sidebar-overlay').classList.remove('open');
+  }
+});
+
+// Also handle via the existing nav loop — patch the page handler
+const _origNavClick = document.querySelectorAll('.nav-item');
+_origNavClick.forEach(el=>{
+  if(el.dataset.page==='analytics'){
+    el.addEventListener('click',()=>{
+      document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('page-analytics').classList.add('active');
+      switchAnalyticsTab('digest');
+    });
+  }
+});
+
+// Refresh analytics when data syncs
+const _baseRefreshAll = window.refreshAllViews;
+window.refreshAllViews = function(){
+  _baseRefreshAll();
+  const pg=document.getElementById('page-analytics');
+  if(pg&&pg.classList.contains('active')){
+    const active=pg.querySelector('.analytics-panel.active');
+    if(active){const id=active.id.replace('apanel-','');switchAnalyticsTab(id);}
+  }
+};
+</script>
