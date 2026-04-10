@@ -1081,7 +1081,7 @@ tbody td{padding:11px 14px;vertical-align:middle;}
 </div>
 
 <!-- Sidebar Overlay (mobile) -->
-<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 
 <!-- TOPBAR -->
 <div class="topbar">
@@ -2834,7 +2834,10 @@ function toggleMobileSidebar(){
   const open=s.classList.contains('mobile-open');
   if(open){s.classList.remove('mobile-open');o.classList.remove('open');}else{s.classList.add('mobile-open');o.classList.add('open');}
 }
-function closeMobileSidebar(){document.getElementById('main-sidebar').classList.remove('mobile-open');document.getElementById('sidebar-overlay').classList.remove('open');}
+function closeMobileSidebar() {
+  document.getElementById('main-sidebar').classList.remove('mobile-open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
 
 window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('admin-nav').style.display='none';
@@ -3254,6 +3257,16 @@ window.doLogout = function() {
   closeNotifPanel();
   _notifLogout();
 };
+
+// ✅ STOP sidebar clicks from closing
+document.getElementById('main-sidebar').addEventListener('click', function(e) {
+  e.stopPropagation();
+});
+
+// ✅ Overlay click → close sidebar
+document.getElementById('sidebar-overlay').addEventListener('click', function() {
+  closeMobileSidebar();
+});
 
 </script>
 </body>
