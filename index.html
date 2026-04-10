@@ -885,6 +885,151 @@ tbody td{padding:11px 14px;vertical-align:middle;}
 .mstat-l{font-size:9px;opacity:.6;font-family:var(--mono);text-transform:uppercase;letter-spacing:.6px;margin-top:2px;}
 .emp-perf-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
 .emp-kpi-ring{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-family:var(--mono);border:3px solid;flex-shrink:0;}
+/* ═══ NOTIFICATION BELL ═══ */
+.notif-bell{
+  position:relative;background:var(--card);border:1px solid var(--border);
+  width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s ease;flex-shrink:0;
+}
+.notif-bell:hover{border-color:var(--accent);background:var(--accent-light);}
+.notif-badge{
+  position:absolute;top:-5px;right:-5px;
+  background:var(--danger);color:#fff;
+  font-size:9px;font-weight:800;font-family:var(--mono);
+  min-width:16px;height:16px;border-radius:20px;
+  display:flex;align-items:center;justify-content:center;
+  padding:0 4px;border:2px solid var(--bg);
+  animation:dotPulse 2s ease infinite;
+}
+
+/* ═══ NOTIFICATION PANEL ═══ */
+#notif-panel{
+  position:fixed;
+  top:var(--topbar-h);
+  right:0;
+  width:min(360px,100vw);
+  height:calc(100vh - var(--topbar-h));
+  background:var(--surface);
+  border-left:1px solid var(--border);
+  z-index:450;
+  transform:translateX(100%);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  display:flex;
+  flex-direction:column;
+  box-shadow:-4px 0 20px rgba(17,24,39,.08);
+}
+#notif-panel.open{transform:translateX(0);}
+
+#notif-overlay{
+  display:none;
+  position:fixed;inset:0;
+  z-index:399;
+  background:rgba(17,24,39,.2);
+  backdrop-filter:blur(2px);
+}
+
+.notif-panel-header{
+  padding:16px 18px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+  background:var(--surface);
+}
+.notif-panel-title{
+  font-size:14px;font-weight:700;
+  color:var(--text);letter-spacing:-.3px;
+}
+.notif-panel-body{
+  flex:1;overflow-y:auto;
+  padding:12px;
+}
+.notif-panel-body::-webkit-scrollbar{width:3px;}
+.notif-panel-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px;}
+
+.notif-tabs{
+  display:flex;gap:4px;padding:4px;
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:10px;margin-bottom:12px;
+}
+.notif-tab{
+  flex:1;padding:6px 8px;border-radius:7px;
+  font-size:11px;font-weight:600;cursor:pointer;
+  color:var(--muted);text-align:center;
+  transition:all .18s ease;white-space:nowrap;
+  font-family:var(--mono);
+}
+.notif-tab:hover{color:var(--text2);}
+.notif-tab.active{
+  background:var(--surface);
+  color:var(--accent);
+  box-shadow:var(--shadow);
+}
+
+.notif-item{
+  background:var(--card2);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:11px 13px;
+  margin-bottom:8px;
+  cursor:pointer;
+  transition:all .15s ease;
+  animation:fadeUp .2s ease both;
+}
+.notif-item:hover{
+  border-color:var(--border2);
+  background:#f7f9ff;
+  transform:translateX(-2px);
+}
+.notif-item.unread-reminder{
+  border-left:3px solid var(--accent3);
+  padding-left:11px;
+}
+.notif-item.unread-task{
+  border-left:3px solid var(--accent2);
+  padding-left:11px;
+}
+.notif-icon{font-size:16px;flex-shrink:0;line-height:1;}
+.notif-type{
+  font-size:9px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.8px;
+  font-family:var(--mono);margin-bottom:3px;
+}
+.notif-msg{
+  font-size:12px;font-weight:600;
+  color:var(--text);line-height:1.4;
+}
+.notif-sub{
+  font-size:11px;color:var(--muted);
+  margin-top:2px;line-height:1.4;
+}
+.notif-time{
+  font-size:10px;color:var(--muted2);
+  font-family:var(--mono);margin-top:4px;
+}
+.notif-mark-read{
+  font-size:10px;color:var(--accent);
+  cursor:pointer;font-weight:600;
+  font-family:var(--mono);
+  padding:2px 6px;border-radius:4px;
+  border:1px solid var(--accent-mid);
+  background:var(--accent-light);
+  transition:all .15s ease;
+  flex-shrink:0;
+  white-space:nowrap;
+}
+.notif-mark-read:hover{
+  background:var(--accent);color:#fff;
+}
+
+/* mobile notif panel */
+@media(max-width:700px){
+  #notif-panel{
+    width:100vw;
+    top:54px;
+    height:calc(100vh - 54px);
+  }
+}
 </style>
 </head>
 <body>
@@ -960,7 +1105,11 @@ tbody td{padding:11px 14px;vertical-align:middle;}
       <div class="avatar" id="topbar-avatar">?</div>
       <span style="font-size:12px;color:var(--muted);font-family:var(--mono);font-weight:500" id="topbar-username"></span>
     </div>
-    <button class="logout-btn" onclick="doLogout()">⏻ Logout</button>
+   <button class="notif-bell" id="notif-bell" onclick="toggleNotifPanel()" title="Notifications">
+  🔔
+  <span class="notif-badge" id="notif-badge" style="display:none">0</span>
+</button>
+<button class="logout-btn" onclick="doLogout()">⏻ Logout</button>
   </div>
 </div>
 
@@ -991,6 +1140,9 @@ tbody td{padding:11px 14px;vertical-align:middle;}
     <div class="nav-item" data-page="analytics">
       <span class="nav-icon">◈</span><span class="nav-item-label">Reports & Analytics</span>
     </div>
+    <div class="nav-item" data-page="pending-works">
+      <span class="nav-icon">⧗</span><span class="nav-item-label">Pending Works</span>
+    </div>
     <hr class="nav-divider"/>
   </div>
   <div id="emp-nav">
@@ -1000,6 +1152,9 @@ tbody td{padding:11px 14px;vertical-align:middle;}
     </div>
     <div class="nav-item" data-page="emp" id="nav-my-tasks">
       <span class="nav-icon">▷</span><span class="nav-item-label">My Tasks</span>
+    </div>
+    <div class="nav-item" data-page="pending-works" id="nav-emp-pending" style="display:none">
+      <span class="nav-icon">⧗</span><span class="nav-item-label">Pending Works</span>
     </div>
   </div>
 </div>
@@ -1126,7 +1281,7 @@ tbody td{padding:11px 14px;vertical-align:middle;}
     <div class="form-grid">
       <div class="form-group"><label>Employee *</label><select id="t-emp" onchange="fillAreaFromEmp()"><option value="">— Select Employee —</option></select></div>
       <div class="form-group"><label>Area of Work</label><select id="t-area"><option>— Select employee first —</option></select></div>
-      <div class="form-group"><label>Task Type *</label><select id="t-type"><option>Daily</option><option>Weekly</option><option>Monthly</option></select></div>
+      <div class="form-group"><label>Task Type *</label><select id="t-type"><option>Daily</option><option>Weekly</option><option>Monthly</option><option>One Time</option></select></div>
       <div class="form-group"><label>Task Name *</label><input id="t-name" placeholder="e.g. Bank Reconciliation"/></div>
       <div class="form-group full"><label>Work Assigned</label><textarea id="t-work" placeholder="Describe the work to be completed…"></textarea></div>
       <div class="form-group"><label>Target Date *</label><input type="date" id="t-target"/></div>
@@ -1150,6 +1305,7 @@ tbody td{padding:11px 14px;vertical-align:middle;}
       <div class="inner-tab" onclick="filterTasks('Daily',this)">Daily</div>
       <div class="inner-tab" onclick="filterTasks('Weekly',this)">Weekly</div>
       <div class="inner-tab" onclick="filterTasks('Monthly',this)">Monthly</div>
+      <div class="inner-tab" onclick="filterTasks('One Time',this)">One Time</div>
     </div>
     <div class="table-wrap">
       <table>
@@ -1176,7 +1332,7 @@ tbody td{padding:11px 14px;vertical-align:middle;}
     <div class="form-grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">
       <div class="form-group"><label>Employee</label><select id="flt-emp"><option value="">All</option></select></div>
       <div class="form-group"><label>Status</label><select id="flt-status"><option value="">All</option><option>Completed</option><option>Pending</option><option>Missed</option></select></div>
-      <div class="form-group"><label>Task Type</label><select id="flt-type"><option value="">All</option><option>Daily</option><option>Weekly</option><option>Monthly</option></select></div>
+      <div class="form-group"><label>Task Type</label><select id="flt-type"><option value="">All</option><option>Daily</option><option>Weekly</option><option>Monthly</option><option>One Time</option></select></div>
     </div>
     <div class="btn-row"><button class="btn btn-ghost btn-sm" onclick="renderStatusTable()">⊙ Apply</button></div>
   </div>
@@ -1351,8 +1507,114 @@ tbody td{padding:11px 14px;vertical-align:middle;}
   </div>
 </div>
 
-</div><!-- /main -->
-</div><!-- /layout -->
+ <!-- PENDING WORKS PAGE -->
+<div class="page" id="page-pending-works">
+  <div class="page-header">
+    <div class="page-title-wrap">
+      <div class="page-title">Pending Works</div>
+      <div class="page-sub" id="pw-page-sub">Your task list</div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="renderPendingWorks()">↻ Refresh</button>
+  </div>
+
+  <!-- Add Task Form (same as Task Assignment) -->
+  <div class="section" id="pw-form-section">
+    <div class="section-title" id="pw-form-title">New Pending Work</div>
+    <!-- Admin sees employee selector; staff gets their own ID auto-filled -->
+    <div class="form-grid">
+      <div class="form-group" id="pw-emp-wrap">
+        <label>Employee *</label>
+        <select id="pw-t-emp" onchange="pwFillArea()">
+          <option value="">— Select Employee —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Area of Work</label>
+        <select id="pw-t-area"><option>— Select employee first —</option></select>
+      </div>
+      <div class="form-group">
+        <label>Task Type *</label>
+        <select id="pw-t-type">
+          <option>Daily</option><option>Weekly</option><option>Monthly</option><option>One Time</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Task Name *</label>
+        <input id="pw-t-name" placeholder="e.g. Bank Reconciliation"/>
+      </div>
+      <div class="form-group full">
+        <label>Work Description</label>
+        <textarea id="pw-t-work" placeholder="Describe the work…"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Target Date *</label>
+        <input type="date" id="pw-t-target"/>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="pwAssignTask()">◆ Add to Pending Works</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-grid" style="grid-template-columns:repeat(auto-fill,minmax(145px,1fr));margin-bottom:22px;">
+    <div class="stat-card orange"><div class="stat-label">Open</div>
+      <div class="stat-value orange" id="pw-s-open">—</div></div>
+    <div class="stat-card red"><div class="stat-label">Overdue</div>
+      <div class="stat-value red" id="pw-s-over">—</div></div>
+    <div class="stat-card blue"><div class="stat-label">Due Today</div>
+      <div class="stat-value blue" id="pw-s-today">—</div></div>
+    <div class="stat-card green"><div class="stat-label">Completed</div>
+      <div class="stat-value green" id="pw-s-done">—</div></div>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="section">
+    <div class="inner-tabs" id="pw-tabs">
+      <div class="inner-tab active" onclick="setPWTab('all',this)">All</div>
+      <div class="inner-tab" onclick="setPWTab('Pending',this)">Pending</div>
+      <div class="inner-tab" onclick="setPWTab('Completed',this)">Completed</div>
+      <div class="inner-tab" onclick="setPWTab('Missed',this)">Missed</div>
+    </div>
+
+    <!-- Admin filter by employee -->
+    <div class="form-group" id="pw-flt-emp-wrap" style="margin-bottom:14px;max-width:280px;">
+      <label>Filter by Employee</label>
+      <select id="pw-flt-emp" onchange="renderPendingWorks()">
+        <option value="">All Staff</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Task list table -->
+  <div class="section">
+    <div class="section-title">
+      Work Items <span class="badge" id="pw-count">0</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Task ID</th><th>Assigned</th><th>Employee</th>
+            <th>Area</th><th>Type</th><th>Task Name</th>
+            <th>Target</th><th>Status</th><th>KPI</th><th>Update</th>
+          </tr>
+        </thead>
+        <tbody id="pw-task-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ══ PENDING WORK DETAIL/UPDATE MODAL ══ -->
+<div class="modal-overlay" id="pw-modal">
+  <div class="modal" style="width:min(600px,96vw);max-height:90vh;overflow-y:auto;">
+    <div class="modal-title" id="pw-modal-ttl">Work Item <button class="modal-close" onclick="closeModal('pw-modal')">×</button></div>
+    <div id="pw-modal-body"></div>
+  </div>
+</div>
 
 <!-- UPDATE MODAL -->
 <div class="modal-overlay" id="update-modal">
@@ -1407,11 +1669,79 @@ tbody td{padding:11px 14px;vertical-align:middle;}
   </div>
 </div>
 
+<!-- ══ NOTIFICATION PANEL ══ -->
+<div id="notif-panel">
+  <div class="notif-panel-header">
+    <div class="notif-panel-title">🔔 Notifications</div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button onclick="markAllNotifRead()" style="font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;font-weight:600;font-family:var(--mono);">Mark all read</button>
+      <button onclick="toggleNotifPanel()" style="background:var(--card2);border:1px solid var(--border);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--muted);">×</button>
+    </div>
+  </div>
+  <div class="notif-panel-body">
+    <div class="notif-tabs">
+      <div class="notif-tab active" id="ntab-all" onclick="switchNotifTab('all',this)">All</div>
+      <div class="notif-tab" id="ntab-tasks" onclick="switchNotifTab('tasks',this)">Tasks</div>
+      <div class="notif-tab" id="ntab-reminders" onclick="switchNotifTab('reminders',this)">Reminders</div>
+    </div>
+    <div id="notif-list"></div>
+  </div>
+</div>
+<div id="notif-overlay" onclick="toggleNotifPanel()" style="display:none;position:fixed;inset:0;z-index:399;background:rgba(17,24,39,.2);backdrop-filter:blur(2px);"></div>
+
+<!-- ══ REMINDER SPLASH MODAL (shown to employee on login) ══ -->
+<div id="reminder-splash" style="display:none;position:fixed;inset:0;z-index:99998;
+  background:rgba(17,24,39,.6);backdrop-filter:blur(8px);
+  align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:20px;padding:32px;width:min(480px,94vw);
+    max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(17,24,39,.2);
+    animation:scaleIn .3s cubic-bezier(.4,0,.2,1);">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:42px;height:42px;border-radius:12px;
+          background:linear-gradient(135deg,#e8840a,#fca130);
+          display:flex;align-items:center;justify-content:center;
+          font-size:20px;box-shadow:0 4px 12px rgba(232,132,10,.3);">🔔</div>
+        <div>
+          <div style="font-size:16px;font-weight:800;color:#111827;letter-spacing:-.3px">
+            You have reminders
+          </div>
+          <div style="font-size:12px;color:#6b7280;margin-top:2px">
+            From your manager
+          </div>
+        </div>
+      </div>
+      <button onclick="closeSplash()" style="background:#f3f4f6;border:none;
+        width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;
+        display:flex;align-items:center;justify-content:center;color:#6b7280;
+        transition:all .2s ease;" onmouseover="this.style.background='#fce8e6';this.style.color='#d93025'"
+        onmouseout="this.style.background='#f3f4f6';this.style.color='#6b7280'">×</button>
+    </div>
+
+    <!-- Reminder list -->
+    <div id="splash-reminders-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+      <!-- filled by JS -->
+    </div>
+
+    <!-- Footer button -->
+    <button onclick="closeSplash()" style="width:100%;padding:12px;
+      background:linear-gradient(135deg,#3b5bdb,#5c7cfa);color:#fff;
+      border:none;border-radius:10px;font-size:14px;font-weight:700;
+      cursor:pointer;font-family:var(--font);
+      box-shadow:0 4px 14px rgba(59,91,219,.35);
+      transition:all .2s ease;">
+      ✓ Got it — Dismiss
+    </button>
+  </div>
+</div>
+
 <div id="toast"><div class="toast-dot" id="toast-dot"></div><span id="toast-msg"></span></div>
 
 <script>
 const DB_URL='https://script.google.com/macros/s/AKfycby_j29z-w7L4w0FqVYy-VHYtXnuhO9QhPPWUGZ3b02bOgXeH--qrqDW0EyY-iYRVMMD/exec';
-let DB={staff:[],aow:[],tasks:[]};
+let DB={staff:[],aow:[],tasks:[],pendingWorks:[],reminders:[]};
 let dbConnected=false;
 
 async function dbGet(){const r=await fetch(DB_URL);if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}
@@ -1424,7 +1754,14 @@ async function fullSync(){
     if(d.staff&&Array.isArray(d.staff)){DB.staff=d.staff.map(s=>({empId:String(s.EMP_ID||s.empId||''),name:String(s.NAME||s.name||''),designation:String(s.DESIGNATION||s.designation||''),team:String(s.TEAM||s.team||''),doj:String(s.DOJ||s.doj||''),email:String(s.EMAIL||s.email||'')})).filter(s=>s.empId&&s.name);}
     if(d.aow&&Array.isArray(d.aow)){DB.aow=d.aow.map(a=>({empId:String(a.EMP_ID||a.empId||''),name:String(a.NAME||a.name||''),area:String(a.AREA_OF_WORK||a.area||'')})).filter(a=>a.empId);}
     if(d.tasks&&Array.isArray(d.tasks)){DB.tasks=d.tasks.map(t=>({id:String(t.TASK_ID||t.id||''),assignedDate:String(t.ASSIGNED_DATE||t.assignedDate||''),empId:String(t.EMP_ID||t.empId||''),name:String(t.NAME||t.name||''),area:String(t.AREA_OF_WORK||t.area||''),taskType:String(t.TASK_TYPE||t.taskType||''),taskName:String(t.TASK_NAME||t.taskName||''),workAssigned:String(t.WORK_ASSIGNED||t.workAssigned||''),targetDate:fmtDate(t.TARGET_DATE||t.targetDate||''),userRemarks:String(t.USER_REMARKS||t.userRemarks||''),completedDate:fmtDate(t.COMPLETED_DATE||t.completedDate||''),status:String(t.STATUS||t.status||'Pending'),kpi:t.KPI!==undefined?t.KPI:(t.kpi!==undefined?t.kpi:''),score:t.SCORE!==undefined?t.SCORE:(t.score!==undefined?t.score:''),adminRemarks:String(t.ADMIN_REMARKS||t.adminRemarks||'')})).filter(t=>t.id);}
-    recalcStatuses();setConnected(true);refreshAllViews();toast('✓ Synced successfully','var(--accent2)');
+    // ── Pending Works sheet
+    if(d.pendingWorks&&Array.isArray(d.pendingWorks)){DB.pendingWorks=d.pendingWorks.map(p=>({id:String(p.PW_ID||p.id||''),createdDate:String(p.CREATED_DATE||p.createdDate||''),empId:String(p.EMP_ID||p.empId||''),empName:String(p.EMP_NAME||p.empName||''),category:String(p.CATEGORY||p.category||'Other'),priority:String(p.PRIORITY||p.priority||'Medium'),dueDate:fmtDate(p.DUE_DATE||p.dueDate||''),desc:String(p.DESCRIPTION||p.desc||''),notes:String(p.NOTES||p.notes||''),status:String(p.STATUS||p.status||'Open'),empRemarks:String(p.EMP_REMARKS||p.empRemarks||''),adminNote:String(p.ADMIN_NOTE||p.adminNote||''),resolvedDate:fmtDate(p.RESOLVED_DATE||p.resolvedDate||''),createdBy:String(p.CREATED_BY||p.createdBy||'')})).filter(p=>p.id);}
+    // ── Reminders sheet
+    if(d.reminders&&Array.isArray(d.reminders)){DB.reminders=d.reminders.map(r=>({id:String(r.REM_ID||r.id||''),sentDate:String(r.SENT_DATE||r.sentDate||''),empId:String(r.EMP_ID||r.empId||''),empName:String(r.EMP_NAME||r.empName||''),taskId:String(r.TASK_ID||r.taskId||''),taskName:String(r.TASK_NAME||r.taskName||''),message:String(r.MESSAGE||r.message||''),seen:String(r.SEEN||r.seen||'No')})).filter(r=>r.id);}
+    recalcStatuses();setConnected(true);refreshAllViews();
+    // Show splash for employee if unseen reminders exist
+    if(currentUser&&currentUser.role==='employee')checkAndShowSplash();
+    toast('✓ Synced successfully','var(--accent2)');
   }catch(e){setConnected(false);toast('✕ Sync failed: '+e.message,'var(--danger)');}
   setSyncState(false);hideLoader();
 }
@@ -1443,6 +1780,7 @@ function refreshAllViews(){
   renderDashboard();renderStatusTable();renderReminders();
   if(currentUser&&currentUser.role==='admin'){const empPage=document.getElementById('page-emp');if(empPage&&empPage.classList.contains('active'))renderAdminEmpView();}
   if(currentUser&&currentUser.role==='employee'){const empDash=document.getElementById('page-emp-dash');if(empDash&&empDash.classList.contains('active'))renderEmpDashboard();}
+  const pwPage=document.getElementById('page-pending-works');if(pwPage&&pwPage.classList.contains('active'))renderPendingWorks();
 }
 
 let toastTimer;
@@ -1691,8 +2029,38 @@ function renderReminders(){
   </div>`).join('')||'<div class="empty-state"><div class="ei">✓</div><p>No pending or missed tasks</p></div>';
 }
 function fillRemEmp(){const t=DB.tasks.find(x=>x.id===document.getElementById('rem-task').value);document.getElementById('rem-emp-name').value=t?t.name:'';}
-function sendReminder(){const id=document.getElementById('rem-task').value;const msg=document.getElementById('rem-msg').value.trim();if(!id||!msg){toast('Select a task and write a message','var(--danger)');return;}toast('⊙ Reminder logged','var(--accent3)');document.getElementById('rem-msg').value='';}
-function quickRemind(id){const t=DB.tasks.find(x=>x.id===id);if(t)toast(`Reminder sent to ${t.name}`,'var(--accent3)');}
+async function sendReminder(){
+  const id=document.getElementById('rem-task').value;const msg=document.getElementById('rem-msg').value.trim();
+  if(!id||!msg){toast('Select a task and write a message','var(--danger)');return;}
+  const t=DB.tasks.find(x=>x.id===id);if(!t)return;
+  const remId='R'+String(Date.now()).slice(-7);
+  const remObj={id:remId,sentDate:todayStr(),empId:t.empId,empName:t.name,taskId:t.id,taskName:t.taskName,message:msg,seen:'No'};
+  DB.reminders.push(remObj);
+  toast('⊙ Sending reminder…','var(--accent3)');
+  try{
+    await dbPost({action:'addReminder',remId:remId,empId:t.empId,empName:t.name,
+      taskId:t.id,taskName:t.taskName,message:msg,sentDate:todayStr()});
+    toast('✓ Reminder saved to Google Sheet','var(--accent2)');
+  }catch(e){
+    console.error('Reminder DB error:',e);
+    toast('Reminder saved locally only — DB sync failed.','var(--accent3)');
+  }
+  document.getElementById('rem-msg').value='';
+}
+async function quickRemind(id){
+  const t=DB.tasks.find(x=>x.id===id);if(!t)return;
+  const msg=`Reminder: Please complete "${t.taskName}" by ${formatDate(t.targetDate)}.`;
+  const remId='R'+String(Date.now()).slice(-7);
+  const remObj={id:remId,sentDate:todayStr(),empId:t.empId,empName:t.name,taskId:t.id,taskName:t.taskName,message:msg,seen:'No'};
+  DB.reminders.push(remObj);
+  try{
+    const res=await dbPost({action:'addReminder',remId,empId:t.empId,empName:t.name,
+      taskId:t.id,taskName:t.taskName,message:msg,sentDate:todayStr()});
+    toast(`✓ Reminder saved & sent to ${t.name}`,'var(--accent2)');
+  }catch(e){
+    toast(`Reminder local only — DB sync failed`,'var(--accent3)');
+  }
+}
 
 function loadEmpTasks(){if(currentUser&&currentUser.role==='employee'){loadEmpTasksForId(currentUser.empId);}else{renderAdminEmpView();}}
 
@@ -1745,13 +2113,90 @@ function openTaskDetailModal(id){
 }
 
 async function submitUpdate(){
-  const id=document.getElementById('modal-task-id').value;const remarks=document.getElementById('modal-remarks').value.trim();const date=document.getElementById('modal-date').value;
+  const id=document.getElementById('modal-task-id').value;
+  const remarks=document.getElementById('modal-remarks').value.trim();
+  const date=document.getElementById('modal-date').value;
   if(!remarks||!date){toast('Fill all fields','var(--danger)');return;}
-  const t=DB.tasks.find(x=>x.id===id);if(t){t.userRemarks=remarks;t.completedDate=date;}
+  const t=DB.tasks.find(x=>x.id===id);
+  if(t){t.userRemarks=remarks;t.completedDate=date;}
   recalcStatuses();loadEmpTasks();closeModal('update-modal');toast('Saving…');
-  try{await dbPost({action:'updateTask',taskId:id,userRemarks:remarks,completedDate:date});toast('✓ Task updated','var(--accent2)');}
-  catch(e){toast('Updated locally. DB sync failed.','var(--accent3)');}
+  try{
+    await dbPost({action:'updateTask',taskId:id,userRemarks:remarks,completedDate:date});
+    toast('✓ Task updated','var(--accent2)');
+  }catch(e){toast('Updated locally. DB sync failed.','var(--accent3)');}
+
+  // AUTO-RECUR: create next occurrence for recurring tasks
+    if(t&&(t.taskType==='Daily'||t.taskType==='Weekly'||t.taskType==='Monthly')){
+    // Use TARGET date as base for next recurrence (not completion date)
+    // This keeps schedule consistent regardless of when it was completed
+    // REPLACE WITH:
+const today = new Date(); today.setHours(0,0,0,0);
+const targetD = new Date(t.targetDate); targetD.setHours(0,0,0,0);
+const completedD = new Date(date); completedD.setHours(0,0,0,0);
+
+// Use completion date as base if completed late (past target)
+// Use target date as base if completed on time or early
+const isLate = completedD > targetD;
+const base = isLate ? new Date(date) : new Date(t.targetDate);
+
+if(t.taskType==='Daily'){
+  base.setDate(base.getDate()+1);
+}else if(t.taskType==='Weekly'){
+  // For weekly: if late, schedule from next week of target (not completion)
+  // to keep weekly rhythm intact
+  const weeksLate = Math.ceil((completedD - targetD) / (7*24*60*60*1000));
+  const weekBase = new Date(t.targetDate);
+  weekBase.setDate(weekBase.getDate() + (7 * weeksLate) + 7);
+  base.setTime(weekBase.getTime());
+}else if(t.taskType==='Monthly'){
+  if(isLate){
+    // Move to same day next month from target
+    const d = targetD.getDate();
+    base.setTime(targetD.getTime());
+    base.setMonth(base.getMonth()+1);
+    base.setDate(Math.min(d, new Date(base.getFullYear(),base.getMonth()+1,0).getDate()));
+  }else{
+    const d = base.getDate();
+    base.setMonth(base.getMonth()+1);
+    base.setDate(Math.min(d, new Date(base.getFullYear(),base.getMonth()+1,0).getDate()));
+  }
+}
+    const nextDate=base.toISOString().slice(0,10);
+
+    // Check if a pending task for same name+emp already exists on that date (avoid duplicates)
+    const alreadyExists=DB.tasks.some(x=>
+      x.empId===t.empId && x.taskName===t.taskName &&
+      x.targetDate===nextDate && x.status==='Pending'
+    );
+    if(!alreadyExists){
+      const newId='T'+String(Date.now()).slice(-6);
+      const newTask={
+        id:newId, assignedDate:todayStr(), empId:t.empId, name:t.name,
+        area:t.area, taskType:t.taskType, taskName:t.taskName,
+        workAssigned:t.workAssigned, targetDate:nextDate,
+        userRemarks:'', completedDate:'', status:'Pending',
+        kpi:'', score:'', adminRemarks:''
+      };
+      DB.tasks.push(newTask);
+      try{
+        const r=await dbPost({
+          action:'assignTask', empId:t.empId, name:t.name, area:t.area,
+          taskType:t.taskType, taskName:t.taskName,
+          workAssigned:t.workAssigned, targetDate:nextDate
+        });
+        if(r?.result&&typeof r.result==='string'&&r.result.startsWith('T')){
+          newTask.id=r.result;
+        }
+        toast(`↻ Next ${t.taskType} task scheduled · ${formatDate(nextDate)}`,'var(--accent2)');
+      }catch(e){
+        toast('Next recurring task saved locally.','var(--accent3)');
+      }
+    }
+  }
+
   renderDashboard();renderStatusTable();
+  const pwPage=document.getElementById('page-pending-works');
+  if(pwPage&&pwPage.classList.contains('active'))renderPendingWorks();
 }
 
 async function submitRemark(){
@@ -1777,9 +2222,9 @@ function renderDashboard(){
     const a=e.vals.length?Math.round(e.vals.reduce((x,y)=>x+y)/e.vals.length):0;
     return`<div class="bar-col"><div class="bar-val" style="color:${colors[i%6]};font-weight:700">${a||'—'}</div><div class="bar-fill" style="height:${a*1.1}px;background:${colors[i%6]};opacity:.85;border-radius:5px 5px 0 0"></div><div class="bar-label">${e.name.split(' ')[0]}</div></div>`;
   }).join('')||'<div style="color:var(--muted);font-size:13px;align-self:center;font-weight:500">No data yet</div>';
-  const daily=tasks.filter(t=>t.taskType==='Daily').length;const weekly=tasks.filter(t=>t.taskType==='Weekly').length;const monthly=tasks.filter(t=>t.taskType==='Monthly').length;
-  const maxT=Math.max(daily,weekly,monthly,1);
-  document.getElementById('type-chart').innerHTML=[['Daily',daily,'#3b5bdb'],['Weekly',weekly,'#0f9b6e'],['Monthly',monthly,'#e8840a']].map(([l,v,c])=>`<div class="bar-col"><div class="bar-val" style="color:${c};font-weight:700">${v}</div><div class="bar-fill" style="height:${(v/maxT)*100}px;background:${c};opacity:.85;border-radius:5px 5px 0 0"></div><div class="bar-label">${l}</div></div>`).join('');
+  const daily=tasks.filter(t=>t.taskType==='Daily').length;const weekly=tasks.filter(t=>t.taskType==='Weekly').length;const monthly=tasks.filter(t=>t.taskType==='Monthly').length;const onetime=tasks.filter(t=>t.taskType==='One Time').length;
+const maxT=Math.max(daily,weekly,monthly,onetime,1);
+document.getElementById('type-chart').innerHTML=[['Daily',daily,'#3b5bdb'],['Weekly',weekly,'#0f9b6e'],['Monthly',monthly,'#e8840a'],['One Time',onetime,'#7048e8']].map(([l,v,c])=>`<div class="bar-col"><div class="bar-val" style="color:${c};font-weight:700">${v}</div><div class="bar-fill" style="height:${(v/maxT)*100}px;background:${c};opacity:.85;border-radius:5px 5px 0 0"></div><div class="bar-label">${l}</div></div>`).join('');
   const pt=document.getElementById('perf-table');
   pt.innerHTML=DB.staff.map(s=>{
     const st=tasks.filter(t=>t.empId===s.empId);const sc=st.filter(t=>t.status==='Completed');const sm=st.filter(t=>t.status==='Missed');
@@ -1867,6 +2312,364 @@ function populateDropdowns(){
 
 setInterval(()=>{if(dbConnected&&currentUser)fullSync();},5*60*1000);
 
+// ═══════════════════════════════════════════════════════════════
+let pwTabActive = 'all';
+
+function renderPendingWorks() {
+  const isAdmin = currentUser && currentUser.role === 'admin';
+  recalcStatuses();
+
+  // Show/hide employee selector in form
+  document.getElementById('pw-emp-wrap').style.display = isAdmin ? '' : 'none';
+  document.getElementById('pw-flt-emp-wrap').style.display = isAdmin ? '' : 'none';
+  document.getElementById('pw-page-sub').textContent = isAdmin
+    ? 'Assign and track pending work items for your team'
+    : 'Your assigned pending work items';
+
+  // Populate employee dropdowns (admin only)
+  if (isAdmin) {
+    const opts = DB.staff.map(s =>
+      `<option value="${s.empId}">${s.name} · ${s.empId}</option>`).join('');
+    const empSel = document.getElementById('pw-t-emp');
+    if (empSel) empSel.innerHTML = '<option value="">— Select —</option>' + opts;
+    const fltSel = document.getElementById('pw-flt-emp');
+    if (fltSel) {
+      const cur = fltSel.value;
+      fltSel.innerHTML = '<option value="">All Staff</option>' +
+        DB.staff.map(s =>
+          `<option value="${s.empId}" ${s.empId===cur?'selected':''}>${s.name}</option>`
+        ).join('');
+    }
+  }
+
+  // Get tasks scoped by role
+  let tasks = [...DB.tasks];
+  if (!isAdmin && currentUser) {
+    tasks = tasks.filter(t => t.empId === currentUser.empId);
+  }
+
+  // Apply employee filter (admin)
+  const fEmp = document.getElementById('pw-flt-emp')?.value || '';
+  if (fEmp) tasks = tasks.filter(t => t.empId === fEmp);
+
+  // Apply tab filter
+  if (pwTabActive !== 'all') tasks = tasks.filter(t => t.status === pwTabActive);
+
+  // Stats (unfiltered scope)
+  const scope = isAdmin ? DB.tasks
+    : DB.tasks.filter(t => t.empId === currentUser?.empId);
+  const today = todayStr();
+  document.getElementById('pw-s-open').textContent =
+    scope.filter(t => t.status === 'Pending').length;
+  document.getElementById('pw-s-over').textContent =
+    scope.filter(t => t.status === 'Missed').length;
+  document.getElementById('pw-s-today').textContent =
+    scope.filter(t => t.targetDate === today && t.status === 'Pending').length;
+  document.getElementById('pw-s-done').textContent =
+    scope.filter(t => t.status === 'Completed').length;
+  document.getElementById('pw-count').textContent = tasks.length + ' items';
+
+  const tb = document.getElementById('pw-task-table');
+  if (!tasks.length) {
+    tb.innerHTML = `<tr><td colspan="10" class="empty-state">
+      <div class="ei">◌</div><p>No tasks found</p></td></tr>`;
+    return;
+  }
+
+  tb.innerHTML = tasks.map(t => `
+    <tr class="row-clickable" onclick="openTaskDetailModal('${t.id}')">
+      <td style="font-family:var(--mono);font-size:10px;color:var(--muted2)">${t.id}</td>
+      <td style="font-size:12px;color:var(--muted)">${formatDate(t.assignedDate)}</td>
+      <td><strong>${t.name}</strong></td>
+      <td style="font-size:12px">${t.area}</td>
+      <td><span style="font-family:var(--mono);font-size:11px;color:var(--accent3);
+        font-weight:700">${t.taskType}</span></td>
+      <td><strong>${t.taskName}</strong></td>
+      <td style="font-family:var(--mono);font-size:12px">${formatDate(t.targetDate)}</td>
+      <td>${statusBadge(t.status)}</td>
+      <td>${kpiBar(t.kpi)}</td>
+      <td onclick="event.stopPropagation()">
+        ${t.status !== 'Completed'
+          ? `<button class="btn btn-success btn-sm"
+              onclick="openUpdateModal('${t.id}')">✓ Update</button>`
+          : `<span style="color:var(--accent2);font-size:12px;font-weight:700">✓ Done</span>`}
+      </td>
+    </tr>`).join('');
+}
+
+function pwFillArea() {
+  const empId = document.getElementById('pw-t-emp').value;
+  const areas = DB.aow.filter(a => a.empId === empId);
+  const sel = document.getElementById('pw-t-area');
+  sel.innerHTML = areas.length
+    ? areas.map(a => `<option>${a.area}</option>`).join('')
+    : '<option>— No area assigned —</option>';
+}
+
+async function pwAssignTask() {
+  const isAdmin = currentUser && currentUser.role === 'admin';
+  const empId = isAdmin
+    ? document.getElementById('pw-t-emp').value
+    : currentUser.empId;
+  if (!empId) { toast('Select an employee', 'var(--danger)'); return; }
+  const emp = DB.staff.find(s => s.empId === empId);
+  const name = emp?.name || currentUser?.displayName || empId;
+  const area = document.getElementById('pw-t-area').value;
+  const ttype = document.getElementById('pw-t-type').value;
+  const tname = document.getElementById('pw-t-name').value.trim();
+  const work = document.getElementById('pw-t-work').value.trim();
+  const target = document.getElementById('pw-t-target').value;
+  if (!tname || !target) {
+    toast('Task Name and Target Date required', 'var(--danger)'); return;
+  }
+  const id = 'T' + String(Date.now()).slice(-6);
+  DB.tasks.push({
+    id, assignedDate: todayStr(), empId, name, area,
+    taskType: ttype, taskName: tname, workAssigned: work,
+    targetDate: target, userRemarks: '', completedDate: '',
+    status: 'Pending', kpi: '', score: '', adminRemarks: ''
+  });
+  recalcStatuses();
+  renderPendingWorks();
+  renderTaskTable();
+  renderDashboard();
+  toast('Saving…');
+  try {
+    const r = await dbPost({
+      action: 'assignTask', empId, name, area,
+      taskType: ttype, taskName: tname,
+      workAssigned: work, targetDate: target
+    });
+    if (r?.result && typeof r.result === 'string' && r.result.startsWith('T')) {
+      const t = DB.tasks.find(x => x.id === id);
+      if (t) t.id = r.result;
+    }
+    toast('✓ Task saved to TASK sheet', 'var(--accent2)');
+  } catch(e) {
+    toast('Saved locally. DB sync failed.', 'var(--accent3)');
+  }
+  ['pw-t-name','pw-t-work','pw-t-target'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  if (isAdmin) {
+    document.getElementById('pw-t-emp').value = '';
+    document.getElementById('pw-t-area').innerHTML =
+      '<option>— Select employee first —</option>';
+  }
+}
+
+function setPWTab(val, el) {
+  pwTabActive = val;
+  document.querySelectorAll('#pw-tabs .inner-tab')
+    .forEach(x => x.classList.remove('active'));
+  el.classList.add('active');
+  renderPendingWorks();
+}
+
+async function savePendingWork(){
+  const isAdmin=currentUser&&currentUser.role==='admin';
+  const editId=document.getElementById('pw-edit-id').value;
+  const empId=isAdmin?document.getElementById('pw-emp').value:currentUser.empId;
+  const desc=document.getElementById('pw-desc').value.trim();
+  const due=document.getElementById('pw-due').value;
+  if(!empId){toast('Select an employee','var(--danger)');return;}
+  if(!desc){toast('Enter work description','var(--danger)');return;}
+  if(!due){toast('Select a due date','var(--danger)');return;}
+  const emp=DB.staff.find(s=>s.empId===empId);
+  const empName=emp?emp.name:(currentUser?currentUser.displayName:empId);
+  const category=document.getElementById('pw-category').value;
+  const priority=document.getElementById('pw-priority').value;
+  const notes=document.getElementById('pw-notes').value.trim();
+  const createdBy=currentUser?currentUser.displayName:'Unknown';
+
+  if(editId){
+    // Update existing
+    const item=DB.pendingWorks.find(p=>p.id===editId);
+    if(item){Object.assign(item,{empId,empName,category,priority,dueDate:due,desc,notes});}
+    toast('Saving…');
+    try{await dbPost({action:'updatePendingWork',id:editId,empId,empName,category,priority,dueDate:due,desc,notes});toast('✓ Work item updated','var(--accent2)');}
+    catch(e){toast('Saved locally. DB sync failed.','var(--accent3)');}
+  }else{
+    // New item
+    const id='PW'+String(Date.now()).slice(-7);
+    const item={id,createdDate:todayStr(),empId,empName,category,priority,dueDate:due,desc,notes,status:'Open',empRemarks:'',adminNote:'',resolvedDate:'',createdBy};
+    DB.pendingWorks.push(item);
+    toast('Saving…');
+    try{await dbPost({action:'addPendingWork',id,createdDate:todayStr(),empId,empName,category,priority,dueDate:due,desc,notes,status:'Open',createdBy});toast('✓ Work item added','var(--accent2)');}
+    catch(e){toast('Saved locally. DB sync failed.','var(--accent3)');}
+  }
+  closePWForm();renderPendingWorks();
+}
+
+async function addSelfAoW(){
+  if(!currentUser||currentUser.role!=='employee'){return;}
+  const area=document.getElementById('pw-self-area').value.trim();
+  if(!area){toast('Enter an area of work','var(--danger)');return;}
+  const emp=DB.staff.find(s=>s.empId===currentUser.empId);
+  const name=emp?emp.name:currentUser.empId;
+  if(DB.aow.find(a=>a.empId===currentUser.empId&&a.area.toLowerCase()===area.toLowerCase())){toast('Area already assigned','var(--accent3)');return;}
+  DB.aow.push({empId:currentUser.empId,name,area});
+  document.getElementById('pw-self-area').value='';
+  document.getElementById('pw-aow-wrap').style.display='none';
+  toast('Saving area…');
+  try{await dbPost({action:'addAoW',empId:currentUser.empId,name,area});toast('✓ Area of work added','var(--accent2)');}
+  catch(e){toast('Saved locally. DB sync failed.','var(--accent3)');}
+  renderAoWTable();populateDropdowns();
+}
+
+
+function openPWModal(id){
+  const item=DB.pendingWorks.find(p=>p.id===id);if(!item)return;
+  const isAdmin=currentUser&&currentUser.role==='admin';
+  const today=todayStr();
+  const isOver=item.dueDate&&item.dueDate<today&&item.status!=='Resolved';
+  const priClr={High:'var(--danger)',Medium:'var(--accent3)',Low:'var(--accent2)'};
+  const priBg={High:'var(--danger-light)',Medium:'var(--accent3-light)',Low:'var(--accent2-light)'};
+  const stCls={Resolved:'badge-completed','In Progress':'badge-pending',Open:'badge-missed'};
+
+  let actions='';
+  if(isAdmin){
+    actions=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      ${item.status!=='Resolved'?`<button class="btn btn-success btn-sm" onclick="pwChangeStatus('${id}','Resolved')">✓ Mark Resolved</button>`:''}
+      ${item.status==='Open'?`<button class="btn btn-ghost btn-sm" onclick="pwChangeStatus('${id}','In Progress')">▷ In Progress</button>`:''}
+      ${item.status==='Resolved'?`<button class="btn btn-ghost btn-sm" onclick="pwChangeStatus('${id}','Open')">↺ Reopen</button>`:''}
+      <button class="btn btn-ghost btn-sm" onclick="openPWAdminNote('${id}')">+ Admin Note</button>
+      <button class="btn btn-ghost btn-sm" onclick="editPWItem('${id}')">✎ Edit</button>
+      <button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="deletePWItem('${id}')">✕ Delete</button>
+    </div>`;
+  }else{
+    actions=`<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      <div class="form-group" style="margin-bottom:10px"><label>Update Remarks</label><textarea id="pw-emp-remark" placeholder="Describe progress or completion…">${item.empRemarks||''}</textarea></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-success btn-sm" onclick="pwEmpUpdate('${id}','Resolved')">✓ Mark Resolved</button>
+        <button class="btn btn-ghost btn-sm" onclick="pwEmpUpdate('${id}','In Progress')">▷ Update Progress</button>
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('pw-modal')">Close</button>
+      </div>
+    </div>`;
+  }
+   if(!isAdmin&&currentUser){
+    const areas=DB.aow.filter(a=>a.empId===currentUser.empId);
+    const areaSel=document.getElementById('pw-t-area');
+    if(areaSel)areaSel.innerHTML=areas.length
+      ?areas.map(a=>`<option>${a.area}</option>`).join('')
+      :'<option>— No area assigned —</option>';
+  }
+
+  document.getElementById('pw-modal-ttl').innerHTML=`Work Item <span style="font-size:11px;color:var(--muted2);font-family:var(--mono);margin-left:6px">${id}</span><button class="modal-close" onclick="closeModal('pw-modal')">×</button>`;
+  document.getElementById('pw-modal-body').innerHTML=`
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <span class="badge-status ${stCls[item.status]||'badge-missed'}" style="font-size:12px">${item.status}</span>
+      <span style="font-size:12px;font-weight:700;color:${priClr[item.priority]};background:${priBg[item.priority]};padding:3px 10px;border-radius:20px">${item.priority} Priority</span>
+      <span style="font-size:12px;background:var(--accent-light);color:var(--accent);padding:3px 10px;border-radius:20px;font-weight:600">${item.category}</span>
+      ${isOver?'<span style="font-size:12px;background:var(--danger-light);color:var(--danger);padding:3px 10px;border-radius:20px;font-weight:700">⚠ Overdue</span>':''}
+    </div>
+    <div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px">
+      <div style="font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:6px">Work Description</div>
+      <div style="font-size:14px;font-weight:600;line-height:1.6">${item.desc}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius);padding:12px">
+        <div style="font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;font-weight:600;margin-bottom:4px">Assigned To</div>
+        <div style="font-size:13px;font-weight:700">${item.empName}</div>
+        <div style="font-size:11px;color:var(--muted2);font-family:var(--mono)">${item.empId}</div>
+      </div>
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius);padding:12px">
+        <div style="font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;font-weight:600;margin-bottom:4px">Due Date</div>
+        <div style="font-size:13px;font-weight:700;color:${isOver?'var(--danger)':'var(--text)'};font-family:var(--mono)">${formatDate(item.dueDate)||'—'}</div>
+        <div style="font-size:11px;color:var(--muted2)">Created: ${formatDate(item.createdDate)} by ${item.createdBy||'—'}</div>
+      </div>
+    </div>
+    ${item.notes?`<div style="background:var(--accent3-light);border:1px solid rgba(232,132,10,.2);border-radius:var(--radius);padding:12px;margin-bottom:12px"><div style="font-size:10px;color:var(--accent3);font-family:var(--mono);text-transform:uppercase;font-weight:600;margin-bottom:4px">Notes</div><div style="font-size:13px">${item.notes}</div></div>`:''}
+    ${item.empRemarks?`<div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:12px"><div style="font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;font-weight:600;margin-bottom:4px">Employee Update</div><div style="font-size:13px">${item.empRemarks}</div></div>`:''}
+    ${item.adminNote?`<div style="background:var(--accent-light);border:1px solid var(--accent-mid);border-radius:var(--radius);padding:12px;margin-bottom:12px"><div style="font-size:10px;color:var(--accent);font-family:var(--mono);text-transform:uppercase;font-weight:600;margin-bottom:4px">Admin Note</div><div style="font-size:13px">${item.adminNote}</div></div>`:''}
+    <div id="pw-admin-note-zone"></div>
+    ${actions}`;
+  document.getElementById('pw-modal').classList.add('open');
+}
+
+function openPWAdminNote(id){
+  const zone=document.getElementById('pw-admin-note-zone');if(!zone)return;
+  const item=DB.pendingWorks.find(p=>p.id===id);
+  zone.innerHTML=`<div style="margin-top:14px"><div class="form-group" style="margin-bottom:10px"><label>Admin Note</label><textarea id="pw-anote-txt" placeholder="Add a note…">${item?.adminNote||''}</textarea></div><div class="btn-row" style="margin-top:8px"><button class="btn btn-primary btn-sm" onclick="saveAdminPWNote('${id}')">Save Note</button></div></div>`;
+  zone.scrollIntoView({behavior:'smooth'});
+}
+
+async function saveAdminPWNote(id){
+  const note=document.getElementById('pw-anote-txt')?.value.trim()||'';
+  const item=DB.pendingWorks.find(p=>p.id===id);if(item)item.adminNote=note;
+  try{await dbPost({action:'updatePWAdminNote',id,adminNote:note});toast('✓ Note saved','var(--accent2)');}
+  catch(e){toast('Saved locally','var(--accent3)');}
+  closeModal('pw-modal');renderPendingWorks();
+}
+
+async function pwChangeStatus(id,status){
+  const item=DB.pendingWorks.find(p=>p.id===id);if(!item)return;
+  item.status=status;if(status==='Resolved')item.resolvedDate=todayStr();
+  try{await dbPost({action:'updatePWStatus',id,status,resolvedDate:item.resolvedDate||''});toast('✓ Status updated','var(--accent2)');}
+  catch(e){toast('Updated locally','var(--accent3)');}
+  closeModal('pw-modal');renderPendingWorks();
+}
+
+async function pwEmpUpdate(id,status){
+  const item=DB.pendingWorks.find(p=>p.id===id);if(!item)return;
+  const remark=document.getElementById('pw-emp-remark')?.value.trim()||'';
+  item.status=status;item.empRemarks=remark;if(status==='Resolved')item.resolvedDate=todayStr();
+  try{await dbPost({action:'updatePWEmpRemark',id,status,empRemarks:remark,resolvedDate:item.resolvedDate||''});toast(status==='Resolved'?'✓ Marked Resolved':'✓ Progress updated','var(--accent2)');}
+  catch(e){toast('Updated locally','var(--accent3)');}
+  closeModal('pw-modal');renderPendingWorks();
+}
+
+function editPWItem(id){
+  const item=DB.pendingWorks.find(p=>p.id===id);if(!item)return;
+  closeModal('pw-modal');
+  const fw=document.getElementById('pw-form-wrap');
+  document.getElementById('pw-edit-id').value=id;
+  document.getElementById('pw-form-title').textContent='Edit Work Item';
+  document.getElementById('pw-emp-wrap').style.display='';
+  const empSel=document.getElementById('pw-emp');
+  empSel.innerHTML=DB.staff.map(s=>`<option value="${s.empId}" ${s.empId===item.empId?'selected':''}>${s.name} · ${s.empId}</option>`).join('');
+  document.getElementById('pw-category').value=item.category;
+  document.getElementById('pw-priority').value=item.priority;
+  document.getElementById('pw-due').value=item.dueDate;
+  document.getElementById('pw-desc').value=item.desc;
+  document.getElementById('pw-notes').value=item.notes||'';
+  fw.style.display='block';fw.scrollIntoView({behavior:'smooth'});
+}
+
+async function deletePWItem(id){
+  if(!confirm('Delete this work item?'))return;
+  DB.pendingWorks=DB.pendingWorks.filter(p=>p.id!==id);
+  try{await dbPost({action:'deletePendingWork',id});toast('✓ Deleted','var(--danger)');}
+  catch(e){toast('Deleted locally','var(--accent3)');}
+  closeModal('pw-modal');renderPendingWorks();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// REMINDER SPLASH MODULE
+// ═══════════════════════════════════════════════════════════════
+function checkAndShowSplash(){
+  if(!currentUser||currentUser.role!=='employee')return;
+  const myRems=DB.reminders.filter(r=>r.empId===currentUser.empId&&r.seen!=='Yes');
+  if(!myRems.length)return;
+  const list=document.getElementById('splash-reminders-list');
+  list.innerHTML=myRems.map(r=>`<div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:10px;animation:fadeUp .3s ease both">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <span style="font-size:10px;font-family:var(--mono);color:var(--muted2)">${formatDate(r.sentDate)}</span>
+      ${r.taskId?`<span style="font-size:10px;background:var(--accent-light);color:var(--accent);padding:1px 8px;border-radius:20px;font-weight:600">${r.taskName||r.taskId}</span>`:''}
+    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:500">${r.message}</div>
+  </div>`).join('');
+  document.getElementById('reminder-splash').style.display='flex';
+}
+
+async function closeSplash(){
+  document.getElementById('reminder-splash').style.display='none';
+  if(!currentUser)return;
+  const myRems=DB.reminders.filter(r=>r.empId===currentUser.empId&&r.seen!=='Yes');
+  myRems.forEach(r=>r.seen='Yes');
+  try{await dbPost({action:'markRemindersSeen',empId:currentUser.empId});}catch(e){}
+}
+
 const USERS={
   admin:[{username:'Shan',password:'Shan#pearl',role:'admin',displayName:'Shan',empId:null}],
   employees:['17863','16890','18107','16711','17571','17490','17992','16308','17518','18071','17470','17983','18070','18060']
@@ -1887,6 +2690,9 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 function onLoginSuccess(){
+  // Save session to localStorage so refresh doesn't log out
+  localStorage.setItem('accSession', JSON.stringify(currentUser));
+  
   document.getElementById('login-screen').classList.add('hidden');
   const initials=currentUser.displayName.slice(0,2).toUpperCase();
   document.getElementById('topbar-avatar').textContent=initials;
@@ -1901,18 +2707,22 @@ function onLoginSuccess(){
     document.getElementById('emp-nav-grp').textContent='My Account';
     document.getElementById('emp-selector-section').style.display='none';
     document.getElementById('nav-emp-dash').style.display='flex';
-    showPage('emp-dash');fullSync().then(()=>{renderEmpDashboard();});
+    document.getElementById('nav-emp-pending').style.display='flex';
+    showPage('emp-dash');fullSync().then(()=>{renderEmpDashboard();checkAndShowSplash();});
   }
 }
 
 function doLogout(){
   currentUser=null;
+  localStorage.removeItem('accSession'); // Clear saved session
   document.getElementById('login-screen').classList.remove('hidden');
   ['login-user','login-pass'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('login-error').classList.remove('show');
   document.getElementById('topbar-avatar').textContent='?';
   document.getElementById('topbar-username').textContent='';
   document.getElementById('nav-emp-dash').style.display='none';
+  document.getElementById('nav-emp-pending').style.display='none';
+  document.getElementById('reminder-splash').style.display='none';
 }
 
 function showPage(page){
@@ -1995,16 +2805,25 @@ function renderEmpDashboard(){
 document.querySelectorAll('.nav-item').forEach(el=>{
   el.addEventListener('click',()=>{
     const page=el.dataset.page;
-    if(currentUser&&currentUser.role==='employee'&&page!=='emp'&&page!=='emp-dash')return;
+    if(currentUser&&currentUser.role==='employee'&&page!=='emp'&&page!=='emp-dash'&&page!=='pending-works')return;
     document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
-    el.classList.add('active');document.getElementById('page-'+page).classList.add('active');
+    document.querySelectorAll('.page').forEach(x=>{
+      if(x.id==='page-pending-works'){x.style.display='none';x.classList.remove('active');}
+      else x.classList.remove('active');
+    });
+    el.classList.add('active');
+    const pageEl=document.getElementById('page-'+page);
+    if(pageEl){
+      if(page==='pending-works'){pageEl.style.display='block';pageEl.classList.add('active');}
+      else pageEl.classList.add('active');
+    }
     if(page==='dashboard')renderDashboard();
     if(page==='status')renderStatusTable();
     if(page==='reminders')renderReminders();
     if(page==='assign')renderTaskTable();
     if(page==='emp'){if(currentUser&&currentUser.role==='employee'){loadEmpTasksForId(currentUser.empId);}else{renderAdminEmpView();}}
     if(page==='emp-dash')renderEmpDashboard();
+    if(page==='pending-works')renderPendingWorks();
   });
 });
 
@@ -2019,9 +2838,421 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('admin-nav').style.display='none';
   document.getElementById('emp-selector-section').style.display='none';
   document.getElementById('emp-task-section').style.display='block';
-  const lo=document.getElementById('loading-overlay');if(lo)lo.style.display='none';
   document.querySelectorAll('.nav-item').forEach(el=>{el.addEventListener('click',()=>{if(window.innerWidth<=700)closeMobileSidebar();});});
+
+  // ── RESTORE SESSION ON REFRESH ──
+  try {
+    const saved = localStorage.getItem('accSession');
+    if (saved) {
+      currentUser = JSON.parse(saved);
+      onLoginSuccess();
+    } else {
+      // No session — show login, hide loader
+      const lo = document.getElementById('loading-overlay');
+      if (lo) lo.style.display = 'none';
+    }
+  } catch(e) {
+    localStorage.removeItem('accSession');
+    const lo = document.getElementById('loading-overlay');
+    if (lo) lo.style.display = 'none';
+  }
 });
+
+// ══════════════════════════════════════════════════
+// NOTIFICATIONS MODULE
+// ══════════════════════════════════════════════════
+
+let notifPanelOpen = false;
+let notifTabActive = 'all';
+// Track seen task IDs per session in localStorage
+function getSeenTasks() {
+  try { return JSON.parse(localStorage.getItem('seenTasks_' + (currentUser?.empId || 'admin')) || '[]'); } catch(e) { return []; }
+}
+function addSeenTask(id) {
+  const seen = getSeenTasks();
+  if (!seen.includes(id)) { seen.push(id); localStorage.setItem('seenTasks_' + (currentUser?.empId || 'admin'), JSON.stringify(seen)); }
+}
+function getSeenReminders() {
+  try { return JSON.parse(localStorage.getItem('seenRems_' + (currentUser?.empId || 'admin')) || '[]'); } catch(e) { return []; }
+}
+function addSeenReminder(id) {
+  const seen = getSeenReminders();
+  if (!seen.includes(id)) { seen.push(id); localStorage.setItem('seenRems_' + (currentUser?.empId || 'admin'), JSON.stringify(seen)); }
+}
+
+function toggleNotifPanel() {
+  notifPanelOpen = !notifPanelOpen;
+  document.getElementById('notif-panel').classList.toggle('open', notifPanelOpen);
+  document.getElementById('notif-overlay').style.display = notifPanelOpen ? 'block' : 'none';
+  if (notifPanelOpen) renderNotifPanel();
+}
+
+function switchNotifTab(tab, el) {
+  notifTabActive = tab;
+  document.querySelectorAll('.notif-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderNotifPanel();
+}
+
+function buildNotifications() {
+  const isAdmin = currentUser?.role === 'admin';
+  const notifs = [];
+
+  if (isAdmin) {
+    // Admin sees: reminders they sent
+    DB.reminders.forEach(r => {
+      notifs.push({
+        id: 'rem_' + r.id,
+        type: 'reminder',
+        icon: '🔔',
+        typeLabel: 'Reminder Sent',
+        msg: `Reminder sent to ${r.empName}`,
+        sub: r.taskName ? `Task: ${r.taskName}` : r.message.slice(0, 60),
+        time: formatDate(r.sentDate),
+        unread: false,
+        raw: r
+      });
+    });
+    // Admin sees: recently assigned tasks
+    [...DB.tasks].sort((a,b) => (b.assignedDate||'').localeCompare(a.assignedDate||'')).slice(0,20).forEach(t => {
+      notifs.push({
+        id: 'task_' + t.id,
+        type: 'task',
+        icon: '📋',
+        typeLabel: 'Task Assigned',
+        msg: `${t.taskName}`,
+        sub: `${t.name} · ${t.taskType} · Due ${formatDate(t.targetDate)}`,
+        time: formatDate(t.assignedDate),
+        unread: !getSeenTasks().includes('task_' + t.id),
+        raw: t
+      });
+    });
+  } else {
+    // Employee sees: their pending/missed reminders (until task completed)
+    const myEmpId = currentUser?.empId;
+    DB.reminders
+      .filter(r => r.empId === myEmpId)
+      .forEach(r => {
+        // Show reminder until task is completed
+        const task = DB.tasks.find(t => t.id === r.taskId);
+        const taskDone = task && task.status === 'Completed';
+        notifs.push({
+          id: 'rem_' + r.id,
+          type: 'reminder',
+          icon: '🔔',
+          typeLabel: 'Reminder',
+          msg: r.message,
+          sub: r.taskName ? `Task: ${r.taskName}` : '',
+          time: formatDate(r.sentDate),
+          unread: !taskDone && !getSeenReminders().includes('rem_' + r.id),
+          dismissed: taskDone, // grey out if task done
+          raw: r
+        });
+      });
+
+    // Employee sees: newly assigned tasks
+    DB.tasks
+      .filter(t => t.empId === myEmpId)
+      .sort((a,b) => (b.assignedDate||'').localeCompare(a.assignedDate||''))
+      .forEach(t => {
+        notifs.push({
+          id: 'task_' + t.id,
+          type: 'task',
+          icon: t.status === 'Completed' ? '✅' : t.status === 'Missed' ? '⚠️' : '📋',
+          typeLabel: 'Task Assigned',
+          msg: t.taskName,
+          sub: `${t.taskType} · Due ${formatDate(t.targetDate)} · ${t.status}`,
+          time: formatDate(t.assignedDate),
+          unread: !getSeenTasks().includes('task_' + t.id),
+          raw: t
+        });
+      });
+  }
+
+  // Sort: unread first, then by time desc
+  return notifs.sort((a,b) => {
+    if (a.unread && !b.unread) return -1;
+    if (!a.unread && b.unread) return 1;
+    return (b.time||'').localeCompare(a.time||'');
+  });
+}
+
+function getUnreadCount() {
+  if (!currentUser) return 0;
+  return buildNotifications().filter(n => n.unread && !n.dismissed).length;
+}
+
+function updateNotifBadge() {
+  const count = getUnreadCount();
+  const badge = document.getElementById('notif-badge');
+  if (!badge) return;
+  if (count > 0) {
+    badge.style.display = 'flex';
+    badge.textContent = count > 99 ? '99+' : count;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function renderNotifPanel() {
+  const notifs = buildNotifications();
+  const filtered = notifTabActive === 'all' ? notifs
+    : notifs.filter(n => n.type === (notifTabActive === 'tasks' ? 'task' : 'reminder'));
+
+  const list = document.getElementById('notif-list');
+  if (!list) return;
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state" style="padding:32px 16px"><div class="ei">🔔</div><p>No notifications yet</p></div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map((n, i) => {
+    const borderClass = n.unread && !n.dismissed
+      ? (n.type === 'reminder' ? 'unread-reminder' : 'unread-task')
+      : '';
+    const opacity = n.dismissed ? 'opacity:.5;' : '';
+    return `<div class="notif-item ${borderClass}" style="${opacity}animation-delay:${i * 0.04}s"
+      onclick="onNotifClick('${n.id}','${n.type}','${n.raw?.id||''}')">
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        <div class="notif-icon">${n.icon}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="notif-type" style="color:${n.type==='reminder'?'var(--accent3)':'var(--accent2)'}">${n.typeLabel}${n.dismissed?' · ✓ Task Completed':''}</div>
+          <div class="notif-msg">${n.msg}</div>
+          ${n.sub ? `<div class="notif-sub">${n.sub}</div>` : ''}
+          <div class="notif-time">${n.time||'—'}</div>
+        </div>
+        ${n.unread && !n.dismissed ? `<div class="notif-mark-read" onclick="event.stopPropagation();markNotifRead('${n.id}','${n.type}')">✓</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  updateNotifBadge();
+}
+
+function onNotifClick(notifId, type, rawId) {
+  // Mark as read
+  markNotifRead(notifId, type);
+  // Navigate to relevant page
+  if (type === 'task' && rawId) {
+    closeNotifPanel();
+    openTaskDetailModal(rawId);
+  } else if (type === 'reminder') {
+    closeNotifPanel();
+    if (currentUser?.role === 'admin') {
+      // Go to reminders page
+      document.querySelector('[data-page="reminders"]')?.click();
+    }
+  }
+}
+
+function markNotifRead(notifId, type) {
+  if (type === 'task') addSeenTask(notifId);
+  else addSeenReminder(notifId);
+  renderNotifPanel();
+  updateNotifBadge();
+}
+
+function markAllNotifRead() {
+  const notifs = buildNotifications();
+  notifs.forEach(n => {
+    if (n.type === 'task') addSeenTask(n.id);
+    else addSeenReminder(n.id);
+  });
+  renderNotifPanel();
+  updateNotifBadge();
+}
+
+function closeNotifPanel() {
+  notifPanelOpen = false;
+  document.getElementById('notif-panel').classList.remove('open');
+  document.getElementById('notif-overlay').style.display = 'none';
+}
+
+// ── Fix checkAndShowSplash to use persistent reminders ──────
+// Override to show reminders where task is NOT yet completed
+const _origCheckSplash = window.checkAndShowSplash;
+window.checkAndShowSplash = function() {
+  if (!currentUser || currentUser.role !== 'employee') return;
+  const myRems = DB.reminders.filter(r => {
+    if (r.empId !== currentUser.empId) return false;
+    // Show if task not completed
+    const task = DB.tasks.find(t => t.id === r.taskId);
+    const taskDone = task && task.status === 'Completed';
+    return !taskDone && r.seen !== 'Yes';
+  });
+  if (!myRems.length) return;
+  const list = document.getElementById('splash-reminders-list');
+  if (!list) return;
+  list.innerHTML = myRems.map(r => `
+    <div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;animation:fadeUp .3s ease both">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:10px;font-family:var(--mono);color:var(--muted2)">${formatDate(r.sentDate)}</span>
+        ${r.taskName ? `<span style="font-size:10px;background:var(--accent-light);color:var(--accent);padding:1px 8px;border-radius:20px;font-weight:600">${r.taskName}</span>` : ''}
+      </div>
+      <div style="font-size:13px;color:var(--text);line-height:1.6;font-weight:500">${r.message}</div>
+      <div style="margin-top:8px;">
+        <button onclick="closeModal_goTask('${r.taskId}')" class="btn btn-success btn-sm" style="font-size:11px">✓ Mark Task Complete</button>
+      </div>
+    </div>`).join('');
+  document.getElementById('reminder-splash').style.display = 'flex';
+};
+
+function closeModal_goTask(taskId) {
+  closeSplash();
+  if (taskId) {
+    setTimeout(() => openUpdateModal(taskId), 300);
+  }
+}
+
+// ── Fix employee stat card clicks ──────────────────────────
+// Override openStatModal to work for employees showing only their tasks
+const _origOpenStatModal = window.openStatModal;
+window.openStatModal = function(type) {
+  if (currentUser?.role !== 'employee') {
+    _origOpenStatModal(type);
+    return;
+  }
+  // Employee version — filter to their tasks only
+  recalcStatuses();
+  const empId = currentUser.empId;
+  const allTasks = DB.tasks.filter(t => t.empId === empId);
+  const done = allTasks.filter(t => t.status === 'Completed');
+  const pend = allTasks.filter(t => t.status === 'Pending');
+  const miss = allTasks.filter(t => t.status === 'Missed');
+
+  const iconMap = { total:'◆', completed:'✓', pending:'◎', missed:'⚠', kpi:'◈' };
+  const titleMap = { total:'My Tasks', completed:'Completed Tasks', pending:'Pending Tasks', missed:'Missed Tasks', kpi:'My KPI' };
+  document.getElementById('stat-modal-icon').textContent = iconMap[type] || '◆';
+  document.getElementById('stat-modal-title').textContent = titleMap[type] || 'Tasks';
+  document.getElementById('stat-modal-sub').textContent = 'Your personal task details';
+
+  let summaryHTML = '', bodyHTML = '';
+
+  const rowStyle = `font-family:var(--mono);font-size:10px;color:var(--muted2)`;
+
+  if (type === 'total') {
+    summaryHTML = `
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent)">${allTasks.length}</div><div class="sms-lbl">Total</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent2)">${done.length}</div><div class="sms-lbl">Done</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent3)">${pend.length}</div><div class="sms-lbl">Pending</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--danger)">${miss.length}</div><div class="sms-lbl">Missed</div></div>`;
+    const rows = allTasks.sort((a,b) => (b.assignedDate||'').localeCompare(a.assignedDate||'')).map(t =>
+      `<tr class="row-clickable" onclick="closeModal('stat-modal');openTaskDetailModal('${t.id}')">
+        <td style="${rowStyle}">${t.id}</td>
+        <td><strong>${t.taskName}</strong></td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--accent3);font-weight:700">${t.taskType}</td>
+        <td style="font-family:var(--mono);font-size:11px">${formatDate(t.targetDate)}</td>
+        <td>${statusBadge(t.status)}</td>
+        <td>${kpiBar(t.kpi)}</td>
+      </tr>`).join('');
+    bodyHTML = `<div class="stat-modal-section">All My Tasks</div><div style="overflow-x:auto"><table class="stat-detail-table"><thead><tr><th>ID</th><th>Task</th><th>Type</th><th>Target</th><th>Status</th><th>KPI</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="empty-state"><p>No tasks yet</p></td></tr>'}</tbody></table></div>`;
+  } else if (type === 'completed') {
+    summaryHTML = `
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent2)">${done.length}</div><div class="sms-lbl">Done</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent2)">${done.filter(t=>new Date(t.completedDate)<=new Date(t.targetDate)).length}</div><div class="sms-lbl">On Time</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent3)">${done.filter(t=>new Date(t.completedDate)>new Date(t.targetDate)).length}</div><div class="sms-lbl">Late</div></div>`;
+    const rows = done.sort((a,b) => (b.completedDate||'').localeCompare(a.completedDate||'')).map(t => {
+      const isLate = new Date(t.completedDate) > new Date(t.targetDate);
+      return `<tr class="row-clickable" onclick="closeModal('stat-modal');openTaskDetailModal('${t.id}')">
+        <td style="${rowStyle}">${t.id}</td>
+        <td><strong>${t.taskName}</strong></td>
+        <td style="font-family:var(--mono);font-size:11px">${formatDate(t.targetDate)}</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--accent2)">${formatDate(t.completedDate)}</td>
+        <td><span style="font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;${isLate?'background:var(--accent3-light);color:#7d4a00':'background:var(--accent2-light);color:#057a56'}">${isLate?'Late':'On Time'}</span></td>
+        <td>${kpiBar(t.kpi)}</td>
+      </tr>`;}).join('');
+    bodyHTML = `<div class="stat-modal-section">Completed Tasks</div><div style="overflow-x:auto"><table class="stat-detail-table"><thead><tr><th>ID</th><th>Task</th><th>Target</th><th>Completed</th><th>Timing</th><th>KPI</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="empty-state"><p>No completed tasks</p></td></tr>'}</tbody></table></div>`;
+  } else if (type === 'pending') {
+    const today = new Date(); today.setHours(0,0,0,0);
+    summaryHTML = `
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent3)">${pend.length}</div><div class="sms-lbl">Pending</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--danger)">${pend.filter(t=>{const d=new Date(t.targetDate);return(d-today)/(1000*60*60*24)<=1;}).length}</div><div class="sms-lbl">Due Soon</div></div>`;
+    const rows = pend.sort((a,b) => (a.targetDate||'').localeCompare(b.targetDate||'')).map(t => {
+      const daysLeft = Math.ceil((new Date(t.targetDate) - today) / (1000*60*60*24));
+      const urgClr = daysLeft <= 0 ? 'var(--danger)' : daysLeft <= 2 ? 'var(--accent3)' : 'var(--muted)';
+      return `<tr class="row-clickable" onclick="closeModal('stat-modal');openUpdateModal('${t.id}')">
+        <td style="${rowStyle}">${t.id}</td>
+        <td><strong>${t.taskName}</strong></td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--accent3);font-weight:700">${t.taskType}</td>
+        <td style="font-family:var(--mono);font-size:11px">${formatDate(t.targetDate)}</td>
+        <td style="font-family:var(--mono);font-size:11px;color:${urgClr};font-weight:700">${daysLeft === 0?'Today':daysLeft===1?'Tomorrow':daysLeft>0?daysLeft+'d left':'Overdue'}</td>
+        <td><button class="btn btn-success btn-sm" style="font-size:11px" onclick="event.stopPropagation();closeModal('stat-modal');openUpdateModal('${t.id}')">✓ Update</button></td>
+      </tr>`;}).join('');
+    bodyHTML = `<div class="stat-modal-section">My Pending Tasks</div><div style="overflow-x:auto"><table class="stat-detail-table"><thead><tr><th>ID</th><th>Task</th><th>Type</th><th>Target</th><th>Due In</th><th>Action</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="empty-state"><p>No pending tasks 🎉</p></td></tr>'}</tbody></table></div>`;
+  } else if (type === 'missed') {
+    summaryHTML = `
+      <div class="sms-chip"><div class="sms-val" style="color:var(--danger)">${miss.length}</div><div class="sms-lbl">Missed</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent3)">${miss.filter(t=>t.taskType==='Daily').length}</div><div class="sms-lbl">Daily</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent3)">${miss.filter(t=>t.taskType==='Weekly').length}</div><div class="sms-lbl">Weekly</div></div>`;
+    const rows = miss.map(t => {
+      const daysOver = Math.ceil((new Date() - new Date(t.targetDate)) / (1000*60*60*24));
+      return `<tr class="row-clickable" onclick="closeModal('stat-modal');openTaskDetailModal('${t.id}')">
+        <td style="${rowStyle}">${t.id}</td>
+        <td><strong>${t.taskName}</strong></td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--accent3);font-weight:700">${t.taskType}</td>
+        <td style="font-family:var(--mono);font-size:11px">${formatDate(t.targetDate)}</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--danger);font-weight:700">${daysOver}d overdue</td>
+      </tr>`;}).join('');
+    bodyHTML = `<div class="stat-modal-section">Missed Tasks</div><div style="overflow-x:auto"><table class="stat-detail-table"><thead><tr><th>ID</th><th>Task</th><th>Type</th><th>Target</th><th>Overdue</th></tr></thead><tbody>${rows||'<tr><td colspan="5" class="empty-state"><p>No missed tasks ✓</p></td></tr>'}</tbody></table></div>`;
+  } else if (type === 'kpi') {
+    const kpis = done.map(t => parseInt(t.kpi)||0);
+    const avg = kpis.length ? Math.round(kpis.reduce((a,b)=>a+b,0)/kpis.length) : 0;
+    const dkpi = calcAvgByType(allTasks, 'Daily');
+    const wkpi = calcAvgByType(allTasks, 'Weekly');
+    const mkpi = calcAvgByType(allTasks, 'Monthly');
+    summaryHTML = `
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent)">${avg||'—'}</div><div class="sms-lbl">Overall</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent)">${dkpi||'—'}</div><div class="sms-lbl">Daily</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent2)">${wkpi||'—'}</div><div class="sms-lbl">Weekly</div></div>
+      <div class="sms-chip"><div class="sms-val" style="color:var(--accent3)">${mkpi||'—'}</div><div class="sms-lbl">Monthly</div></div>`;
+    const rows = done.sort((a,b) => parseInt(b.kpi)-parseInt(a.kpi)).map(t =>
+      `<tr class="row-clickable" onclick="closeModal('stat-modal');openTaskDetailModal('${t.id}')">
+        <td><strong>${t.taskName}</strong></td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--accent3);font-weight:700">${t.taskType}</td>
+        <td style="font-family:var(--mono);font-size:11px">${formatDate(t.completedDate)}</td>
+        <td>${kpiBar(t.kpi)}</td>
+      </tr>`).join('');
+    bodyHTML = `<div class="stat-modal-section">KPI Breakdown</div><div style="overflow-x:auto"><table class="stat-detail-table"><thead><tr><th>Task</th><th>Type</th><th>Completed</th><th>KPI</th></tr></thead><tbody>${rows||'<tr><td colspan="4" class="empty-state"><p>No completed tasks yet</p></td></tr>'}</tbody></table></div>`;
+  }
+
+  document.getElementById('stat-modal-summary').innerHTML = summaryHTML;
+  document.getElementById('stat-modal-body').innerHTML = bodyHTML;
+  document.getElementById('stat-modal').classList.add('open');
+};
+
+// ── Hook into refreshAllViews to update badge ───────────────
+const _notifRefreshAll = window.refreshAllViews;
+window.refreshAllViews = function() {
+  _notifRefreshAll();
+  updateNotifBadge();
+  if (notifPanelOpen) renderNotifPanel();
+};
+
+// ── Also make employee dashboard stat cards clickable ───────
+// Patch renderEmpDashboard to add onclick to stat cards
+const _notifEmpDash = window.renderEmpDashboard;
+window.renderEmpDashboard = function() {
+  _notifEmpDash();
+  // Make stat cards clickable for employees
+  const statCards = document.querySelectorAll('#page-emp-dash .stat-card');
+  const types = ['total','completed','pending','missed','kpi'];
+  statCards.forEach((card, i) => {
+    if (types[i]) {
+      card.style.cursor = 'pointer';
+      card.classList.add('stat-card-clickable');
+      card.onclick = () => openStatModal(types[i]);
+    }
+  });
+};
+
+// Clear seen notifications on logout
+const _notifLogout = window.doLogout;
+window.doLogout = function() {
+  closeNotifPanel();
+  _notifLogout();
+};
+
 </script>
 </body>
 </html>
@@ -2685,7 +3916,7 @@ window.addEventListener('DOMContentLoaded', () => {
       <div class="form-grid">
         <div class="form-group full"><label>Task Name *</label><input id="bulk-task-name" placeholder="e.g. Daily Bank Recon"/></div>
         <div class="form-group full"><label>Work Description</label><textarea id="bulk-task-work" placeholder="Describe the work…" style="min-height:60px"></textarea></div>
-        <div class="form-group"><label>Task Type</label><select id="bulk-task-type"><option>Daily</option><option>Weekly</option><option>Monthly</option></select></div>
+        <div class="form-group"><label>Task Type</label><select id="bulk-task-type"><option>Daily</option><option>Weekly</option><option>Monthly</option><option>One Time</option></select></div>
         <div class="form-group"><label>Target Date *</label><input type="date" id="bulk-task-target"/></div>
       </div>
       <div class="btn-row">
