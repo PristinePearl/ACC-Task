@@ -773,7 +773,7 @@ tbody td{padding:11px 14px;vertical-align:middle;}
 .hamburger:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light);}
 .sidebar-overlay{
   display:none;position:fixed;inset:0;
-  background:rgba(17,24,39,.5);z-index:200;backdrop-filter:blur(4px);
+  background:rgba(17,24,39,.5);z-index:200;backdrop-filter:none;
 }
 .sidebar-overlay.open{display:block;animation:fadeIn .2s ease;}
 
@@ -834,10 +834,12 @@ tbody td{padding:11px 14px;vertical-align:middle;}
   .sync-btn{display:none;}
   #page-status .stat-grid{grid-template-columns:1fr;}
   .stat-value{font-size:22px;}
+  .monthly-stats{grid-template-columns:repeat(3,1fr);}
+  .digest-stats{grid-template-columns:repeat(3,1fr);}
 }
 
 /* ═══ ANALYTICS PAGE STYLES ═══ */
-.analytics-tabs{display:flex;gap:4px;background:#f1f5f9;border:1px solid var(--border);padding:4px;border-radius:12px;margin-bottom:24px;overflow-x:auto;flex-wrap:nowrap;}
+.analytics-tabs{display:flex;gap:4px;background:#f1f5f9;border:1px solid var(--border);padding:4px;border-radius:12px;margin-bottom:24px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;}
 .atab{padding:8px 18px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);transition:all .18s ease;white-space:nowrap;}
 .atab:hover{color:var(--text2);}
 .atab.active{background:#fff;color:var(--accent);box-shadow:var(--shadow);}
@@ -861,7 +863,7 @@ tbody td{padding:11px 14px;vertical-align:middle;}
 .hist-lbl{font-size:9px;color:var(--muted2);font-family:var(--mono);text-align:center;font-weight:600;}
 .hist-val{font-size:11px;font-family:var(--mono);font-weight:700;}
 .tcmp-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
-.tcmp-name{font-weight:700;font-size:13px;min-width:120px;flex-shrink:0;}
+.tcmp-name{font-weight:700;font-size:13px;min-width:80px;flex-shrink:0;}
 .tcmp-bars{flex:1;display:flex;flex-direction:column;gap:5px;}
 .tcmp-line{display:flex;align-items:center;gap:8px;}
 .tcmp-lbl{font-size:10px;color:var(--muted);font-family:var(--mono);font-weight:600;min-width:68px;}
@@ -912,7 +914,7 @@ tbody td{padding:11px 14px;vertical-align:middle;}
   height:calc(100vh - var(--topbar-h));
   background:var(--surface);
   border-left:1px solid var(--border);
-  z-index:450;
+  z-index:400;
   transform:translateX(100%);
   transition:transform .3s cubic-bezier(.4,0,.2,1);
   display:flex;
@@ -924,9 +926,9 @@ tbody td{padding:11px 14px;vertical-align:middle;}
 #notif-overlay{
   display:none;
   position:fixed;inset:0;
-  z-index:399;
+  z-index:300;
   background:rgba(17,24,39,.2);
-  backdrop-filter:blur(2px);
+  backdrop-filter:none;
 }
 
 .notif-panel-header{
@@ -1687,7 +1689,7 @@ tbody td{padding:11px 14px;vertical-align:middle;}
     <div id="notif-list"></div>
   </div>
 </div>
-<div id="notif-overlay" onclick="toggleNotifPanel()" style="display:none;position:fixed;inset:0;z-index:399;background:rgba(17,24,39,.2);backdrop-filter:blur(2px);"></div>
+<div id="notif-overlay" onclick="toggleNotifPanel()" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(17,24,39,.2);"></div>
 
 <!-- ══ REMINDER SPLASH MODAL (shown to employee on login) ══ -->
 <div id="reminder-splash" style="display:none;position:fixed;inset:0;z-index:99998;
@@ -3841,7 +3843,7 @@ window.addEventListener('DOMContentLoaded', () => {
     heatSection.className = 'section';
     heatSection.innerHTML = `
       <div class="section-title">Completion Heatmap <span class="badge">Last 18 weeks</span></div>
-      <div id="heatmap-wrap">Loading…</div>`;
+      <div id="heatmap-wrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch">Loading…</div>`;
     dashPage.appendChild(heatSection);
 
     // Leaderboard section
@@ -3909,7 +3911,7 @@ window.addEventListener('DOMContentLoaded', () => {
   bulkModal.className = 'modal-overlay';
   bulkModal.id = 'bulk-modal';
   bulkModal.innerHTML = `
-    <div class="modal" style="width:min(560px,96vw)">
+    <div class="modal" style="width:min(560px,100vw);max-height:85vh;overflow-y:auto">
       <div class="modal-title">Bulk Task Assignment <button class="modal-close" onclick="closeModal('bulk-modal')">×</button></div>
       <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.6px">Select Employees</div>
       <div id="bulk-emp-list" style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;margin-bottom:16px"></div>
@@ -4475,18 +4477,7 @@ document.querySelector('[data-page="analytics"]')?.addEventListener('click', () 
 });
 
 // Also handle via the existing nav loop — patch the page handler
-const _origNavClick = document.querySelectorAll('.nav-item');
-_origNavClick.forEach(el=>{
-  if(el.dataset.page==='analytics'){
-    el.addEventListener('click',()=>{
-      document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
-      document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
-      el.classList.add('active');
-      document.getElementById('page-analytics').classList.add('active');
-      switchAnalyticsTab('digest');
-    });
-  }
-});
+
 
 // Refresh analytics when data syncs
 const _baseRefreshAll = window.refreshAllViews;
