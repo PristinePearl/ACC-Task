@@ -51,7 +51,7 @@ body::before{
     radial-gradient(ellipse 80% 50% at 10% -10%,rgba(59,91,219,.06) 0%,transparent 60%),
     radial-gradient(ellipse 60% 40% at 90% 110%,rgba(15,155,110,.05) 0%,transparent 60%);
 }
-.layout,#login-screen,.topbar,.sidebar{position:relative;z-index:1;}
+.layout,#login-screen,.topbar{position:relative;z-index:1;}
 
 /* ═══════════════════════════════════
    KEYFRAMES
@@ -771,9 +771,21 @@ tbody td{padding:11px 14px;vertical-align:middle;}
   transition:all .2s ease;flex-shrink:0;
 }
 .hamburger:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light);}
-.sidebar-overlay{
-  display:none;position:fixed;inset:0;
-  background:rgba(17,24,39,.5);z-index:200;backdrop-filter:none;
+sidebar-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(17,24,39,.5);
+  z-index:999;
+}
+
+/* 👇 ADD THIS NEW LINE */
+.sidebar.mobile-open ~ .sidebar-overlay{
+  pointer-events:auto;
+}
+.sidebar{
+  background: #fff !important;   /* force no dim */
+  opacity: 1 !important;
 }
 .sidebar-overlay.open{display:block;animation:fadeIn .2s ease;}
 
@@ -797,10 +809,15 @@ tbody td{padding:11px 14px;vertical-align:middle;}
   .sync-btn,.logout-btn{padding:5px 9px;font-size:11px;}
   .avatar{width:30px;height:30px;font-size:11px;}
   .sidebar{
-    display:block !important;position:fixed;top:0;left:-230px;
-    width:230px;height:100vh;z-index:500;
-    transition:left .3s cubic-bezier(.4,0,.2,1);padding-top:64px;
-  }
+  display:block !important;
+  position:fixed;
+  top:54px;
+  left:-230px;
+  width:230px;
+  height:calc(100vh - 54px);
+  z-index:9999;  /* 🔥 VERY HIGH */
+  pointer-events: auto;
+}
   .sidebar.mobile-open{left:0;box-shadow:var(--shadow-lg);}
   .layout{flex-direction:column;}
   .main{padding:14px;}
@@ -3266,6 +3283,14 @@ document.getElementById('main-sidebar').addEventListener('click', function(e) {
 // ✅ Overlay click → close sidebar
 document.getElementById('sidebar-overlay').addEventListener('click', function() {
   closeMobileSidebar();
+});
+
+document.getElementById('sidebar-overlay').addEventListener('click', function(){
+  closeMobileSidebar();
+});
+
+document.getElementById('main-sidebar').addEventListener('click', function(e){
+  e.stopPropagation();
 });
 
 </script>
