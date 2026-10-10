@@ -1049,6 +1049,16 @@ sidebar-overlay{
     height:calc(100vh - 54px);
   }
 }
+
+/* AoW multi-chip */
+.aow-chip-box{display:flex;flex-wrap:wrap;align-items:center;gap:6px;background:#fafbfd;border:1px solid var(--border);border-radius:var(--radius);padding:6px 8px;min-height:42px;cursor:text;transition:border-color .2s,box-shadow .2s;}
+.aow-chip-box:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,91,219,.1);background:#fff;}
+.aow-chip-box input{border:none !important;box-shadow:none !important;background:transparent !important;padding:4px 4px;flex:1;min-width:140px;outline:none;}
+.aow-chip{display:inline-flex;align-items:center;gap:6px;background:var(--accent-light);color:var(--accent);padding:3px 6px 3px 10px;border-radius:20px;font-size:12px;font-weight:600;margin:2px 4px 2px 0;}
+.aow-chip button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;line-height:1;padding:0 4px;border-radius:50%;}
+.aow-chip button:hover{background:var(--danger);color:#fff;}
+.badge-excused{background:#eef2ff;color:#3b5bdb;border:1px solid rgba(59,91,219,.2);}
+.badge-excused::before{background:#3b5bdb;}
 </style>
 </head>
 <body>
@@ -1162,6 +1172,9 @@ sidebar-overlay{
     <div class="nav-item" data-page="pending-works">
       <span class="nav-icon">⧗</span><span class="nav-item-label">Pending Works</span>
     </div>
+    <div class="nav-item" data-page="holidays"><span class="nav-icon">☼</span><span class="nav-item-label">Holidays &amp; Leave</span></div>
+    <div class="nav-item" data-page="activity"><span class="nav-icon">☰</span><span class="nav-item-label">Activity Log</span></div>
+    <div class="nav-item" data-page="recycle"><span class="nav-icon">♻</span><span class="nav-item-label">Recycle Bin</span></div>
     <hr class="nav-divider"/>
   </div>
   <div id="emp-nav">
@@ -1275,7 +1288,12 @@ sidebar-overlay{
     <div class="section-title">Assign Area of Work</div>
     <div class="form-grid">
       <div class="form-group"><label>Employee *</label><select id="aow-emp"><option value="">— Select Employee —</option></select></div>
-      <div class="form-group"><label>Area of Work *</label><input id="aow-area" placeholder="e.g. Banking, GST, Payroll"/></div>
+      <div class="form-group"><label>Areas of Work * <span style="font-weight:400;color:var(--muted2)">(press Enter or comma after each to add several)</span></label>
+        <div class="aow-chip-box" id="aow-chip-box" onclick="document.getElementById('aow-area').focus()">
+          <span id="aow-chips"></span>
+          <input id="aow-area" placeholder="e.g. Banking, GST, Payroll" autocomplete="off"/>
+        </div>
+      </div>
     </div>
     <div class="btn-row"><button class="btn btn-primary" onclick="addAoW()">＋ Assign</button></div>
   </div>
@@ -1301,16 +1319,40 @@ sidebar-overlay{
       <div class="form-group"><label>Employee *</label><select id="t-emp" onchange="fillAreaFromEmp()"><option value="">— Select Employee —</option></select></div>
       <div class="form-group"><label>Area of Work</label><select id="t-area"><option>— Select employee first —</option></select></div>
       <div class="form-group"><label>Task Type *</label><select id="t-type"><option>Daily</option><option>Weekly</option><option>Monthly</option><option>One Time</option></select></div>
-      <div class="form-group"><label>Task Name *</label><input id="t-name" placeholder="e.g. Bank Reconciliation"/></div>
+      <div class="form-group"><label>Task Name *</label><input id="t-name" list="task-name-list" autocomplete="off" placeholder="Select or type a new task name"/></div>
       <div class="form-group full"><label>Work Assigned</label><textarea id="t-work" placeholder="Describe the work to be completed…"></textarea></div>
       <div class="form-group"><label>Target Date *</label><input type="date" id="t-target"/></div>
     </div>
-    <div class="btn-row"><button class="btn btn-primary" onclick="assignTask()">◆ Assign Task</button></div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="assignTask()">◆ Assign Task</button><button class="btn btn-ghost" onclick="openMultiTask()">☰ Multiple Tasks (one staff)</button></div>
+  </div>
+  <div class="section" id="tm-section">
+    <div class="section-title">Task Name Master <span class="badge" id="tm-count">0 names</span></div>
+    <div class="alert alert-info">☰ Every new task name is saved here automatically and appears in the Task Name dropdown. You can also add or delete names below.</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px;">
+      <div class="form-group" style="flex:1;min-width:220px;max-width:380px;"><label>New Task Name</label><input id="tm-new" placeholder="e.g. Bank Reconciliation" onkeydown="if(event.key==='Enter')addTaskNameManual()"/></div>
+      <button class="btn btn-primary" onclick="addTaskNameManual()">＋ Add Name</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Task Name</th><th>Tasks Using It</th><th>Added</th><th></th></tr></thead>
+        <tbody id="tm-table"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="section" id="aa-section">
+    <div class="section-title">Auto-Repeat Tasks <span class="badge" id="aa-count">0 series</span></div>
+    <div class="alert alert-info">↻ Daily tasks repeat every day, Weekly every 7 days, Monthly on the same date each month. The target date moves by the same gap as the original task. Use Stop to end a repeat.</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Employee</th><th>Task</th><th>Type</th><th>Last Allotted</th><th>Next Allot</th><th>Status</th><th></th></tr></thead>
+        <tbody id="aa-table"></tbody>
+      </table>
+    </div>
   </div>
   <div class="section">
     <div class="section-title" style="justify-content:space-between;align-items:center;">
       <div style="display:flex;align-items:center;gap:8px;">All Tasks <span class="badge" id="task-count">0 tasks</span></div>
-      <button class="btn btn-ghost btn-sm" onclick="exportTasksExcel()">⬇ Export Excel</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" id="tk-del-sel" style="color:var(--danger)" onclick="deleteSelectedTasks()">🗑 Delete Selected</button><button class="btn btn-ghost btn-sm" onclick="exportTasksExcel()">⬇ Export Excel</button></div>
     </div>
     <div class="form-grid" style="grid-template-columns:repeat(auto-fill,minmax(155px,1fr));margin-bottom:16px;">
       <div class="form-group"><label>Team</label><select id="tf-team" onchange="renderTaskTable()"><option value="">All Teams</option></select></div>
@@ -1328,7 +1370,7 @@ sidebar-overlay{
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Task ID</th><th>Assigned Date</th><th>Employee</th><th>Team</th><th>Area</th><th>Type</th><th>Task Name</th><th>Target Date</th><th>Status</th><th>KPI</th><th>Admin</th></tr></thead>
+        <thead><tr><th style="width:30px"><input type="checkbox" id="tk-sel-all" onchange="tkSelAll(this)" style="width:auto;padding:0"></th><th>Task ID</th><th>Assigned Date</th><th>Employee</th><th>Team</th><th>Area</th><th>Type</th><th>Task Name</th><th>Target Date</th><th>Status</th><th>KPI</th><th>Admin</th></tr></thead>
         <tbody id="task-table"></tbody>
       </table>
     </div>
@@ -1350,7 +1392,7 @@ sidebar-overlay{
     <div class="section-title">Filter</div>
     <div class="form-grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">
       <div class="form-group"><label>Employee</label><select id="flt-emp"><option value="">All</option></select></div>
-      <div class="form-group"><label>Status</label><select id="flt-status"><option value="">All</option><option>Completed</option><option>Pending</option><option>Missed</option></select></div>
+      <div class="form-group"><label>Status</label><select id="flt-status"><option value="">All</option><option>Completed</option><option>Pending</option><option>Missed</option><option>Excused</option></select></div>
       <div class="form-group"><label>Task Type</label><select id="flt-type"><option value="">All</option><option>Daily</option><option>Weekly</option><option>Monthly</option><option>One Time</option></select></div>
     </div>
     <div class="btn-row"><button class="btn btn-ghost btn-sm" onclick="renderStatusTable()">⊙ Apply</button></div>
@@ -1382,6 +1424,15 @@ sidebar-overlay{
   <div class="section">
     <div class="section-title">Tasks Needing Attention</div>
     <div id="reminder-list"></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Sent Reminders <span class="badge" id="rem-count">0</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Employee</th><th>Task</th><th>Message</th><th>Seen</th><th></th></tr></thead>
+        <tbody id="rem-sent-table"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -1462,6 +1513,71 @@ sidebar-overlay{
   </div>
 </div>
 
+
+<!-- HOLIDAYS & LEAVE -->
+<div class="page" id="page-holidays">
+  <div class="page-header">
+    <div class="page-title-wrap"><div class="page-title">Holidays &amp; Leave</div><div class="page-sub">Keeps KPI fair · Daily tasks skip off days</div></div>
+  </div>
+  <div class="alert alert-info">☼ <div>Daily tasks are <b>not created</b> on weekly-off days, holidays or an employee's leave days. A task whose deadline falls on such a day is never counted as Missed: a Daily task becomes <b>Excused</b>; any other task gets the next working day as its deadline.</div></div>
+  <div class="section">
+    <div class="section-title">Weekly Off Days</div>
+    <div id="wk-off-boxes" style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:6px"></div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="saveWeeklyOff()">Save Weekly Off</button></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Holidays <span class="badge" id="hol-count">0</span></div>
+    <div class="form-grid">
+      <div class="form-group"><label>Date *</label><input type="date" id="hol-date"/></div>
+      <div class="form-group"><label>Holiday Name</label><input id="hol-name" placeholder="e.g. Deepavali"/></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="addHolidayUI()">＋ Add Holiday</button></div>
+    <div class="table-wrap" style="margin-top:16px"><table>
+      <thead><tr><th>Date</th><th>Day</th><th>Name</th><th></th></tr></thead>
+      <tbody id="hol-table"></tbody></table></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Employee Leave <span class="badge" id="lv-count">0</span></div>
+    <div class="form-grid">
+      <div class="form-group"><label>Employee *</label><select id="lv-emp"><option value="">— Select —</option></select></div>
+      <div class="form-group"><label>From *</label><input type="date" id="lv-from"/></div>
+      <div class="form-group"><label>To *</label><input type="date" id="lv-to"/></div>
+      <div class="form-group"><label>Reason</label><input id="lv-reason" placeholder="e.g. Sick leave"/></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="addLeaveUI()">＋ Mark Leave</button></div>
+    <div class="table-wrap" style="margin-top:16px"><table>
+      <thead><tr><th>Employee</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th></th></tr></thead>
+      <tbody id="lv-table"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ACTIVITY LOG -->
+<div class="page" id="page-activity">
+  <div class="page-header">
+    <div class="page-title-wrap"><div class="page-title">Activity Log</div><div class="page-sub">Who did what, and when</div></div>
+    <button class="btn btn-ghost btn-sm" onclick="loadActivity()">↻ Refresh</button>
+  </div>
+  <div class="section">
+    <div class="form-grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));margin-bottom:14px">
+      <div class="form-group"><label>Search</label><input id="log-q" placeholder="user, task, id…" oninput="renderActivity()"/></div>
+      <div class="form-group"><label>Action</label><select id="log-act" onchange="renderActivity()"><option value="">All actions</option></select></div>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Time</th><th>User</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
+      <tbody id="log-table"></tbody></table></div>
+  </div>
+</div>
+
+<!-- RECYCLE BIN -->
+<div class="page" id="page-recycle">
+  <div class="page-header">
+    <div class="page-title-wrap"><div class="page-title">Recycle Bin</div><div class="page-sub">Deleted tasks and staff are kept for 30 days</div></div>
+    <button class="btn btn-ghost btn-sm" onclick="loadRecycle()">↻ Refresh</button>
+  </div>
+  <div class="section"><div class="table-wrap"><table>
+    <thead><tr><th>Deleted</th><th>By</th><th>Type</th><th>What</th><th></th></tr></thead>
+    <tbody id="bin-table"></tbody></table></div></div>
+</div>
 
 <!-- REPORTS & ANALYTICS PAGE -->
 <div class="page" id="page-analytics">
@@ -1559,7 +1675,7 @@ sidebar-overlay{
       </div>
       <div class="form-group">
         <label>Task Name *</label>
-        <input id="pw-t-name" placeholder="e.g. Bank Reconciliation"/>
+        <input id="pw-t-name" list="task-name-list" autocomplete="off" placeholder="Select or type a new task name"/>
       </div>
       <div class="form-group full">
         <label>Work Description</label>
@@ -1632,6 +1748,27 @@ sidebar-overlay{
   <div class="modal" style="width:min(600px,96vw);max-height:90vh;overflow-y:auto;">
     <div class="modal-title" id="pw-modal-ttl">Work Item <button class="modal-close" onclick="closeModal('pw-modal')">×</button></div>
     <div id="pw-modal-body"></div>
+  </div>
+</div>
+
+<!-- MULTI TASK MODAL -->
+<div class="modal-overlay" id="mt-modal">
+  <div class="modal" style="width:min(980px,97vw);max-height:92vh;overflow-y:auto;">
+    <div class="modal-title">Assign Multiple Tasks <button class="modal-close" onclick="closeModal('mt-modal')">×</button></div>
+    <div class="form-grid" style="grid-template-columns:minmax(220px,360px);margin-bottom:16px;">
+      <div class="form-group"><label>Employee *</label><select id="mt-emp" onchange="mtEmpChanged()"><option value="">— Select Employee —</option></select></div>
+    </div>
+    <div class="table-wrap">
+      <table style="min-width:860px">
+        <thead><tr><th style="width:26%">Task Name *</th><th style="width:12%">Type *</th><th style="width:16%">Area</th><th style="width:26%">Work Assigned</th><th style="width:15%">Target Date *</th><th></th></tr></thead>
+        <tbody id="mt-rows"></tbody>
+      </table>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="mtAddRow()">＋ Add Row</button>
+      <button class="btn btn-primary" id="mt-submit" onclick="submitMultiTask()">◆ Assign All Tasks</button>
+      <button class="btn btn-ghost" onclick="closeModal('mt-modal')">Cancel</button>
+    </div>
   </div>
 </div>
 
@@ -1756,15 +1893,33 @@ sidebar-overlay{
   </div>
 </div>
 
+<datalist id="task-name-list"></datalist>
 <div id="toast"><div class="toast-dot" id="toast-dot"></div><span id="toast-msg"></span></div>
 
 <script>
 const DB_URL='https://script.google.com/macros/s/AKfycby_j29z-w7L4w0FqVYy-VHYtXnuhO9QhPPWUGZ3b02bOgXeH--qrqDW0EyY-iYRVMMD/exec';
-let DB={staff:[],aow:[],tasks:[],pendingWorks:[],reminders:[]};
+let DB={staff:[],aow:[],tasks:[],pendingWorks:[],reminders:[],taskMaster:[],comments:[],templates:[],seen:{},holidays:[],holidaySet:{},leaves:[],settings:{weeklyOff:[0]}};
 let dbConnected=false;
 
-async function dbGet(){const r=await fetch(DB_URL);if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}
-async function dbPost(payload){const r=await fetch(DB_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}
+let authToken='';
+function handleAuthError(code){
+  if(code==='AUTH'){if(currentUser){toast('Session expired — please sign in again','var(--danger)');doLogout();}}
+}
+async function apiCall(url,opt){
+  const r=await fetch(url,opt);
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  const j=await r.json();
+  if(j&&j.ok===false){
+    if(j.error==='AUTH')handleAuthError(j.error);
+    throw new Error(j.error||'Request failed');
+  }
+  return j;
+}
+async function dbGet(){return apiCall(DB_URL+'?token='+encodeURIComponent(authToken));}
+async function dbPost(payload){
+  if(payload&&payload.action==='assignTask')tmEnsure(payload.taskName);
+  return apiCall(DB_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(Object.assign({token:authToken},payload))});
+}
 
 async function fullSync(){
   setSyncState(true);
@@ -1777,7 +1932,18 @@ async function fullSync(){
     if(d.pendingWorks&&Array.isArray(d.pendingWorks)){DB.pendingWorks=d.pendingWorks.map(p=>({id:String(p.PW_ID||p.id||''),createdDate:String(p.CREATED_DATE||p.createdDate||''),empId:String(p.EMP_ID||p.empId||''),empName:String(p.EMP_NAME||p.empName||''),category:String(p.CATEGORY||p.category||'Other'),priority:String(p.PRIORITY||p.priority||'Medium'),dueDate:fmtDate(p.DUE_DATE||p.dueDate||''),desc:String(p.DESCRIPTION||p.desc||''),notes:String(p.NOTES||p.notes||''),status:String(p.STATUS||p.status||'Open'),empRemarks:String(p.EMP_REMARKS||p.empRemarks||''),adminNote:String(p.ADMIN_NOTE||p.adminNote||''),resolvedDate:fmtDate(p.RESOLVED_DATE||p.resolvedDate||''),createdBy:String(p.CREATED_BY||p.createdBy||'')})).filter(p=>p.id);}
     // ── Reminders sheet
     if(d.reminders&&Array.isArray(d.reminders)){DB.reminders=d.reminders.map(r=>({id:String(r.REM_ID||r.id||''),sentDate:String(r.SENT_DATE||r.sentDate||''),empId:String(r.EMP_ID||r.empId||''),empName:String(r.EMP_NAME||r.empName||''),taskId:String(r.TASK_ID||r.taskId||''),taskName:String(r.TASK_NAME||r.taskName||''),message:String(r.MESSAGE||r.message||''),seen:String(r.SEEN||r.seen||'No')})).filter(r=>r.id);}
-    recalcStatuses();setConnected(true);refreshAllViews();
+    if(d.taskMaster&&Array.isArray(d.taskMaster)){DB.taskMaster=d.taskMaster.map(m=>({name:String(m.TASK_NAME||m.name||'').trim(),createdDate:String(m.CREATED_DATE||m.createdDate||'')})).filter(m=>m.name);}
+    if(Array.isArray(d.comments)){DB.comments=d.comments.map(c=>({id:String(c.COMMENT_ID||''),taskId:String(c.TASK_ID||''),authorId:String(c.AUTHOR_ID||''),author:String(c.AUTHOR_NAME||''),isAdmin:String(c.IS_ADMIN)==='Yes',text:String(c.TEXT||''),createdAt:String(c.CREATED_AT||'')})).filter(c=>c.id);}
+    if(Array.isArray(d.templates)){DB.templates=d.templates.map(t=>({id:String(t.TPL_ID||''),name:String(t.NAME||''),work:String(t.WORK||''),type:String(t.TYPE||''),area:String(t.AREA||'')})).filter(t=>t.id);}
+    if(Array.isArray(d.seen)){const sn={};d.seen.forEach(x=>{sn[String(x)]=1;});seenPending.forEach(x=>{sn[x]=1;});DB.seen=sn;}
+    if(Array.isArray(d.holidays)){DB.holidays=d.holidays.map(h=>({date:fmtDate(h.DATE),name:String(h.NAME||'')})).filter(h=>h.date);}
+    if(Array.isArray(d.leaves)){DB.leaves=d.leaves.map(l=>({id:String(l.LEAVE_ID||''),empId:String(l.EMP_ID||''),name:String(l.NAME||''),from:fmtDate(l.FROM_DATE),to:fmtDate(l.TO_DATE),reason:String(l.REASON||'')})).filter(l=>l.id&&l.from&&l.to);}
+    if(d.settings){const raw=d.settings.WEEKLY_OFF===undefined?'0':String(d.settings.WEEKLY_OFF);DB.settings.weeklyOff=raw.split(',').map(x=>x.trim()).filter(x=>x!=='').map(Number).filter(x=>x>=0&&x<=6);}
+    DB.holidaySet={};DB.holidays.forEach(h=>{DB.holidaySet[h.date]=1;});
+    if(currentUser&&d.me&&d.me.displayName&&!currentUser.displayName)currentUser.displayName=d.me.displayName;
+recalcStatuses();setConnected(true);refreshAllViews();
+    autoAllotRecurring();
+    tmBackfill();
     // Show splash for employee if unseen reminders exist
     if(currentUser&&currentUser.role==='employee')checkAndShowSplash();
     toast('✓ Synced successfully','var(--accent2)');
@@ -1815,7 +1981,7 @@ function toast(msg,clr='var(--accent2)'){
   toastTimer=setTimeout(()=>{t.classList.remove('show');t.classList.add('hide');setTimeout(()=>{t.style.opacity='0';t.classList.remove('hide');},300);},3000);
 }
 
-function statusBadge(s){const m={Completed:'badge-completed',Pending:'badge-pending',Missed:'badge-missed'};return`<span class="badge-status ${m[s]||'badge-pending'}">${s||'Pending'}</span>`;}
+function statusBadge(s){const m={Completed:'badge-completed',Pending:'badge-pending',Missed:'badge-missed',Excused:'badge-excused'};return`<span class="badge-status ${m[s]||'badge-pending'}">${s||'Pending'}</span>`;}
 
 function kpiBar(k){
   if(k===''||k===undefined||k===null)return`<span style="color:var(--muted2);font-size:12px;font-weight:600">—</span>`;
@@ -1824,18 +1990,37 @@ function kpiBar(k){
   return`<div class="kpi-bar-wrap"><div class="kpi-bar"><div class="kpi-bar-fill" style="width:${pct}%;background:${clr}"></div></div><span class="kpi-num" style="color:${clr}">${pct}</span></div>`;
 }
 
-function todayStr(){return new Date().toISOString().slice(0,10);}
+function todayStr(){const n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');}
 function formatDate(d){if(!d)return'—';const s=typeof d==='string'?d.slice(0,10):d;const parts=String(s).split('-');if(parts.length===3)return parts[2]+'/'+parts[1]+'/'+parts[0];const dt=new Date(s);if(isNaN(dt))return String(d);return String(dt.getDate()).padStart(2,'0')+'/'+String(dt.getMonth()+1).padStart(2,'0')+'/'+dt.getFullYear();}
 
+// ═══ WORKING CALENDAR (weekly off + holidays + leave) ═══
+function addDaysStr(ds,n){const p=String(ds).split('-');const d=new Date(+p[0],+p[1]-1,+p[2]+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function isOffDay(ds){const p=String(ds).split('-');const wd=new Date(+p[0],+p[1]-1,+p[2]).getDay();return DB.settings.weeklyOff.includes(wd)||!!DB.holidaySet[ds];}
+function onLeaveDay(empId,ds){return DB.leaves.some(l=>l.empId===String(empId)&&l.from<=ds&&ds<=l.to);}
+function nonWorkingDay(empId,ds){return isOffDay(ds)||onLeaveDay(empId,ds);}
+// first working day on/after the target date
+function effTargetDate(empId,ds){let d=ds;for(let i=0;i<400&&nonWorkingDay(empId,d);i++)d=addDaysStr(d,1);return d;}
+
+// KPI rules (same as the server):
+//  completed before target = 100 | on target, or within the off-day/leave extension = 90 | later = 70
+//  past target: Daily task whose day was an off/leave day = Excused (not counted)
+//               otherwise Missed once the (extended) deadline is over
 function recalcStatuses(){
-  const today=new Date();today.setHours(0,0,0,0);
+  const today=todayStr();
   DB.tasks.forEach(t=>{
+    const td=t.targetDate||'';
     if(t.completedDate&&t.completedDate!==''){
-      const cd=new Date(t.completedDate);const td=new Date(t.targetDate);
+      const cd=t.completedDate;const eff=td?effTargetDate(t.empId,td):td;
       t.status='Completed';
-      if(cd<td){t.kpi=100;t.score='1.0';}else if(+cd===+td){t.kpi=90;t.score='0.9';}else{t.kpi=70;t.score='0.7';}
-    }else if(t.targetDate&&new Date(t.targetDate)<today){t.status='Missed';t.kpi=0;t.score='0.0';}
-    else{t.status='Pending';t.kpi='';t.score='';}
+      if(!td||cd<td){t.kpi=100;t.score='1.0';}
+      else if(cd<=eff){t.kpi=90;t.score='0.9';}
+      else{t.kpi=70;t.score='0.7';}
+    }else if(td&&today>td){
+      const eff=effTargetDate(t.empId,td);
+      if(t.taskType==='Daily'&&eff!==td){t.status='Excused';t.kpi='';t.score='';}
+      else if(today>eff){t.status='Missed';t.kpi=0;t.score='0.0';}
+      else{t.status='Pending';t.kpi='';t.score='';}
+    }else{t.status='Pending';t.kpi='';t.score='';}
   });
 }
 
@@ -1849,7 +2034,7 @@ async function addEmployee(){
   DB.staff.push({empId:id,name,designation:desig,team,doj,email});
   renderEmpTable();populateDropdowns();renderDashboard();
   toast('Saving employee…');
-  try{await dbPost({action:'addStaff',empId:id,name,designation:desig,team,doj,email});toast('✓ Employee saved','var(--accent2)');}
+  try{const r=await dbPost({action:'addStaff',empId:id,name,designation:desig,team,doj,email});toast('✓ Employee saved','var(--accent2)');toast('Now type '+name+"'s password in the USERS sheet",'var(--accent3)');}
   catch(e){toast('Saved locally. DB sync failed.','var(--accent3)');}
   ['emp-id','emp-name','emp-desig','emp-email','emp-doj'].forEach(x=>document.getElementById(x).value='');
 }
@@ -1896,7 +2081,7 @@ function renderTeamSummary(){
     const kpis=done.map(t=>parseInt(t.kpi)||0);const avgKpi=kpis.length?Math.round(kpis.reduce((a,b)=>a+b,0)/kpis.length):null;
     const clr=TEAM_COLORS[idx%TEAM_COLORS.length];
     const kpiColor=avgKpi===null?'var(--muted)':avgKpi>=90?'var(--accent2)':avgKpi>=70?'var(--accent3)':'var(--danger)';
-    const compRate=tasks.length?Math.round((done.length/tasks.length)*100):0;
+    const compRate=tasks.filter(x=>x.status!=='Excused').length?Math.round((done.length/tasks.filter(x=>x.status!=='Excused').length)*100):0;
     return`<div class="team-card">
       <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${clr.bar};border-radius:var(--radius-lg) var(--radius-lg) 0 0;"></div>
       <div class="team-card-name"><div class="team-dot" style="background:${clr.dot};box-shadow:0 0 6px ${clr.dot}40"></div>${tn}</div>
@@ -1920,29 +2105,82 @@ function renderTeamSummary(){
 
 function removeEmp(id){DB.staff=DB.staff.filter(s=>s.empId!==id);renderEmpTable();populateDropdowns();renderDashboard();toast('Removed','var(--danger)');}
 
+let aowPending=[];
+function renderAoWChips(){
+  const el=document.getElementById('aow-chips');if(!el)return;
+  el.innerHTML=aowPending.map((a,i)=>`<span class="aow-chip">${a}<button type="button" onclick="event.stopPropagation();removePendingAoW(${i})">×</button></span>`).join('');
+}
+function removePendingAoW(i){aowPending.splice(i,1);renderAoWChips();}
+function commitAoWInput(){
+  const inp=document.getElementById('aow-area');if(!inp)return;
+  inp.value.split(/[,;\n]/).map(x=>x.trim()).filter(Boolean).forEach(v=>{
+    if(!aowPending.some(x=>x.toLowerCase()===v.toLowerCase()))aowPending.push(v);
+  });
+  inp.value='';renderAoWChips();
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const inp=document.getElementById('aow-area');if(!inp)return;
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='Enter'||e.key===','){e.preventDefault();commitAoWInput();}
+    else if(e.key==='Backspace'&&!inp.value&&aowPending.length){aowPending.pop();renderAoWChips();}
+  });
+  inp.addEventListener('paste',()=>setTimeout(commitAoWInput,0));
+});
+
 async function addAoW(){
-  const empId=document.getElementById('aow-emp').value;const area=document.getElementById('aow-area').value.trim();
-  if(!empId){toast('Select an employee','var(--danger)');return;}if(!area){toast('Enter an area of work','var(--danger)');return;}
+  commitAoWInput();
+  const empId=document.getElementById('aow-emp').value;
+  if(!empId){toast('Select an employee','var(--danger)');return;}
+  if(!aowPending.length){toast('Enter at least one area of work','var(--danger)');return;}
   const emp=DB.staff.find(s=>s.empId===empId);const name=emp?.name||'';
-  DB.aow.push({empId,name,area});renderAoWTable();populateDropdowns();
-  document.getElementById('aow-area').value='';document.getElementById('aow-emp').value='';
-  toast('Saving area…');
-  try{await dbPost({action:'addAoW',empId,name,area});toast('✓ Area saved','var(--accent2)');}
-  catch(e){toast('Saved locally. DB sync failed.','var(--accent3)');}
+  const fresh=aowPending.filter(area=>!DB.aow.some(a=>a.empId===empId&&a.area.toLowerCase()===area.toLowerCase()));
+  const skipped=aowPending.length-fresh.length;
+  if(!fresh.length){toast('All these areas are already assigned','var(--accent3)');return;}
+  fresh.forEach(area=>DB.aow.push({empId,name,area}));
+  aowPending=[];renderAoWChips();
+  renderAoWTable();populateDropdowns();
+  document.getElementById('aow-emp').value='';
+  toast('Saving '+fresh.length+' area'+(fresh.length>1?'s':'')+'…');
+  let failed=0;
+  for(const area of fresh){
+    try{await dbPost({action:'addAoW',empId,name,area});}catch(e){failed++;}
+  }
+  if(failed)toast('Saved locally. DB sync failed for '+failed+' area(s).','var(--accent3)');
+  else toast('✓ '+fresh.length+' area'+(fresh.length>1?'s':'')+' saved'+(skipped?' ('+skipped+' duplicate skipped)':''),'var(--accent2)');
 }
 
 function renderAoWTable(){
   const tb=document.getElementById('aow-table');
-  if(!DB.aow.length){tb.innerHTML='<tr><td colspan="4" class="empty-state"><div class="ei">◌</div><p>No assignments yet</p></td></tr>';return;}
-  tb.innerHTML=DB.aow.map((a,i)=>`<tr>
-    <td><span style="font-family:var(--mono);color:var(--accent);font-size:12px;font-weight:700">${a.empId}</span></td>
-    <td><strong>${a.name}</strong></td>
-    <td><span style="background:var(--accent-light);color:var(--accent);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600">${a.area}</span></td>
-    <td><button class="btn btn-ghost btn-sm" onclick="removeAoW(${i})">✕</button></td>
+  if(!DB.aow.length){tb.innerHTML='<tr><td colspan="4" class="empty-state"><div class="ei">◌</div><p>No assignments yet</p></td></tr>';document.getElementById('aow-count').textContent='0 assignments';return;}
+  const groups={};
+  DB.aow.forEach(a=>{
+    if(!groups[a.empId])groups[a.empId]={empId:a.empId,name:a.name||(DB.staff.find(s=>s.empId===a.empId)?.name)||'',areas:[]};
+    if(!groups[a.empId].areas.some(x=>x.toLowerCase()===a.area.toLowerCase()))groups[a.empId].areas.push(a.area);
+  });
+  const list=Object.values(groups);
+  tb.innerHTML=list.map(g=>`<tr>
+    <td style="vertical-align:top"><span style="font-family:var(--mono);color:var(--accent);font-size:12px;font-weight:700">${g.empId}</span></td>
+    <td style="vertical-align:top"><strong>${g.name}</strong><br><span style="font-size:10px;color:var(--muted2);font-family:var(--mono)">${g.areas.length} area${g.areas.length>1?'s':''}</span></td>
+    <td>${g.areas.map(ar=>`<span class="aow-chip">${ar}<button type="button" title="Remove" data-emp="${g.empId}" data-area="${encodeURIComponent(ar)}" onclick="removeAoW(this.dataset.emp,decodeURIComponent(this.dataset.area))">×</button></span>`).join('')}</td>
+    <td style="vertical-align:top"><button class="btn btn-ghost btn-sm" title="Remove all areas" onclick="removeAllAoW('${g.empId}')">✕ All</button></td>
   </tr>`).join('');
-  document.getElementById('aow-count').textContent=DB.aow.length+' assignments';
+  document.getElementById('aow-count').textContent=list.length+' staff · '+DB.aow.length+' areas';
 }
-function removeAoW(i){DB.aow.splice(i,1);renderAoWTable();toast('Removed','var(--danger)');}
+async function removeAoW(empId,area){
+  if(!isAdminUser())return;
+  if(!confirm(`Remove area "${area}" from this employee?`))return;
+  DB.aow=DB.aow.filter(a=>!(a.empId===empId&&a.area.toLowerCase()===String(area).toLowerCase()));
+  renderAoWTable();toast('Removing…');
+  try{await dbPost({action:'deleteAoW',empId,area});toast('✓ Area removed','var(--accent3)');}
+  catch(e){toast('Removed locally. DB sync failed.','var(--accent3)');}
+}
+async function removeAllAoW(empId){
+  if(!isAdminUser())return;
+  if(!confirm('Remove all areas of work for this employee?'))return;
+  DB.aow=DB.aow.filter(a=>a.empId!==empId);renderAoWTable();toast('Removing…');
+  try{await dbPost({action:'deleteAoW',empId});toast('✓ Areas removed','var(--accent3)');}
+  catch(e){toast('Removed locally. DB sync failed.','var(--accent3)');}
+}
 
 function fillAreaFromEmp(){
   const empId=document.getElementById('t-emp').value;const areas=DB.aow.filter(a=>a.empId===empId);
@@ -1970,6 +2208,351 @@ async function assignTask(){
   renderTaskTable();updateTaskCount();
 }
 
+function mtEsc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+function mtAreaOptions(empId,sel){
+  const areas=DB.aow.filter(a=>a.empId===empId).map(a=>a.area);
+  const uniq=[...new Set(areas)];
+  if(!uniq.length)return'<option value="">— No area —</option>';
+  return uniq.map(a=>`<option value="${mtEsc(a)}" ${a===sel?'selected':''}>${mtEsc(a)}</option>`).join('');
+}
+function openMultiTask(){
+  const sel=document.getElementById('mt-emp');
+  sel.innerHTML='<option value="">— Select Employee —</option>'+DB.staff.map(s=>`<option value="${mtEsc(s.empId)}">${mtEsc(s.name)} · ${mtEsc(s.empId)}</option>`).join('');
+  const pre=document.getElementById('t-emp')?.value||'';
+  if(pre)sel.value=pre;
+  document.getElementById('mt-rows').innerHTML='';
+  mtAddRow();mtAddRow();
+  document.getElementById('mt-modal').classList.add('open');
+}
+function mtEmpChanged(){
+  const empId=document.getElementById('mt-emp').value;
+  document.querySelectorAll('#mt-rows .mt-area').forEach(sel=>{sel.innerHTML=mtAreaOptions(empId,sel.value);});
+}
+function mtAddRow(){
+  const empId=document.getElementById('mt-emp').value;
+  const tr=document.createElement('tr');
+  tr.innerHTML=`
+    <td><input class="mt-name" list="task-name-list" autocomplete="off" placeholder="Select or type a new name" style="width:100%"/></td>
+    <td><select class="mt-type" style="width:100%"><option>Daily</option><option>Weekly</option><option>Monthly</option><option>One Time</option></select></td>
+    <td><select class="mt-area" style="width:100%">${mtAreaOptions(empId,'')}</select></td>
+    <td><input class="mt-work" placeholder="Describe the work…" style="width:100%"/></td>
+    <td><input type="date" class="mt-target" style="width:100%"/></td>
+    <td><button class="btn btn-ghost btn-sm" title="Remove row" onclick="this.closest('tr').remove()">✕</button></td>`;
+  document.getElementById('mt-rows').appendChild(tr);
+}
+async function submitMultiTask(){
+  const empId=document.getElementById('mt-emp').value;
+  if(!empId){toast('Select an employee','var(--danger)');return;}
+  const emp=DB.staff.find(s=>s.empId===empId);const name=emp?.name||'Unknown';
+  const items=[];let bad=false;
+  document.querySelectorAll('#mt-rows tr').forEach(tr=>{
+    const taskName=tr.querySelector('.mt-name').value.trim();
+    const work=tr.querySelector('.mt-work').value.trim();
+    const target=tr.querySelector('.mt-target').value;
+    if(!taskName&&!work&&!target)return; // empty row, ignore
+    if(!taskName||!target){bad=true;tr.style.background='var(--danger-light)';return;}
+    tr.style.background='';
+    items.push({taskName,work,target,taskType:tr.querySelector('.mt-type').value,area:tr.querySelector('.mt-area').value});
+  });
+  if(bad){toast('Each filled row needs Task Name and Target Date','var(--danger)');return;}
+  if(!items.length){toast('Add at least one task','var(--danger)');return;}
+  const btn=document.getElementById('mt-submit');btn.disabled=true;
+  const base=Date.now();let failed=0;
+  const added=items.map((it,i)=>{
+    const t={id:'T'+String(base+i).slice(-6),assignedDate:todayStr(),empId,name,area:it.area,taskType:it.taskType,taskName:it.taskName,workAssigned:it.work,targetDate:it.target,userRemarks:'',completedDate:'',status:'Pending',kpi:'',score:'',adminRemarks:''};
+    DB.tasks.push(t);return t;
+  });
+  recalcStatuses();renderTaskTable();renderDashboard();
+  toast('Saving '+items.length+' tasks…');
+  for(let i=0;i<items.length;i++){
+    const it=items[i];
+    try{
+      const r=await dbPost({action:'assignTask',empId,name,area:it.area,taskType:it.taskType,taskName:it.taskName,workAssigned:it.work,targetDate:it.target});
+      if(r?.result&&typeof r.result==='string'&&r.result.startsWith('T'))added[i].id=r.result;
+    }catch(e){failed++;}
+  }
+  btn.disabled=false;
+  closeModal('mt-modal');
+  renderTaskTable();renderDashboard();
+  if(failed)toast(`Saved locally. DB sync failed for ${failed} of ${items.length} tasks.`,'var(--accent3)');
+  else toast(`✓ ${items.length} tasks assigned to ${name}`,'var(--accent2)');
+}
+
+// ═══ AUTO-ALLOT RECURRING TASKS ═══
+const AA_MARK='⏹ Repeat stopped';
+const AA_TYPES=['Daily','Weekly','Monthly'];
+let aaRunning=false;let aaKeys=[];
+function aaLocal(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function aaParse(s){const p=String(s).slice(0,10).split('-');return new Date(+p[0],+p[1]-1,+p[2]);}
+function aaNorm(v){
+  if(!v)return'';
+  if(typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v))return v;
+  const d=new Date(v);if(isNaN(d))return String(v).slice(0,10);
+  return aaLocal(d);
+}
+function aaAddDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
+function aaMonthOcc(base,i,dom){
+  const first=new Date(base.getFullYear(),base.getMonth()+i,1);
+  const last=new Date(first.getFullYear(),first.getMonth()+1,0).getDate();
+  return new Date(first.getFullYear(),first.getMonth(),Math.min(dom,last));
+}
+function aaSeries(){
+  const map={};
+  DB.tasks.forEach(t=>{
+    if(!AA_TYPES.includes(t.taskType)||!t.assignedDate||!t.taskName)return;
+    const key=t.empId+'|'+t.taskType+'|'+t.taskName.trim().toLowerCase();
+    (map[key]=map[key]||{key,tasks:[]}).tasks.push(t);
+  });
+  Object.values(map).forEach(ser=>{
+    ser.tasks.sort((a,b)=>aaNorm(a.assignedDate).localeCompare(aaNorm(b.assignedDate)));
+    ser.first=ser.tasks[0];ser.latest=ser.tasks[ser.tasks.length-1];
+    ser.stopped=ser.tasks.some(t=>(t.adminRemarks||'').includes(AA_MARK));
+  });
+  return map;
+}
+// next scheduled occurrence after the latest task
+function aaNextOcc(ser){
+  const L=aaParse(aaNorm(ser.latest.assignedDate));
+  if(ser.latest.taskType==='Daily'){let n=aaAddDays(L,1);for(let i=0;i<400&&nonWorkingDay(ser.latest.empId,aaLocal(n));i++)n=aaAddDays(n,1);return n;}
+  if(ser.latest.taskType==='Weekly')return aaAddDays(L,7);
+  const dom=aaParse(aaNorm(ser.first.assignedDate)).getDate();
+  return aaMonthOcc(L,1,dom);
+}
+// most recent occurrence that is due (<= today) and newer than the latest task; no back-filling of skipped periods
+function aaDue(ser,today){
+  const L=aaParse(aaNorm(ser.latest.assignedDate));
+  const type=ser.latest.taskType;
+  if(type==='Daily')return today>L?today:null;
+  if(type==='Weekly'){
+    const diff=Math.round((today-L)/86400000);
+    const k=Math.floor(diff/7);
+    return k>=1?aaAddDays(L,7*k):null;
+  }
+  const dom=aaParse(aaNorm(ser.first.assignedDate)).getDate();
+  let last=null;
+  for(let i=1;i<600;i++){const occ=aaMonthOcc(L,i,dom);if(occ>today)break;last=occ;}
+  return last;
+}
+async function autoAllotRecurring(){ return; /* done on the server (calendar-aware) */
+  if(aaRunning||!currentUser)return;
+  aaRunning=true;
+  try{
+    const today=aaParse(aaLocal(new Date()));
+    const created=[];let seq=0;
+    Object.values(aaSeries()).forEach(ser=>{
+      if(ser.stopped)return;
+      const L=ser.latest;
+      if(currentUser.role==='employee'&&L.empId!==currentUser.empId)return;
+      if(DB.staff.length&&!DB.staff.some(x=>x.empId===L.empId))return;
+      const due=aaDue(ser,today);if(!due)return;
+      const aStr=aaLocal(due);
+      let off=Math.round((aaParse(aaNorm(L.targetDate))-aaParse(aaNorm(L.assignedDate)))/86400000);
+      if(!(off>=0))off=0;
+      const tStr=aaLocal(aaAddDays(due,off));
+      if(ser.tasks.some(x=>aaNorm(x.assignedDate)===aStr||aaNorm(x.targetDate)===tStr))return;
+      const t={id:'T'+String(Date.now()+(seq++)).slice(-6),assignedDate:aStr,empId:L.empId,name:L.name,area:L.area,taskType:L.taskType,taskName:L.taskName,workAssigned:L.workAssigned,targetDate:tStr,userRemarks:'',completedDate:'',status:'Pending',kpi:'',score:'',adminRemarks:''};
+      DB.tasks.push(t);created.push(t);
+    });
+    if(!created.length)return;
+    recalcStatuses();refreshAllViews();
+    let failed=0;
+    for(const t of created){
+      try{
+        const r=await dbPost({action:'assignTask',empId:t.empId,name:t.name,area:t.area,taskType:t.taskType,taskName:t.taskName,workAssigned:t.workAssigned,targetDate:t.targetDate,assignedDate:t.assignedDate});
+        if(r?.result&&typeof r.result==='string'&&r.result.startsWith('T'))t.id=r.result;
+      }catch(e){failed++;}
+    }
+    if(failed)toast(`↻ ${created.length} recurring tasks allotted (${failed} not saved to DB)`,'var(--accent3)');
+    else toast(`↻ Auto-allotted ${created.length} recurring task${created.length>1?'s':''}`,'var(--accent2)');
+    refreshAllViews();
+  }catch(e){console.error('autoAllot',e);}
+  finally{aaRunning=false;}
+}
+function renderRepeatManager(){
+  const tb=document.getElementById('aa-table');if(!tb)return;
+  if(!currentUser||currentUser.role!=='admin')return;
+  const list=Object.values(aaSeries()).sort((a,b)=>(a.latest.name||'').localeCompare(b.latest.name||'')||a.latest.taskName.localeCompare(b.latest.taskName));
+  aaKeys=list.map(x=>x.key);
+  document.getElementById('aa-count').textContent=list.length+' series';
+  if(!list.length){tb.innerHTML='<tr><td colspan="7" class="empty-state"><div class="ei">◌</div><p>No Daily / Weekly / Monthly tasks yet</p></td></tr>';return;}
+  tb.innerHTML=list.map((ser,i)=>{
+    const L=ser.latest;
+    const stBadge=ser.stopped?'<span class="badge-status badge-missed">Stopped</span>':'<span class="badge-status badge-completed">Repeating</span>';
+    return`<tr>
+      <td><strong>${L.name}</strong><br><span style="font-size:10px;color:var(--muted2);font-family:var(--mono)">${L.empId}</span></td>
+      <td><strong>${L.taskName}</strong></td>
+      <td><span style="font-family:var(--mono);font-size:11px;color:var(--accent3);font-weight:700">${L.taskType}</span></td>
+      <td style="font-family:var(--mono);font-size:12px">${formatDate(aaNorm(L.assignedDate))}</td>
+      <td style="font-family:var(--mono);font-size:12px;font-weight:600">${ser.stopped?'—':formatDate(aaLocal(aaNextOcc(ser)))}</td>
+      <td>${stBadge}</td>
+      <td>${ser.stopped
+        ?`<button class="btn btn-success btn-sm" onclick="aaResume(${i})">▶ Resume</button>`
+        :`<button class="btn btn-ghost btn-sm" onclick="aaStop(${i})">⏹ Stop</button>`}</td>
+    </tr>`;
+  }).join('');
+}
+async function aaStop(i){
+  const ser=aaSeries()[aaKeys[i]];if(!ser)return;
+  if(!confirm(`Stop auto-repeat for "${ser.latest.taskName}" (${ser.latest.name})?`))return;
+  const L=ser.latest;
+  const r=(L.adminRemarks||'').trim();
+  L.adminRemarks=(r?r+' · ':'')+AA_MARK;
+  renderRepeatManager();renderTaskTable();toast('Saving…');
+  try{await dbPost({action:'adminRemark',taskId:L.id,remark:L.adminRemarks});toast('⏹ Auto-repeat stopped','var(--accent3)');}
+  catch(e){toast('Stopped locally. DB sync failed.','var(--accent3)');}
+}
+async function aaResume(i){
+  const ser=aaSeries()[aaKeys[i]];if(!ser)return;
+  const marked=ser.tasks.filter(t=>(t.adminRemarks||'').includes(AA_MARK));
+  marked.forEach(t=>{t.adminRemarks=t.adminRemarks.split(' · '+AA_MARK).join('').split(AA_MARK).join('').trim();});
+  renderRepeatManager();renderTaskTable();toast('Saving…');
+  try{
+    for(const t of marked)await dbPost({action:'adminRemark',taskId:t.id,remark:t.adminRemarks});
+    toast('▶ Auto-repeat resumed','var(--accent2)');
+  }catch(e){toast('Resumed locally. DB sync failed.','var(--accent3)');}
+  autoAllotRecurring();
+}
+
+// ═══ ADMIN DELETE TOOLS ═══
+function isAdminUser(){return !!(currentUser&&currentUser.role==='admin');}
+function tkSelChanged(){
+  const all=document.querySelectorAll('.tk-sel');
+  const n=document.querySelectorAll('.tk-sel:checked').length;
+  const b=document.getElementById('tk-del-sel');
+  if(b)b.textContent='🗑 Delete Selected'+(n?` (${n})`:'');
+  const h=document.getElementById('tk-sel-all');
+  if(h)h.checked=all.length>0&&n===all.length;
+}
+function tkSelAll(cb){document.querySelectorAll('.tk-sel').forEach(x=>{x.checked=cb.checked;});tkSelChanged();}
+function deleteSelectedTasks(){
+  const ids=[...document.querySelectorAll('.tk-sel:checked')].map(x=>x.value);
+  if(!ids.length){toast('Tick the tasks you want to delete','var(--danger)');return;}
+  deleteTasksFlow(ids);
+}
+function aaKeyOf(t){return t.empId+'|'+t.taskType+'|'+String(t.taskName||'').trim().toLowerCase();}
+async function deleteTasksFlow(ids){
+  if(!isAdminUser()){toast('Only admin can delete','var(--danger)');return;}
+  ids=[...new Set((ids||[]).filter(Boolean))];
+  const tasks=DB.tasks.filter(t=>ids.includes(t.id));
+  if(!tasks.length)return;
+  if(!confirm(`Delete ${tasks.length} task${tasks.length>1?'s':''}? This cannot be undone.`))return;
+  const series=aaSeries();const keys=new Set();
+  tasks.forEach(t=>{
+    if(!AA_TYPES.includes(t.taskType))return;
+    const k=aaKeyOf(t);const ser=series[k];
+    if(ser&&!ser.stopped)keys.add(k);
+  });
+  let stop=false;
+  if(keys.size)stop=confirm('Some of these are repeating tasks (Daily / Weekly / Monthly).\n\nOK = also STOP their auto-repeat\nCancel = keep repeating (a new one may be created automatically)');
+  DB.tasks=DB.tasks.filter(t=>!ids.includes(t.id));
+  DB.reminders=DB.reminders.filter(r=>!ids.includes(r.taskId));
+  recalcStatuses();refreshAllViews();
+  toast('Deleting…');
+  let failed=false;
+  let binId='';try{const r=await dbPost({action:'deleteTasks',taskIds:ids});binId=(r&&r.result&&r.result.binId)||'';}catch(e){failed=true;}
+  if(stop){
+    const s2=aaSeries();
+    for(const k of keys){
+      const ser=s2[k];if(!ser)continue;     // nothing left in this series
+      const L=ser.latest;const r=(L.adminRemarks||'').trim();
+      L.adminRemarks=(r?r+' · ':'')+AA_MARK;
+      try{await dbPost({action:'adminRemark',taskId:L.id,remark:L.adminRemarks});}catch(e){failed=true;}
+    }
+    refreshAllViews();
+  }
+  if(failed)toast('Deleted locally. DB sync failed.','var(--accent3)');
+  else if(binId)pushUndo(`${tasks.length} task${tasks.length>1?'s':''} moved to Recycle Bin`,()=>restoreBinItem(binId));
+  else toast(`✓ ${tasks.length} task${tasks.length>1?'s':''} deleted`,'var(--accent2)');
+}
+function renderSentReminders(){
+  const tb=document.getElementById('rem-sent-table');if(!tb)return;
+  const list=[...DB.reminders].sort((a,b)=>(b.sentDate||'').localeCompare(a.sentDate||''));
+  const c=document.getElementById('rem-count');if(c)c.textContent=list.length;
+  tb.innerHTML=list.length?list.map(r=>`<tr>
+    <td style="font-family:var(--mono);font-size:12px">${formatDate(r.sentDate)}</td>
+    <td><strong>${mtEsc(r.empName)}</strong><br><span style="font-size:10px;color:var(--muted2);font-family:var(--mono)">${mtEsc(r.empId)}</span></td>
+    <td style="font-size:12px">${mtEsc(r.taskName)||'—'}</td>
+    <td style="font-size:12px;color:var(--text2);max-width:280px">${mtEsc(r.message)}</td>
+    <td>${r.seen==='Yes'?'<span style="color:var(--accent2);font-weight:700;font-size:12px">✓ Seen</span>':'<span style="color:var(--muted2);font-size:12px">—</span>'}</td>
+    <td><button class="btn btn-ghost btn-sm" title="Delete reminder" style="color:var(--danger)" onclick="deleteReminder('${r.id}')">🗑</button></td>
+  </tr>`).join(''):'<tr><td colspan="6" class="empty-state"><div class="ei">◌</div><p>No reminders sent yet</p></td></tr>';
+}
+async function deleteReminder(id){
+  if(!isAdminUser())return;
+  if(!confirm('Delete this reminder?'))return;
+  DB.reminders=DB.reminders.filter(r=>r.id!==id);
+  renderSentReminders();toast('Deleting…');
+  try{await dbPost({action:'deleteReminder',remId:id});toast('✓ Reminder deleted','var(--accent2)');}
+  catch(e){toast('Deleted locally. DB sync failed.','var(--accent3)');}
+}
+
+// ═══ TASK NAME MASTER ═══
+let tmBackfilled=false;let tmList=[];
+function tmNames(){
+  const seen={},out=[];
+  DB.taskMaster.forEach(m=>{const k=m.name.toLowerCase();if(!seen[k]){seen[k]=1;out.push(m.name);}});
+  return out.sort((a,b)=>a.localeCompare(b));
+}
+function renderTaskNameList(){
+  const dl=document.getElementById('task-name-list');if(!dl)return;
+  dl.innerHTML=tmNames().map(n=>`<option value="${mtEsc(n)}"></option>`).join('');
+}
+function tmEnsure(name){
+  name=String(name||'').trim();if(!name)return;
+  if(!DB.taskMaster.some(m=>m.name.toLowerCase()===name.toLowerCase())){
+    DB.taskMaster.push({name,createdDate:todayStr()});
+    renderTaskNameList();renderTaskMaster();
+  }
+}
+function renderTaskMaster(){
+  const tb=document.getElementById('tm-table');if(!tb)return;
+  tmList=tmNames();
+  document.getElementById('tm-count').textContent=tmList.length+(tmList.length===1?' name':' names');
+  if(!tmList.length){tb.innerHTML='<tr><td colspan="4" class="empty-state"><div class="ei">◌</div><p>No task names yet — they are added as you create tasks</p></td></tr>';return;}
+  const used={};DB.tasks.forEach(t=>{const k=String(t.taskName||'').trim().toLowerCase();used[k]=(used[k]||0)+1;});
+  tb.innerHTML=tmList.map((n,i)=>{
+    const m=DB.taskMaster.find(x=>x.name.toLowerCase()===n.toLowerCase());
+    return`<tr>
+      <td><strong>${mtEsc(n)}</strong></td>
+      <td style="font-family:var(--mono);font-size:12px;font-weight:600">${used[n.toLowerCase()]||0}</td>
+      <td style="font-family:var(--mono);font-size:12px;color:var(--muted)">${m&&m.createdDate?formatDate(m.createdDate):'—'}</td>
+      <td><button class="btn btn-ghost btn-sm" title="Delete name" style="color:var(--danger)" onclick="deleteTaskName(${i})">🗑</button></td>
+    </tr>`;
+  }).join('');
+}
+async function addTaskNameManual(){
+  if(!isAdminUser())return;
+  const inp=document.getElementById('tm-new');const name=inp.value.trim();
+  if(!name){toast('Enter a task name','var(--danger)');return;}
+  if(DB.taskMaster.some(m=>m.name.toLowerCase()===name.toLowerCase())){toast('Task name already exists','var(--accent3)');return;}
+  DB.taskMaster.push({name,createdDate:todayStr()});
+  inp.value='';renderTaskNameList();renderTaskMaster();toast('Saving…');
+  try{await dbPost({action:'addTaskName',name});toast('✓ Task name added','var(--accent2)');}
+  catch(e){toast('Added locally. DB sync failed.','var(--accent3)');}
+}
+async function deleteTaskName(i){
+  if(!isAdminUser())return;
+  const name=tmList[i];if(!name)return;
+  if(!confirm(`Delete task name "${name}" from the master?\n\nExisting tasks with this name are not affected.`))return;
+  DB.taskMaster=DB.taskMaster.filter(m=>m.name.toLowerCase()!==name.toLowerCase());
+  renderTaskNameList();renderTaskMaster();toast('Deleting…');
+  try{await dbPost({action:'deleteTaskName',name});toast('✓ Task name deleted','var(--accent3)');}
+  catch(e){toast('Deleted locally. DB sync failed.','var(--accent3)');}
+}
+// first run: build the master from names already used in existing tasks
+async function tmBackfill(){
+  if(tmBackfilled||!isAdminUser())return;
+  tmBackfilled=true;
+  if(DB.taskMaster.length||!DB.tasks.length)return;
+  const seen={},names=[];
+  DB.tasks.forEach(t=>{const n=String(t.taskName||'').trim();const k=n.toLowerCase();if(n&&!seen[k]){seen[k]=1;names.push(n);}});
+  if(!names.length)return;
+  names.forEach(n=>DB.taskMaster.push({name:n,createdDate:todayStr()}));
+  renderTaskNameList();renderTaskMaster();
+  try{await dbPost({action:'addTaskNames',names});toast(`✓ Task Name Master created (${names.length} names)`,'var(--accent2)');}
+  catch(e){}
+}
+
 let taskFilter='all';
 function filterTasks(f,el){taskFilter=f;document.querySelectorAll('.inner-tab').forEach(x=>x.classList.remove('active'));el.classList.add('active');renderTaskTable();}
 
@@ -1981,10 +2564,11 @@ function renderTaskTable(){
   if(fTeam)tasks=tasks.filter(t=>{const s=DB.staff.find(x=>x.empId===t.empId);return(s?.team||'')===fTeam;});
   if(fEmp)tasks=tasks.filter(t=>t.empId===fEmp);if(fFrom)tasks=tasks.filter(t=>t.assignedDate>=fFrom);if(fTo)tasks=tasks.filter(t=>t.assignedDate<=fTo);
   const tb=document.getElementById('task-table');
-  if(!tasks.length){tb.innerHTML='<tr><td colspan="11" class="empty-state"><div class="ei">◌</div><p>No tasks match filters</p></td></tr>';return;}
+  if(!tasks.length){tb.innerHTML='<tr><td colspan="12" class="empty-state"><div class="ei">◌</div><p>No tasks match filters</p></td></tr>';return;}
   tb.innerHTML=tasks.map(t=>{
     const emp=DB.staff.find(s=>s.empId===t.empId);const team=emp?.team||'—';
     return`<tr>
+    <td><input type="checkbox" class="tk-sel" value="${t.id}" onchange="tkSelChanged()" style="width:auto;padding:0"></td>
     <td style="font-family:var(--mono);font-size:10px;color:var(--muted2)">${t.id}</td>
     <td style="font-size:12px;color:var(--muted)">${formatDate(t.assignedDate)}</td>
     <td><strong style="font-size:13px">${t.name}</strong><br><span style="font-size:10px;color:var(--muted2);font-family:var(--mono)">${t.empId}</span></td>
@@ -1995,7 +2579,7 @@ function renderTaskTable(){
     <td style="font-family:var(--mono);font-size:12px;font-weight:500">${formatDate(t.targetDate)}</td>
     <td>${statusBadge(t.status)}</td>
     <td>${kpiBar(t.kpi)}</td>
-    <td><button class="btn btn-ghost btn-sm" onclick="openRemarkModal('${t.id}')">+ Remark</button></td>
+    <td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="openRemarkModal('${t.id}')">+ Remark</button> <button class="btn btn-ghost btn-sm" title="Delete task" style="color:var(--danger)" onclick="deleteTasksFlow(['${t.id}'])">🗑</button></td>
   </tr>`;}).join('');
   updateTaskCount();
 }
@@ -2009,7 +2593,7 @@ function populateTaskFilters(){
   empSel.innerHTML='<option value="">All Employees</option>'+DB.staff.map(s=>`<option value="${s.empId}" ${s.empId===curEmp?'selected':''}>${s.name}</option>`).join('');
 }
 function clearTaskFilters(){['tf-team','tf-emp','tf-from','tf-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});renderTaskTable();}
-function updateTaskCount(){document.getElementById('task-count').textContent=DB.tasks.length+' tasks';}
+function updateTaskCount(){document.getElementById('task-count').textContent=DB.tasks.length+' tasks';tkSelChanged();}
 
 function renderStatusTable(){
   recalcStatuses();
@@ -2032,7 +2616,7 @@ function renderStatusTable(){
     <td>${kpiBar(t.kpi)}</td>
     <td style="font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:600">${t.score||'—'}</td>
     <td style="font-size:12px;color:var(--muted);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.userRemarks||'—'}</td>
-    <td onclick="event.stopPropagation()"><button class="btn btn-ghost btn-sm" onclick="openRemarkModal('${t.id}')">Remark</button></td>
+    <td onclick="event.stopPropagation()" style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="openRemarkModal('${t.id}')">Remark</button> <button class="btn btn-ghost btn-sm" title="Delete task" style="color:var(--danger)" onclick="deleteTasksFlow(['${t.id}'])">🗑</button></td>
   </tr>`).join('');
 }
 
@@ -2054,7 +2638,7 @@ async function sendReminder(){
   const t=DB.tasks.find(x=>x.id===id);if(!t)return;
   const remId='R'+String(Date.now()).slice(-7);
   const remObj={id:remId,sentDate:todayStr(),empId:t.empId,empName:t.name,taskId:t.id,taskName:t.taskName,message:msg,seen:'No'};
-  DB.reminders.push(remObj);
+  DB.reminders.push(remObj);renderSentReminders();
   toast('⊙ Sending reminder…','var(--accent3)');
   try{
     await dbPost({action:'addReminder',remId:remId,empId:t.empId,empName:t.name,
@@ -2071,7 +2655,7 @@ async function quickRemind(id){
   const msg=`Reminder: Please complete "${t.taskName}" by ${formatDate(t.targetDate)}.`;
   const remId='R'+String(Date.now()).slice(-7);
   const remObj={id:remId,sentDate:todayStr(),empId:t.empId,empName:t.name,taskId:t.id,taskName:t.taskName,message:msg,seen:'No'};
-  DB.reminders.push(remObj);
+  DB.reminders.push(remObj);renderSentReminders();
   try{
     const res=await dbPost({action:'addReminder',remId,empId:t.empId,empName:t.name,
       taskId:t.id,taskName:t.taskName,message:msg,sentDate:todayStr()});
@@ -2125,7 +2709,7 @@ function openTaskDetailModal(id){
     ${t.adminRemarks?`<div class="tdm-section" style="border-color:var(--accent-mid)"><div class="tdm-section-label" style="color:var(--accent)">Admin Remarks</div><div class="tdm-section-text">${t.adminRemarks}</div></div>`:''}
     <div class="tdm-actions">
       ${t.status!=='Completed'&&isEmp?`<button class="btn btn-success btn-sm" onclick="closeModal('task-detail-modal');openUpdateModal('${t.id}')">✓ Mark Complete</button>`:''}
-      ${!isEmp?`<button class="btn btn-ghost btn-sm" onclick="closeModal('task-detail-modal');openRemarkModal('${t.id}')">+ Add Remark</button>`:''}
+      ${!isEmp?`<button class="btn btn-ghost btn-sm" onclick="closeModal('task-detail-modal');openRemarkModal('${t.id}')">+ Add Remark</button><button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="closeModal('task-detail-modal');deleteTasksFlow(['${t.id}'])">🗑 Delete</button>`:''}
       <button class="btn btn-ghost btn-sm" onclick="closeModal('task-detail-modal')">Close</button>
     </div>`;
   document.getElementById('task-detail-modal').classList.add('open');
@@ -2143,75 +2727,6 @@ async function submitUpdate(){
     await dbPost({action:'updateTask',taskId:id,userRemarks:remarks,completedDate:date});
     toast('✓ Task updated','var(--accent2)');
   }catch(e){toast('Updated locally. DB sync failed.','var(--accent3)');}
-
-  // AUTO-RECUR: create next occurrence for recurring tasks
-    if(t&&(t.taskType==='Daily'||t.taskType==='Weekly'||t.taskType==='Monthly')){
-    // Use TARGET date as base for next recurrence (not completion date)
-    // This keeps schedule consistent regardless of when it was completed
-    // REPLACE WITH:
-const today = new Date(); today.setHours(0,0,0,0);
-const targetD = new Date(t.targetDate); targetD.setHours(0,0,0,0);
-const completedD = new Date(date); completedD.setHours(0,0,0,0);
-
-// Use completion date as base if completed late (past target)
-// Use target date as base if completed on time or early
-const isLate = completedD > targetD;
-const base = isLate ? new Date(date) : new Date(t.targetDate);
-
-if(t.taskType==='Daily'){
-  base.setDate(base.getDate()+1);
-}else if(t.taskType==='Weekly'){
-  // For weekly: if late, schedule from next week of target (not completion)
-  // to keep weekly rhythm intact
-  const weeksLate = Math.ceil((completedD - targetD) / (7*24*60*60*1000));
-  const weekBase = new Date(t.targetDate);
-  weekBase.setDate(weekBase.getDate() + (7 * weeksLate) + 7);
-  base.setTime(weekBase.getTime());
-}else if(t.taskType==='Monthly'){
-  if(isLate){
-    // Move to same day next month from target
-    const d = targetD.getDate();
-    base.setTime(targetD.getTime());
-    base.setMonth(base.getMonth()+1);
-    base.setDate(Math.min(d, new Date(base.getFullYear(),base.getMonth()+1,0).getDate()));
-  }else{
-    const d = base.getDate();
-    base.setMonth(base.getMonth()+1);
-    base.setDate(Math.min(d, new Date(base.getFullYear(),base.getMonth()+1,0).getDate()));
-  }
-}
-    const nextDate=base.toISOString().slice(0,10);
-
-    // Check if a pending task for same name+emp already exists on that date (avoid duplicates)
-    const alreadyExists=DB.tasks.some(x=>
-      x.empId===t.empId && x.taskName===t.taskName &&
-      x.targetDate===nextDate && x.status==='Pending'
-    );
-    if(!alreadyExists){
-      const newId='T'+String(Date.now()).slice(-6);
-      const newTask={
-        id:newId, assignedDate:todayStr(), empId:t.empId, name:t.name,
-        area:t.area, taskType:t.taskType, taskName:t.taskName,
-        workAssigned:t.workAssigned, targetDate:nextDate,
-        userRemarks:'', completedDate:'', status:'Pending',
-        kpi:'', score:'', adminRemarks:''
-      };
-      DB.tasks.push(newTask);
-      try{
-        const r=await dbPost({
-          action:'assignTask', empId:t.empId, name:t.name, area:t.area,
-          taskType:t.taskType, taskName:t.taskName,
-          workAssigned:t.workAssigned, targetDate:nextDate
-        });
-        if(r?.result&&typeof r.result==='string'&&r.result.startsWith('T')){
-          newTask.id=r.result;
-        }
-        toast(`↻ Next ${t.taskType} task scheduled · ${formatDate(nextDate)}`,'var(--accent2)');
-      }catch(e){
-        toast('Next recurring task saved locally.','var(--accent3)');
-      }
-    }
-  }
 
   renderDashboard();renderStatusTable();
   const pwPage=document.getElementById('page-pending-works');
@@ -2280,7 +2795,7 @@ function openStatModal(type){
     bodyHTML=`<div class="stat-modal-section">All Tasks · Latest First</div><div style="overflow-x:auto"><table class="stat-detail-table"><thead><tr><th>ID</th><th>Assigned</th><th>Employee</th><th>Team</th><th>Area</th><th>Type</th><th>Task Name</th><th>Target</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }else if(type==='completed'){
     const onTime=done.filter(t=>new Date(t.completedDate)<=new Date(t.targetDate));const late=done.filter(t=>new Date(t.completedDate)>new Date(t.targetDate));
-    summaryHTML=`<div class="sms-chip"><div class="sms-val" style="color:var(--accent2)">${done.length}</div><div class="sms-lbl">Done</div></div><div class="sms-chip"><div class="sms-val" style="color:var(--accent2)">${onTime.length}</div><div class="sms-lbl">On Time</div></div><div class="sms-chip"><div class="sms-val" style="color:var(--accent3)">${late.length}</div><div class="sms-lbl">Late</div></div><div class="sms-chip"><div class="sms-val" style="color:var(--accent2)">${tasks.length?Math.round((done.length/tasks.length)*100):0}%</div><div class="sms-lbl">Rate</div></div>`;
+    summaryHTML=`<div class="sms-chip"><div class="sms-val" style="color:var(--accent2)">${done.length}</div><div class="sms-lbl">Done</div></div><div class="sms-chip"><div class="sms-val" style="color:var(--accent2)">${onTime.length}</div><div class="sms-lbl">On Time</div></div><div class="sms-chip"><div class="sms-val" style="color:var(--accent3)">${late.length}</div><div class="sms-lbl">Late</div></div><div class="sms-chip"><div class="sms-val" style="color:var(--accent2)">${tasks.filter(x=>x.status!=='Excused').length?Math.round((done.length/tasks.filter(x=>x.status!=='Excused').length)*100):0}%</div><div class="sms-lbl">Rate</div></div>`;
     const rows=done.sort((a,b)=>(b.completedDate||'').localeCompare(a.completedDate||'')).map(t=>{const isLate=t.completedDate&&t.targetDate&&new Date(t.completedDate)>new Date(t.targetDate);return`<tr><td style="font-family:var(--mono);font-size:10px;color:var(--muted2)">${t.id}</td><td><strong>${t.taskName}</strong></td><td style="color:var(--muted);font-size:11px">${t.name}</td><td style="font-family:var(--mono);font-size:11px;color:var(--accent3);font-weight:700">${t.taskType}</td><td style="font-family:var(--mono);font-size:11px;font-weight:500">${formatDate(t.targetDate)}</td><td style="font-family:var(--mono);font-size:11px;color:var(--accent2);font-weight:600">${formatDate(t.completedDate)}</td><td><span style="font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;${isLate?'background:var(--accent3-light);color:#7d4a00':'background:var(--accent2-light);color:#057a56'}">${isLate?'Late':'On Time'}</span></td><td>${kpiBar(t.kpi)}</td></tr>`;}).join('')||'<tr><td colspan="8" class="empty-state"><p>No completed tasks</p></td></tr>';
     bodyHTML=`<div class="stat-modal-section">Completed Tasks</div><div style="overflow-x:auto"><table class="stat-detail-table"><thead><tr><th>ID</th><th>Task</th><th>Employee</th><th>Type</th><th>Target</th><th>Completed</th><th>Timing</th><th>KPI</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }else if(type==='pending'){
@@ -2412,6 +2927,7 @@ function renderPendingWorks() {
           ? `<button class="btn btn-success btn-sm"
               onclick="openUpdateModal('${t.id}')">✓ Update</button>`
           : `<span style="color:var(--accent2);font-size:12px;font-weight:700">✓ Done</span>`}
+        ${isAdmin?`<button class="btn btn-ghost btn-sm" title="Delete task" style="color:var(--danger)" onclick="deleteTasksFlow(['${t.id}'])">🗑</button>`:''}
       </td>
     </tr>`).join('');
 }
@@ -2689,33 +3205,50 @@ async function closeSplash(){
   try{await dbPost({action:'markRemindersSeen',empId:currentUser.empId});}catch(e){}
 }
 
-const USERS={
-  admin:[{username:'Shan',password:'Shan#pearl',role:'admin',displayName:'Shan',empId:null}],
-  employees:['17863','16890','18107','16711','17571','17490','17992','16308','17518','18071','17470','17983','18070','18060']
-};
 let currentUser=null;
 
-function doLogin(){
-  const u=document.getElementById('login-user').value.trim();const p=document.getElementById('login-pass').value;
-  const err=document.getElementById('login-error');err.classList.remove('show');
-  const adminMatch=USERS.admin.find(a=>a.username===u&&a.password===p);
-  if(adminMatch){currentUser={username:u,role:'admin',displayName:u,empId:null};onLoginSuccess();return;}
-  if(USERS.employees.includes(u)&&p===u){currentUser={username:u,role:'employee',displayName:u,empId:u};onLoginSuccess();return;}
-  err.classList.add('show');document.getElementById('login-pass').value='';
+function showLoginError(msg){
+  const err=document.getElementById('login-error');
+  err.textContent='⚠ '+msg;err.classList.add('show');
+}
+
+async function doLogin(){
+  const u=document.getElementById('login-user').value.trim();
+  const p=document.getElementById('login-pass').value;
+  document.getElementById('login-error').classList.remove('show');
+  if(!u||!p){showLoginError('Enter your username and password');return;}
+  const btn=document.querySelector('.login-btn');btn.disabled=true;btn.style.opacity='.7';
+  try{
+    const r=await fetch(DB_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'login',username:u,password:p})});
+    const j=await r.json();
+    if(!j.ok){showLoginError(j.error||'Sign-in failed');document.getElementById('login-pass').value='';return;}
+    authToken=j.result.token;currentUser=j.result.user;
+    document.getElementById('login-pass').value='';
+    onLoginSuccess();
+  }catch(e){showLoginError('Cannot reach the server. Check your connection and try again.');}
+  finally{btn.disabled=false;btn.style.opacity='';}
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
   ['login-user','login-pass'].forEach(id=>{document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});});
 });
 
+function resetDB(){
+  DB.staff=[];DB.aow=[];DB.tasks=[];DB.pendingWorks=[];DB.reminders=[];DB.taskMaster=[];
+  DB.comments=[];DB.templates=[];DB.seen={};DB.holidays=[];DB.holidaySet={};DB.leaves=[];
+  DB.settings={weeklyOff:[0]};
+}
+
 function onLoginSuccess(){
-  // Save session to localStorage so refresh doesn't log out
-  localStorage.setItem('accSession', JSON.stringify(currentUser));
-  
+  try{localStorage.setItem('accSession',JSON.stringify({token:authToken,user:currentUser}));}catch(e){}
   document.getElementById('login-screen').classList.add('hidden');
-  const initials=currentUser.displayName.slice(0,2).toUpperCase();
+  const initials=String(currentUser.displayName||currentUser.username).slice(0,2).toUpperCase();
   document.getElementById('topbar-avatar').textContent=initials;
-  document.getElementById('topbar-username').textContent=currentUser.displayName;
+  document.getElementById('topbar-username').textContent=currentUser.displayName||currentUser.username;
+  startSession();
+}
+
+function startSession(){
   if(currentUser.role==='admin'){
     document.getElementById('admin-nav').style.display='block';
     document.getElementById('emp-nav-grp').textContent='Employee';
@@ -2732,8 +3265,9 @@ function onLoginSuccess(){
 }
 
 function doLogout(){
-  currentUser=null;
-  localStorage.removeItem('accSession'); // Clear saved session
+  currentUser=null;authToken='';
+  try{localStorage.removeItem('accSession');}catch(e){}
+  resetDB();
   document.getElementById('login-screen').classList.remove('hidden');
   ['login-user','login-pass'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('login-error').classList.remove('show');
@@ -2742,6 +3276,7 @@ function doLogout(){
   document.getElementById('nav-emp-dash').style.display='none';
   document.getElementById('nav-emp-pending').style.display='none';
   document.getElementById('reminder-splash').style.display='none';
+  ['stat-modal','task-detail-modal','update-modal'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('open');});
 }
 
 function showPage(page){
@@ -2805,7 +3340,7 @@ function renderEmpDashboard(){
   document.getElementById('ed-total').textContent=tasks.length;document.getElementById('ed-done').textContent=done.length;
   document.getElementById('ed-pending').textContent=pend.length;document.getElementById('ed-missed').textContent=miss.length;
   document.getElementById('ed-kpi').textContent=avg||'—';document.getElementById('ed-kpi').style.color=kpiClr;
-  const rate=tasks.length?Math.round((done.length/tasks.length)*100):0;
+  const rate=tasks.filter(x=>x.status!=='Excused').length?Math.round((done.length/tasks.filter(x=>x.status!=='Excused').length)*100):0;
   document.getElementById('ed-rate-bar').style.width=rate+'%';document.getElementById('ed-rate-num').textContent=rate+'%';
   const recent=[...tasks].sort((a,b)=>(b.targetDate||'').localeCompare(a.targetDate||'')).slice(0,5);
   const rt=document.getElementById('ed-recent-tasks');
@@ -2838,11 +3373,14 @@ document.querySelectorAll('.nav-item').forEach(el=>{
     }
     if(page==='dashboard')renderDashboard();
     if(page==='status')renderStatusTable();
-    if(page==='reminders')renderReminders();
+    if(page==='reminders'){renderReminders();renderSentReminders();}
     if(page==='assign')renderTaskTable();
     if(page==='emp'){if(currentUser&&currentUser.role==='employee'){loadEmpTasksForId(currentUser.empId);}else{renderAdminEmpView();}}
     if(page==='emp-dash')renderEmpDashboard();
     if(page==='pending-works')renderPendingWorks();
+    if(page==='holidays')renderHolidays();
+    if(page==='activity')loadActivity();
+    if(page==='recycle')loadRecycle();
   });
 });
 
@@ -2866,7 +3404,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   try {
     const saved = localStorage.getItem('accSession');
     if (saved) {
-      currentUser = JSON.parse(saved);
+      {const sv=JSON.parse(saved);if(!sv||!sv.token||!sv.user)throw new Error('old session');authToken=sv.token;currentUser=sv.user;}
       onLoginSuccess();
     } else {
       // No session — show login, hide loader
@@ -2886,21 +3424,22 @@ window.addEventListener('DOMContentLoaded',()=>{
 
 let notifPanelOpen = false;
 let notifTabActive = 'all';
-// Track seen task IDs per session in localStorage
-function getSeenTasks() {
-  try { return JSON.parse(localStorage.getItem('seenTasks_' + (currentUser?.empId || 'admin')) || '[]'); } catch(e) { return []; }
+// Seen notifications are saved per user in the NOTIF_SEEN sheet
+let seenPending=[],seenTimer=null;
+function seenQueue(id){
+  if(DB.seen[id])return;
+  DB.seen[id]=1;seenPending.push(id);
+  clearTimeout(seenTimer);seenTimer=setTimeout(flushSeen,800);
 }
-function addSeenTask(id) {
-  const seen = getSeenTasks();
-  if (!seen.includes(id)) { seen.push(id); localStorage.setItem('seenTasks_' + (currentUser?.empId || 'admin'), JSON.stringify(seen)); }
+async function flushSeen(){
+  if(!seenPending.length)return;
+  const ids=seenPending.splice(0);
+  try{await dbPost({action:'markSeen',ids});}catch(e){seenPending.unshift(...ids);}
 }
-function getSeenReminders() {
-  try { return JSON.parse(localStorage.getItem('seenRems_' + (currentUser?.empId || 'admin')) || '[]'); } catch(e) { return []; }
-}
-function addSeenReminder(id) {
-  const seen = getSeenReminders();
-  if (!seen.includes(id)) { seen.push(id); localStorage.setItem('seenRems_' + (currentUser?.empId || 'admin'), JSON.stringify(seen)); }
-}
+function getSeenTasks(){return Object.keys(DB.seen);}
+function addSeenTask(id){seenQueue(id);}
+function getSeenReminders(){return Object.keys(DB.seen);}
+function addSeenReminder(id){seenQueue(id);}
 
 function toggleNotifPanel() {
   notifPanelOpen = !notifPanelOpen;
@@ -3331,17 +3870,32 @@ function doUndo() {
   if (action) { action.fn(); toast('✓ Undone', 'var(--accent2)'); }
 }
 
-// Override removeEmp with undo support
-const _origRemoveEmp = window.removeEmp;
-window.removeEmp = function(id) {
+// Delete employee (admin) — server moves everything to the Recycle Bin
+window.removeEmp = async function(id) {
+  if (!isAdminUser()) { toast('Only admin can delete', 'var(--danger)'); return; }
   const removed = DB.staff.find(s => s.empId === id);
   if (!removed) return;
+  if (!confirm(`Delete ${removed.name} (${id}) from Team Master?\n\nEverything is kept in the Recycle Bin for 30 days.`)) return;
+  const taskCount = DB.tasks.filter(t => t.empId === id).length;
+  let delTasks = false;
+  if (taskCount) delTasks = confirm(`${removed.name} has ${taskCount} task(s).\n\nOK = also delete all their tasks & reminders\nCancel = keep the tasks`);
   DB.staff = DB.staff.filter(s => s.empId !== id);
-  renderEmpTable(); populateDropdowns(); renderDashboard();
-  pushUndo(`Removed ${removed.name}`, () => {
-    DB.staff.push(removed);
-    renderEmpTable(); populateDropdowns(); renderDashboard();
-  });
+  DB.aow = DB.aow.filter(a => a.empId !== id);
+  if (delTasks) {
+    DB.tasks = DB.tasks.filter(t => t.empId !== id);
+    DB.reminders = DB.reminders.filter(r => r.empId !== id);
+  }
+  recalcStatuses(); refreshAllViews();
+  toast('Deleting…');
+  let binId = '';
+  try {
+    const r = await dbPost({ action: 'deleteStaff', empId: id, deleteTasks: delTasks });
+    binId = (r && r.result && r.result.binId) || '';
+  } catch (e) {
+    toast('Delete failed: ' + e.message, 'var(--danger)'); fullSync(); return;
+  }
+  if (binId) pushUndo(`Deleted ${removed.name} — in Recycle Bin`, () => restoreBinItem(binId));
+  else toast('✓ Employee deleted', 'var(--accent2)');
 };
 
 // ── TREND INDICATORS ─────────────────────────────────────────
@@ -3565,93 +4119,102 @@ function buildBadges(empId, containerId) {
   }).join('');
 }
 
-// ── TASK COMMENTS THREAD ─────────────────────────────────────
-// Store comments in localStorage per task
-function getComments(taskId) {
-  try { return JSON.parse(localStorage.getItem('comments_'+taskId)||'[]'); } catch(e) { return []; }
+// ── TASK COMMENTS THREAD (shared, stored in COMMENTS sheet) ──
+function fmtCommentTime(s){
+  const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+  return m?`${m[3]}/${m[2]} ${m[4]}:${m[5]}`:String(s||'');
 }
-function saveComments(taskId, comments) {
-  try { localStorage.setItem('comments_'+taskId, JSON.stringify(comments)); } catch(e) {}
-}
+function getComments(taskId){return DB.comments.filter(c=>c.taskId===taskId);}
 
 function renderCommentsThread(taskId, containerId) {
   const el = document.getElementById(containerId);
   if (!el) return;
   const comments = getComments(taskId);
   const isAdmin = currentUser?.role === 'admin';
-  const authorName = isAdmin ? 'Admin' : (DB.staff.find(s=>s.empId===currentUser?.empId)?.name || 'Employee');
+  const authorName = isAdmin ? 'Admin' : (DB.staff.find(s=>s.empId===currentUser?.empId)?.name || currentUser?.displayName || 'Employee');
 
   el.innerHTML = `
     <div style="font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:10px">Comments</div>
     <div id="comments-list-${taskId}" style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
       ${comments.length ? comments.map(c=>`
         <div style="display:flex;gap:8px;animation:fadeUp .2s ease">
-          <div style="width:28px;height:28px;border-radius:50%;background:${c.isAdmin?'var(--accent)':'var(--accent2)'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">${c.author.slice(0,2).toUpperCase()}</div>
+          <div style="width:28px;height:28px;border-radius:50%;background:${c.isAdmin?'var(--accent)':'var(--accent2)'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">${mtEsc(c.author).slice(0,2).toUpperCase()}</div>
           <div style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:8px 10px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
-              <span style="font-size:11px;font-weight:700;color:${c.isAdmin?'var(--accent)':'var(--accent2)'}">${c.author}</span>
-              <span style="font-size:10px;color:var(--muted2);font-family:var(--mono)">${c.time}</span>
+              <span style="font-size:11px;font-weight:700;color:${c.isAdmin?'var(--accent)':'var(--accent2)'}">${mtEsc(c.author)}</span>
+              <span style="font-size:10px;color:var(--muted2);font-family:var(--mono)">${mtEsc(fmtCommentTime(c.createdAt))}</span>
             </div>
-            <div style="font-size:13px;color:var(--text2);line-height:1.5">${c.text}</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.5">${mtEsc(c.text)}</div>
           </div>
         </div>`).join('') : '<div style="text-align:center;color:var(--muted2);font-size:12px;padding:12px">No comments yet</div>'}
     </div>
     <div style="display:flex;gap:8px">
-      <input id="comment-input-${taskId}" placeholder="Add a comment…" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:var(--font);outline:none;background:#fafbfd;color:var(--text)"
-        onkeydown="if(event.key==='Enter')postComment('${taskId}','${authorName}',${isAdmin})"/>
-      <button onclick="postComment('${taskId}','${authorName}',${isAdmin})" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">Send</button>
+      <input id="comment-input-${taskId}" maxlength="1000" placeholder="Add a comment…" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:var(--font);outline:none;background:#fafbfd;color:var(--text)"
+        onkeydown="if(event.key==='Enter')postComment('${taskId}','${mtEsc(authorName)}',${isAdmin})"/>
+      <button onclick="postComment('${taskId}','${mtEsc(authorName)}',${isAdmin})" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">Send</button>
     </div>`;
+  const list=document.getElementById('comments-list-'+taskId);if(list)list.scrollTop=list.scrollHeight;
 }
 
-function postComment(taskId, author, isAdmin) {
+async function postComment(taskId, author, isAdmin) {
   const inp = document.getElementById('comment-input-'+taskId);
   if (!inp || !inp.value.trim()) return;
-  const comments = getComments(taskId);
-  comments.push({ author, text: inp.value.trim(), time: new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}), isAdmin });
-  saveComments(taskId, comments);
+  const text = inp.value.trim().replace(/[<>]/g,'');
+  const tmp = { id:'tmp'+Date.now(), taskId, authorId:currentUser.empId||currentUser.username, author, isAdmin:!!isAdmin, text,
+    createdAt: todayStr()+' '+new Date().toTimeString().slice(0,5) };
+  DB.comments.push(tmp);
   inp.value = '';
   renderCommentsThread(taskId, 'comments-thread-'+taskId);
+  try{
+    const r = await dbPost({ action:'addComment', taskId, text });
+    if(r&&r.result&&r.result.id){tmp.id=r.result.id;tmp.createdAt=r.result.createdAt;}
+  }catch(e){
+    DB.comments = DB.comments.filter(c=>c!==tmp);
+    renderCommentsThread(taskId, 'comments-thread-'+taskId);
+    toast('Comment not saved: '+e.message,'var(--danger)');
+  }
 }
 
-
-// ── TASK TEMPLATES ────────────────────────────────────────────
-let taskTemplates = JSON.parse(localStorage.getItem('taskTemplates')||'[]');
-function saveTemplates() { localStorage.setItem('taskTemplates', JSON.stringify(taskTemplates)); }
-
+// ── TASK TEMPLATES (shared, stored in TEMPLATES sheet) ──
 function saveAsTemplate() {
   const name = document.getElementById('t-name').value.trim();
   const work = document.getElementById('t-work').value.trim();
   const type = document.getElementById('t-type').value;
   const area = document.getElementById('t-area').value;
   if (!name) { toast('Enter a task name first', 'var(--danger)'); return; }
-  taskTemplates.push({ name, work, type, area, id:'TPL'+Date.now() });
-  saveTemplates();
-  renderTemplateList();
-  toast('✓ Template saved', 'var(--accent2)');
+  const tpl = { id:'tmp'+Date.now(), name, work, type, area };
+  DB.templates.push(tpl); renderTemplateList(); toast('Saving…');
+  dbPost({ action:'addTemplate', name, work, type, area })
+    .then(r=>{ if(r&&r.result&&r.result.id)tpl.id=r.result.id; renderTemplateList(); toast('✓ Template saved','var(--accent2)'); })
+    .catch(e=>{ DB.templates=DB.templates.filter(x=>x!==tpl); renderTemplateList(); toast('Template not saved: '+e.message,'var(--danger)'); });
 }
 
 function loadTemplate(id) {
-  const tmpl = taskTemplates.find(t => t.id === id);
+  const tmpl = DB.templates.find(t => t.id === id);
   if (!tmpl) return;
   document.getElementById('t-name').value = tmpl.name;
   document.getElementById('t-work').value = tmpl.work;
-  document.getElementById('t-type').value = tmpl.type;
+  if (tmpl.type) document.getElementById('t-type').value = tmpl.type;
   toast('Template loaded', 'var(--accent)');
 }
 
-function deleteTemplate(id) {
-  taskTemplates = taskTemplates.filter(t => t.id !== id);
-  saveTemplates(); renderTemplateList();
+async function deleteTemplate(id) {
+  if (!confirm('Delete this saved template?')) return;
+  const old = DB.templates;
+  DB.templates = DB.templates.filter(t => t.id !== id);
+  renderTemplateList();
+  try{ await dbPost({ action:'deleteTemplate', id }); }
+  catch(e){ DB.templates = old; renderTemplateList(); toast('Delete failed: '+e.message,'var(--danger)'); }
 }
 
 function renderTemplateList() {
   const wrap = document.getElementById('template-list');
   if (!wrap) return;
-  wrap.innerHTML = taskTemplates.length === 0
+  wrap.innerHTML = DB.templates.length === 0
     ? '<div style="font-size:12px;color:var(--muted2);padding:8px 0">No saved templates</div>'
-    : taskTemplates.map(t => `
+    : DB.templates.map(t => `
       <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
-        <div style="flex:1;font-size:12px;font-weight:600">${t.name} <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">${t.type}</span></div>
+        <div style="flex:1;font-size:12px;font-weight:600">${mtEsc(t.name)} <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">${mtEsc(t.type)}</span></div>
         <button onclick="loadTemplate('${t.id}')" class="btn btn-ghost btn-sm" style="font-size:11px">Use</button>
         <button onclick="deleteTemplate('${t.id}')" class="btn btn-ghost btn-sm" style="font-size:11px">✕</button>
       </div>`).join('');
@@ -3809,7 +4372,7 @@ window.renderEmpDashboard = function() {
   const empId = currentUser.empId;
   const tasks = DB.tasks.filter(t => t.empId === empId);
   const done = tasks.filter(t => t.status === 'Completed');
-  const rate = tasks.length ? Math.round((done.length/tasks.length)*100) : 0;
+  const rate = tasks.filter(x=>x.status!=='Excused').length?Math.round((done.length/tasks.filter(x=>x.status!=='Excused').length)*100):0;
   buildProgressRing(rate, 'emp-progress-ring', rate>=80?'var(--accent2)':rate>=50?'var(--accent3)':'var(--danger)');
   buildBadges(empId, 'emp-badges');
 };
@@ -3954,7 +4517,7 @@ window.addEventListener('DOMContentLoaded', () => {
       <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.6px">Select Employees</div>
       <div id="bulk-emp-list" style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;margin-bottom:16px"></div>
       <div class="form-grid">
-        <div class="form-group full"><label>Task Name *</label><input id="bulk-task-name" placeholder="e.g. Daily Bank Recon"/></div>
+        <div class="form-group full"><label>Task Name *</label><input id="bulk-task-name" list="task-name-list" autocomplete="off" placeholder="Select or type a new task name"/></div>
         <div class="form-group full"><label>Work Description</label><textarea id="bulk-task-work" placeholder="Describe the work…" style="min-height:60px"></textarea></div>
         <div class="form-group"><label>Task Type</label><select id="bulk-task-type"><option>Daily</option><option>Weekly</option><option>Monthly</option><option>One Time</option></select></div>
         <div class="form-group"><label>Target Date *</label><input type="date" id="bulk-task-target"/></div>
@@ -3988,7 +4551,7 @@ window.refreshAllViews = function() {
     const empId = currentUser.empId;
     const tasks = DB.tasks.filter(t => t.empId === empId);
     const done = tasks.filter(t => t.status === 'Completed');
-    const rate = tasks.length ? Math.round((done.length/tasks.length)*100) : 0;
+    const rate = tasks.filter(x=>x.status!=='Excused').length?Math.round((done.length/tasks.filter(x=>x.status!=='Excused').length)*100):0;
     buildProgressRing(rate, 'emp-progress-ring', rate>=80?'var(--accent2)':rate>=50?'var(--accent3)':'var(--danger)');
     buildBadges(empId, 'emp-badges');
   }
@@ -4161,7 +4724,7 @@ function renderMonthly(){
   const miss=mt.filter(t=>t.status==='Missed');
   const kpis=done.map(t=>parseInt(t.kpi)||0);
   const avg=kpis.length?Math.round(kpis.reduce((a,b)=>a+b,0)/kpis.length):0;
-  const rate=mt.length?Math.round((done.length/mt.length)*100):0;
+  const rate=mt.filter(x=>x.status!=='Excused').length?Math.round((done.length/mt.filter(x=>x.status!=='Excused').length)*100):0;
 
   // Weekly bars
   const mStart=new Date(start);
@@ -4185,7 +4748,7 @@ function renderMonthly(){
     const sc=st.filter(t=>t.status==='Completed');
     const sm=st.filter(t=>t.status==='Missed');
     const kv=sc.length?Math.round(sc.map(t=>parseInt(t.kpi)||0).reduce((a,b)=>a+b,0)/sc.length):0;
-    const cr=st.length?Math.round((sc.length/st.length)*100):0;
+    const cr=st.filter(x=>x.status!=='Excused').length?Math.round((sc.length/st.filter(x=>x.status!=='Excused').length)*100):0;
     const clr=kv>=90?'var(--accent2)':kv>=70?'var(--accent3)':'var(--danger)';
     return`<div class="emp-perf-row">
       <div class="emp-kpi-ring" style="color:${clr};border-color:${clr}">${kv||'—'}</div>
@@ -4266,7 +4829,7 @@ function exportMonthlyPDF(){
   const miss=mt.filter(t=>t.status==='Missed');
   const kpis=done.map(t=>parseInt(t.kpi)||0);
   const avg=kpis.length?Math.round(kpis.reduce((a,b)=>a+b,0)/kpis.length):0;
-  const rate=mt.length?Math.round((done.length/mt.length)*100):0;
+  const rate=mt.filter(x=>x.status!=='Excused').length?Math.round((done.length/mt.filter(x=>x.status!=='Excused').length)*100):0;
   const genDate=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
 
   const empRows=DB.staff.map(s=>{
@@ -4274,7 +4837,7 @@ function exportMonthlyPDF(){
     const sc=st.filter(t=>t.status==='Completed');
     const sm=st.filter(t=>t.status==='Missed');
     const kv=sc.length?Math.round(sc.map(t=>parseInt(t.kpi)||0).reduce((a,b)=>a+b,0)/sc.length):0;
-    const cr=st.length?Math.round((sc.length/st.length)*100):0;
+    const cr=st.filter(x=>x.status!=='Excused').length?Math.round((sc.length/st.filter(x=>x.status!=='Excused').length)*100):0;
     const clr=kv>=90?'#0f9b6e':kv>=70?'#e8840a':'#d93025';
     return`<tr style="border-bottom:1px solid #f0f0f0">
       <td style="padding:9px 10px;font-weight:700">${s.name}</td>
@@ -4443,7 +5006,7 @@ function renderTeamChart(){
     const miss=tasks.filter(t=>t.status==='Missed');
     const kpis=done.map(t=>parseInt(t.kpi)||0);
     const avgKpi=kpis.length?Math.round(kpis.reduce((a,b)=>a+b,0)/kpis.length):0;
-    const compRate=tasks.length?Math.round((done.length/tasks.length)*100):0;
+    const compRate=tasks.filter(x=>x.status!=='Excused').length?Math.round((done.length/tasks.filter(x=>x.status!=='Excused').length)*100):0;
     return{name,members:members.length,tasks:tasks.length,done:done.length,miss:miss.length,avgKpi,compRate,color:tClrs[i%tClrs.length]};
   });
 
@@ -4526,5 +5089,125 @@ window.refreshAllViews = function(){
     const active=pg.querySelector('.analytics-panel.active');
     if(active){const id=active.id.replace('apanel-','');switchAnalyticsTab(id);}
   }
+};
+
+// refresh Auto-Repeat manager with every view refresh
+const _aaRefreshAll=window.refreshAllViews;
+window.refreshAllViews=function(){_aaRefreshAll();renderRepeatManager();renderSentReminders();renderTaskNameList();renderTaskMaster();};
+</script>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// v4 FEATURES — password change, users, activity log, recycle bin, holidays & leave
+// ══════════════════════════════════════════════════════════════
+
+// ── ACTIVITY LOG ──────────────────────────────────────────────
+let LOG_CACHE=[];
+async function loadActivity(){
+  const tb=document.getElementById('log-table');
+  tb.innerHTML='<tr><td colspan="5" class="empty-state"><p>Loading…</p></td></tr>';
+  try{
+    const r=await dbPost({action:'getLog',limit:1000});LOG_CACHE=r.result||[];
+    const sel=document.getElementById('log-act');const cur=sel.value;
+    const acts=[...new Set(LOG_CACHE.map(x=>x.action))].sort();
+    sel.innerHTML='<option value="">All actions</option>'+acts.map(a=>`<option ${a===cur?'selected':''}>${mtEsc(a)}</option>`).join('');
+    renderActivity();
+  }catch(e){tb.innerHTML='<tr><td colspan="5" class="empty-state"><p>Could not load: '+mtEsc(e.message)+'</p></td></tr>';}
+}
+function renderActivity(){
+  const q=(document.getElementById('log-q').value||'').toLowerCase();const act=document.getElementById('log-act').value;
+  const rows=LOG_CACHE.filter(x=>(!act||x.action===act)&&(!q||(x.user+' '+x.action+' '+x.target+' '+x.details).toLowerCase().includes(q))).slice(0,500);
+  const bad=a=>/DENIED|FAILED|LOCKED|DELETE|PURGE/.test(a);
+  document.getElementById('log-table').innerHTML=rows.map(x=>`<tr><td style="font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap">${mtEsc(x.time)}</td><td><strong style="font-size:12px">${mtEsc(x.user)}</strong><br><span style="font-size:10px;color:var(--muted2);font-family:var(--mono)">${mtEsc(x.role)}</span></td><td><span style="font-family:var(--mono);font-size:11px;font-weight:700;color:${bad(x.action)?'var(--danger)':'var(--accent)'}">${mtEsc(x.action)}</span></td><td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${mtEsc(x.target)}</td><td style="font-size:12px;color:var(--text2);max-width:360px">${mtEsc(x.details)}</td></tr>`).join('')||'<tr><td colspan="5" class="empty-state"><div class="ei">◌</div><p>No activity matches</p></td></tr>';
+}
+
+// ── RECYCLE BIN ───────────────────────────────────────────────
+async function loadRecycle(){
+  const tb=document.getElementById('bin-table');
+  tb.innerHTML='<tr><td colspan="5" class="empty-state"><p>Loading…</p></td></tr>';
+  try{
+    const r=await dbPost({action:'getBin'});const list=r.result||[];
+    tb.innerHTML=list.map(b=>`<tr><td style="font-family:var(--mono);font-size:12px;white-space:nowrap">${mtEsc(b.deletedAt)}</td><td style="font-size:12px">${mtEsc(b.deletedBy)}</td><td><span style="font-size:11px;background:var(--accent-light);color:var(--accent);padding:2px 8px;border-radius:20px;font-weight:700">${mtEsc(b.type)}</span></td><td style="font-size:13px">${mtEsc(b.label)}</td><td style="white-space:nowrap"><button class="btn btn-success btn-sm" data-b="${mtEsc(b.binId)}" onclick="restoreBinItem(this.dataset.b)">↺ Restore</button> <button class="btn btn-ghost btn-sm" style="color:var(--danger)" data-b="${mtEsc(b.binId)}" onclick="purgeBinEntry(this.dataset.b)">Delete forever</button></td></tr>`).join('')||'<tr><td colspan="5" class="empty-state"><div class="ei">♻</div><p>Recycle bin is empty</p></td></tr>';
+  }catch(e){tb.innerHTML='<tr><td colspan="5" class="empty-state"><p>Could not load: '+mtEsc(e.message)+'</p></td></tr>';}
+}
+async function restoreBinItem(binId){
+  try{
+    const r=await dbPost({action:'restoreBin',binId});
+    const x=r.result||{};
+    toast(`✓ Restored ${x.restored||0} record(s)`+(x.skipped?` (${x.skipped} already existed)`:''),'var(--accent2)');
+    await fullSync();
+    const p=document.getElementById('page-recycle');if(p&&p.classList.contains('active'))loadRecycle();
+  }catch(e){toast('Restore failed: '+e.message,'var(--danger)');}
+}
+async function purgeBinEntry(binId){
+  if(!confirm('Delete this permanently? It cannot be restored afterwards.'))return;
+  try{await dbPost({action:'purgeBinItem',binId});toast('Deleted permanently','var(--accent3)');loadRecycle();}
+  catch(e){toast('Failed: '+e.message,'var(--danger)');}
+}
+
+// ── HOLIDAYS & LEAVE ──────────────────────────────────────────
+const DAY_NAMES=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+function dayNameOf(ds){const p=ds.split('-');return DAY_NAMES[new Date(+p[0],+p[1]-1,+p[2]).getDay()];}
+function renderHolidays(){
+  document.getElementById('wk-off-boxes').innerHTML=DAY_NAMES.map((n,i)=>`<label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer"><input type="checkbox" class="wk-off" value="${i}" ${DB.settings.weeklyOff.includes(i)?'checked':''} style="width:auto"/>${n}</label>`).join('');
+  const hs=[...DB.holidays].sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('hol-count').textContent=hs.length;
+  document.getElementById('hol-table').innerHTML=hs.map(h=>`<tr><td style="font-family:var(--mono);font-size:12px;font-weight:600">${formatDate(h.date)}</td><td style="font-size:12px;color:var(--muted)">${dayNameOf(h.date)}</td><td><strong>${mtEsc(h.name)}</strong></td><td><button class="btn btn-ghost btn-sm" style="color:var(--danger)" data-d="${h.date}" onclick="deleteHolidayUI(this.dataset.d)">🗑</button></td></tr>`).join('')||'<tr><td colspan="4" class="empty-state"><div class="ei">◌</div><p>No holidays added</p></td></tr>';
+  const sel=document.getElementById('lv-emp');const cur=sel.value;
+  sel.innerHTML='<option value="">— Select —</option>'+DB.staff.map(s=>`<option value="${mtEsc(s.empId)}" ${s.empId===cur?'selected':''}>${mtEsc(s.name)} · ${mtEsc(s.empId)}</option>`).join('');
+  const ls=[...DB.leaves].sort((a,b)=>b.from.localeCompare(a.from));
+  document.getElementById('lv-count').textContent=ls.length;
+  document.getElementById('lv-table').innerHTML=ls.map(l=>{
+    const days=Math.round((new Date(l.to)-new Date(l.from))/86400000)+1;
+    return`<tr><td><strong>${mtEsc(l.name)}</strong><br><span style="font-size:10px;color:var(--muted2);font-family:var(--mono)">${mtEsc(l.empId)}</span></td><td style="font-family:var(--mono);font-size:12px">${formatDate(l.from)}</td><td style="font-family:var(--mono);font-size:12px">${formatDate(l.to)}</td><td style="font-family:var(--mono);font-size:12px;font-weight:700">${days}</td><td style="font-size:12px;color:var(--muted)">${mtEsc(l.reason)||'—'}</td><td><button class="btn btn-ghost btn-sm" style="color:var(--danger)" data-i="${mtEsc(l.id)}" onclick="deleteLeaveUI(this.dataset.i)">🗑</button></td></tr>`;
+  }).join('')||'<tr><td colspan="6" class="empty-state"><div class="ei">◌</div><p>No leave marked</p></td></tr>';
+}
+function afterCalendarChange(){recalcStatuses();refreshAllViews();renderHolidays();}
+async function saveWeeklyOff(){
+  const vals=[...document.querySelectorAll('.wk-off:checked')].map(x=>+x.value);
+  const old=DB.settings.weeklyOff;DB.settings.weeklyOff=vals;afterCalendarChange();
+  try{await dbPost({action:'saveSettings',weeklyOff:vals});toast('✓ Weekly off saved','var(--accent2)');}
+  catch(e){DB.settings.weeklyOff=old;afterCalendarChange();toast('Not saved: '+e.message,'var(--danger)');}
+}
+async function addHolidayUI(){
+  const date=document.getElementById('hol-date').value;const name=document.getElementById('hol-name').value.trim()||'Holiday';
+  if(!date){toast('Pick a date','var(--danger)');return;}
+  if(DB.holidays.some(h=>h.date===date)){toast('That date is already a holiday','var(--accent3)');return;}
+  const h={date,name};DB.holidays.push(h);DB.holidaySet[date]=1;afterCalendarChange();
+  try{await dbPost({action:'addHoliday',date,name});toast('✓ Holiday added','var(--accent2)');
+    document.getElementById('hol-date').value='';document.getElementById('hol-name').value='';}
+  catch(e){DB.holidays=DB.holidays.filter(x=>x!==h);delete DB.holidaySet[date];afterCalendarChange();toast('Not saved: '+e.message,'var(--danger)');}
+}
+async function deleteHolidayUI(date){
+  if(!confirm('Remove this holiday?'))return;
+  const old=DB.holidays;DB.holidays=DB.holidays.filter(h=>h.date!==date);delete DB.holidaySet[date];afterCalendarChange();
+  try{await dbPost({action:'deleteHoliday',date});toast('Holiday removed','var(--accent3)');}
+  catch(e){DB.holidays=old;DB.holidaySet[date]=1;afterCalendarChange();toast('Failed: '+e.message,'var(--danger)');}
+}
+async function addLeaveUI(){
+  const empId=document.getElementById('lv-emp').value,from=document.getElementById('lv-from').value;
+  let to=document.getElementById('lv-to').value||from;const reason=document.getElementById('lv-reason').value.trim();
+  if(!empId||!from){toast('Select employee and From date','var(--danger)');return;}
+  if(to<from){toast('"To" date is before "From" date','var(--danger)');return;}
+  const s=DB.staff.find(x=>x.empId===empId);
+  const l={id:'tmp'+Date.now(),empId,name:s?s.name:empId,from,to,reason};
+  DB.leaves.push(l);afterCalendarChange();
+  try{const r=await dbPost({action:'addLeave',empId,from,to,reason});if(r&&r.result&&r.result.id)l.id=r.result.id;
+    toast('✓ Leave marked','var(--accent2)');renderHolidays();
+    ['lv-from','lv-to','lv-reason'].forEach(id=>document.getElementById(id).value='');}
+  catch(e){DB.leaves=DB.leaves.filter(x=>x!==l);afterCalendarChange();toast('Not saved: '+e.message,'var(--danger)');}
+}
+async function deleteLeaveUI(id){
+  if(!confirm('Remove this leave entry?'))return;
+  const old=DB.leaves;DB.leaves=DB.leaves.filter(l=>l.id!==id);afterCalendarChange();
+  try{await dbPost({action:'deleteLeave',id});toast('Leave removed','var(--accent3)');}
+  catch(e){DB.leaves=old;afterCalendarChange();toast('Failed: '+e.message,'var(--danger)');}
+}
+
+// re-render the Holidays page on every data refresh while it is open
+const _prevRefreshAll=window.refreshAllViews;
+window.refreshAllViews=function(){
+  _prevRefreshAll();
+  const p=document.getElementById('page-holidays');if(p&&p.classList.contains('active'))renderHolidays();
 };
 </script>
