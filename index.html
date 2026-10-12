@@ -5568,7 +5568,7 @@ function renderPmsReport(){
       ${COMPS.map(c=>`<td style="text-align:center">${num(a.per[c.key])}</td>`).join('')}
       <td style="text-align:center">${num(a.comp)}</td>
       <td style="text-align:center">${a.kpi===null?'<span class="comp-sub">No tasks</span>':`<span class="comp-num" style="font-size:13px">${a.kpi}</span><br><span class="comp-sub">${a.tasks} task${a.tasks>1?'s':''}</span>`}</td>
-      <td style="text-align:center">${fc}</td><td style="text-align:center">${rc}</td><td>${isEmp?'':`<button class="btn btn-ghost btn-sm" title="Print appraisal sheet" data-e="${mtEsc(s.empId)}" onclick="pmsPrint(this.dataset.e)">🖨</button>`}</td></tr>`;
+      <td style="text-align:center">${fc}</td><td style="text-align:center">${rc}</td><td>${isEmp?'':`<button class="btn btn-ghost btn-sm" title="Print PMS sheet" data-e="${mtEsc(s.empId)}" onclick="pmsPrint(this.dataset.e)">🖨</button>`}</td></tr>`;
   }).join('')||'<tr><td colspan="13" class="empty-state"><p>No employees</p></td></tr>';
   const avg=finals.length?Math.round(finals.reduce((x,y)=>x+y,0)/finals.length*10)/10:'—';
   document.getElementById('pms-stats').textContent=isEmp?'':`Evaluated ${finals.length} of ${rows.length} employees · Team average final score ${avg}`;
@@ -5625,7 +5625,7 @@ function pmsSheetSection(s,r,months,isEmp){
   const hex=f.score!==undefined?PMS_HEX[f.band[1]]:'#6b7280';
   const kpiW=a.kpi===null?'—':(Math.round(a.kpi*KPI_WEIGHT*10)/10),cW=a.comp===''?'—':(Math.round(a.comp*COMP_WEIGHT*10)/10);
   return`<section>
-  <div class="hd"><div class="co">Pristine Pearl Pharma Private Limited</div><div class="tt">Employee Performance Appraisal (PMS)</div></div>
+  <div class="hd"><div class="co">Pristine Pearl Pharma Private Limited</div><div class="tt">Employee Performance Report (PMS)</div></div>
   <table class="info"><tr><td><span>Associate</span><b>${E(s.name)}</b></td><td><span>Designation</span><b>${E(s.designation||'—')}</b></td><td><span>Emp ID</span><b>${E(s.empId)}</b></td></tr>
   <tr><td><span>Team</span><b>${E(s.team||'—')}</b></td><td><span>Appraisal Period</span><b>${E(r.label)}</b></td><td><span>Months</span><b>${ymLabel(r.from)}${r.from!==r.to?' – '+ymLabel(r.to):''}</b></td></tr></table>
   <h3>A. Key Result Areas / KPI <small>(Weight 60%)</small></h3>
@@ -5779,4 +5779,4 @@ function pmsPrintSummary(mode,ids,mw){
   w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${E(title)}</title><style>${css}</style></head><body>${body}${ft}</body></html>`);w.document.close();
   setTimeout(()=>{try{w.focus();w.print();}catch(e){}},500);
 }
-</script> 
+</script>
