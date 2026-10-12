@@ -5627,7 +5627,7 @@ function pmsSheetSection(s,r,months,isEmp){
   return`<section>
   <div class="hd"><div class="co">Pristine Pearl Pharma Private Limited</div><div class="tt">Employee Performance Report (PMS)</div></div>
   <table class="info"><tr><td><span>Associate</span><b>${E(s.name)}</b></td><td><span>Designation</span><b>${E(s.designation||'—')}</b></td><td><span>Emp ID</span><b>${E(s.empId)}</b></td></tr>
-  <tr><td><span>Team</span><b>${E(s.team||'—')}</b></td><td><span>Appraisal Period</span><b>${E(r.label)}</b></td><td><span>Months</span><b>${ymLabel(r.from)}${r.from!==r.to?' – '+ymLabel(r.to):''}</b></td></tr></table>
+  <tr><td><span>Team</span><b>${E(s.team||'—')}</b></td><td><span>Perfermance Period</span><b>${E(r.label)}</b></td><td><span>Months</span><b>${ymLabel(r.from)}${r.from!==r.to?' – '+ymLabel(r.to):''}</b></td></tr></table>
   <h3>A. Key Result Areas / KPI <small>(Weight 60%)</small></h3>
   <table class="g"><thead><tr><th>Task Type</th><th>Tasks Due</th><th>Completed</th><th>Missed</th><th>Pending</th><th>Avg KPI</th></tr></thead><tbody>${kpiRows}</tbody>
   <tfoot><tr><td colspan="5"><b>KPI Score</b> <span class="muted">(avg of task KPI; 100 before target · 90 on target · 70 late · 0 missed)</span></td><td class="c"><b>${a.kpi===null?'—':a.kpi}</b></td></tr></tfoot></table>
@@ -5635,7 +5635,7 @@ function pmsSheetSection(s,r,months,isEmp){
   <table class="g"><thead><tr><th>Competency</th><th style="width:60px">Score</th><th></th></tr></thead><tbody>${compRows}</tbody>
   <tfoot><tr><td><b>Competency Score</b> <span class="muted">(average of ratings · ${a.n} of ${months.length} month${months.length>1?'s':''} rated)</span></td><td class="c"><b>${a.comp===''?'—':a.comp}</b></td><td></td></tr></tfoot></table>
   ${monthRows?`<h3>C. Month-wise Summary</h3><table class="g sm"><thead><tr><th>Month</th>${COMPS.map(c=>`<th>${E(c.label.replace('Communication & Team Work','Comm. & Team'))}</th>`).join('')}<th>Comp.</th><th>KPI</th><th>Final</th></tr></thead><tbody>${monthRows}</tbody></table>`:''}
-  <h3>${monthRows?'D':'C'}. Final Appraisal Summary</h3>
+  <h3>${monthRows?'D':'C'}. Final Performance Summary</h3>
   <table class="sum"><tr><td><span>KPI Score × 60%</span><b>${kpiW}</b></td><td><span>Competency Score × 40%</span><b>${cW}</b></td><td><span>Final Score (max 100)</span><b style="color:${hex}">${f.score!==undefined?f.score:'—'}</b></td><td><span>Final Rating</span><b style="color:${hex}">${f.score!==undefined?f.band[1]:(a.comp===''?'Pending Evaluation':E(f.text))}</b></td></tr></table>
   ${remarks.length?`<h3>Manager's Remarks</h3><div class="rem">${remarks.map(x=>`<p><b>${ymLabel(x.m)}:</b> ${E(x.t)}</p>`).join('')}</div>`:''}
   <div class="sig"><div>Employee Signature<br><span>Date:</span></div><div>Reporting Manager<br><span>Date:</span></div><div>HR / Management<br><span>Date:</span></div></div>
