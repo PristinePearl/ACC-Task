@@ -1168,6 +1168,7 @@ tr.comp-dirty td:first-child{box-shadow:inset 3px 0 0 var(--accent3);}
     <div class="nav-item" data-page="team">
       <span class="nav-icon">◎</span><span class="nav-item-label">Team Master</span>
     </div>
+    <div class="nav-item" data-page="resigned"><span class="nav-icon">⇥</span><span class="nav-item-label">Resigned</span></div>
     <div class="nav-item" data-page="aow">
       <span class="nav-icon">◉</span><span class="nav-item-label">Area of Work</span>
     </div>
@@ -1287,7 +1288,7 @@ tr.comp-dirty td:first-child{box-shadow:inset 3px 0 0 var(--accent3);}
     <div id="team-summary-cards" class="team-cards-grid"></div>
   </div>
   <div class="section">
-    <div class="section-title">Employee List <span class="badge" id="emp-count">0 staff</span></div>
+    <div class="section-title">Employee List <span class="badge" id="emp-count">0 staff</span> <span class="badge" id="emp-resigned-count" style="cursor:pointer" onclick="showPage('resigned');renderResigned()">0 resigned</span></div>
     <div class="table-wrap">
       <table>
         <thead><tr><th>EMP ID</th><th>Name</th><th>Designation</th><th>Team</th><th>DOJ</th><th>Email</th><th></th></tr></thead>
@@ -1295,6 +1296,23 @@ tr.comp-dirty td:first-child{box-shadow:inset 3px 0 0 var(--accent3);}
       </table>
     </div>
   </div>
+</div>
+
+<!-- RESIGNED -->
+<div class="page" id="page-resigned">
+  <div class="page-header">
+    <div class="page-title-wrap"><div class="page-title">Resigned Employees</div><div class="page-sub">Records, pending work and PMS of employees who have left</div></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Resigned List <span class="badge" id="res-count">0</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>EMP ID</th><th>Name</th><th>Team</th><th>DOJ</th><th>Last Day</th><th>Tasks (Done/Total)</th><th>Pending</th><th>Missed</th><th>Avg KPI</th><th>PMS Final</th><th>Open Pending Works</th><th></th></tr></thead>
+        <tbody id="res-table"></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="res-detail"></div>
 </div>
 
 <!-- AREA OF WORK -->
@@ -1983,7 +2001,7 @@ tr.comp-dirty td:first-child{box-shadow:inset 3px 0 0 var(--accent3);}
 
 <script>
 const DB_URL='https://script.google.com/macros/s/AKfycby_j29z-w7L4w0FqVYy-VHYtXnuhO9QhPPWUGZ3b02bOgXeH--qrqDW0EyY-iYRVMMD/exec';
-let DB={staff:[],aow:[],tasks:[],pendingWorks:[],reminders:[],taskMaster:[],comments:[],templates:[],seen:{},holidays:[],holidaySet:{},leaves:[],competencies:[],settings:{weeklyOff:[0]}};
+let DB={staff:[],resigned:[],rTasks:[],rPW:[],aow:[],tasks:[],pendingWorks:[],reminders:[],taskMaster:[],comments:[],templates:[],seen:{},holidays:[],holidaySet:{},leaves:[],competencies:[],settings:{weeklyOff:[0]}};
 let dbConnected=false;
 
 let authToken='';
@@ -2010,7 +2028,7 @@ async function fullSync(){
   setSyncState(true);
   try{
     const res=await dbGet();const d=res.result||res;
-    if(d.staff&&Array.isArray(d.staff)){DB.staff=d.staff.map(s=>({empId:String(s.EMP_ID||s.empId||''),name:String(s.NAME||s.name||''),designation:String(s.DESIGNATION||s.designation||''),team:String(s.TEAM||s.team||''),doj:String(s.DOJ||s.doj||''),email:String(s.EMAIL||s.email||'')})).filter(s=>s.empId&&s.name);}
+    if(d.staff&&Array.isArray(d.staff)){const allStaff=d.staff.map(s=>({empId:String(s.EMP_ID||s.empId||''),name:String(s.NAME||s.name||''),designation:String(s.DESIGNATION||s.designation||''),team:String(s.TEAM||s.team||''),doj:String(s.DOJ||s.doj||''),email:String(s.EMAIL||s.email||''),status:String(s.STATUS||'').trim(),resignDate:fmtDate(s.RESIGN_DATE||''),resignReason:String(s.RESIGN_REASON||'')})).filter(s=>s.empId&&s.name);DB.resigned=allStaff.filter(s=>s.status.toLowerCase()==='resigned');DB.staff=allStaff.filter(s=>s.status.toLowerCase()!=='resigned');}
     if(d.aow&&Array.isArray(d.aow)){DB.aow=d.aow.map(a=>({empId:String(a.EMP_ID||a.empId||''),name:String(a.NAME||a.name||''),area:String(a.AREA_OF_WORK||a.area||'')})).filter(a=>a.empId);}
     if(d.tasks&&Array.isArray(d.tasks)){DB.tasks=d.tasks.map(t=>({id:String(t.TASK_ID||t.id||''),assignedDate:String(t.ASSIGNED_DATE||t.assignedDate||''),empId:String(t.EMP_ID||t.empId||''),name:String(t.NAME||t.name||''),area:String(t.AREA_OF_WORK||t.area||''),taskType:String(t.TASK_TYPE||t.taskType||''),taskName:String(t.TASK_NAME||t.taskName||''),workAssigned:String(t.WORK_ASSIGNED||t.workAssigned||''),targetDate:fmtDate(t.TARGET_DATE||t.targetDate||''),userRemarks:String(t.USER_REMARKS||t.userRemarks||''),completedDate:fmtDate(t.COMPLETED_DATE||t.completedDate||''),status:String(t.STATUS||t.status||'Pending'),kpi:t.KPI!==undefined?t.KPI:(t.kpi!==undefined?t.kpi:''),score:t.SCORE!==undefined?t.SCORE:(t.score!==undefined?t.score:''),adminRemarks:String(t.ADMIN_REMARKS||t.adminRemarks||'')})).filter(t=>t.id);}
     // ── Pending Works sheet
@@ -2024,6 +2042,7 @@ async function fullSync(){
     if(Array.isArray(d.holidays)){DB.holidays=d.holidays.map(h=>({date:fmtDate(h.DATE),name:String(h.NAME||'')})).filter(h=>h.date);}
     if(Array.isArray(d.leaves)){DB.leaves=d.leaves.map(l=>({id:String(l.LEAVE_ID||''),empId:String(l.EMP_ID||''),name:String(l.NAME||''),from:fmtDate(l.FROM_DATE),to:fmtDate(l.TO_DATE),reason:String(l.REASON||'')})).filter(l=>l.id&&l.from&&l.to);}
     if(Array.isArray(d.competencies)){DB.competencies=d.competencies.map(c=>({empId:String(c.EMP_ID||''),name:String(c.NAME||''),period:String(c.PERIOD||'').slice(0,7),punctuality:cn(c.PUNCTUALITY),communication:cn(c.COMMUNICATION_TEAMWORK),planning:cn(c.WORK_PLANNING),initiation:cn(c.PROCESS_INITIATION),knowledge:cn(c.KNOWLEDGE),integrity:cn(c.INTEGRITY),remarks:String(c.REMARKS||''),ratedBy:String(c.RATED_BY||''),updatedAt:String(c.UPDATED_AT||'')})).filter(c=>c.empId&&c.period);}
+    {const rs={};DB.resigned.forEach(s=>{rs[s.empId]=1;});DB.rTasks=DB.tasks.filter(t=>rs[t.empId]);DB.tasks=DB.tasks.filter(t=>!rs[t.empId]);DB.rPW=DB.pendingWorks.filter(p=>rs[p.empId]);DB.pendingWorks=DB.pendingWorks.filter(p=>!rs[p.empId]);}
     if(d.settings){const raw=d.settings.WEEKLY_OFF===undefined?'0':String(d.settings.WEEKLY_OFF);DB.settings.weeklyOff=raw.split(',').map(x=>x.trim()).filter(x=>x!=='').map(Number).filter(x=>x>=0&&x<=6);}
     DB.holidaySet={};DB.holidays.forEach(h=>{DB.holidaySet[h.date]=1;});
     if(currentUser&&d.me&&d.me.displayName&&!currentUser.displayName)currentUser.displayName=d.me.displayName;
@@ -2047,7 +2066,7 @@ function updateClock(){const n=new Date();document.getElementById('clock').textC
 setInterval(updateClock,1000);updateClock();
 
 function refreshAllViews(){
-  populateDropdowns();renderEmpTable();renderAoWTable();renderTaskTable();
+  populateDropdowns();renderEmpTable();renderAoWTable();renderTaskTable();if(document.getElementById('page-resigned')?.classList.contains('active'))renderResigned();
   renderDashboard();renderStatusTable();renderReminders();
   if(currentUser&&currentUser.role==='admin'){const empPage=document.getElementById('page-emp');if(empPage&&empPage.classList.contains('active'))renderAdminEmpView();}
   if(currentUser&&currentUser.role==='employee'){const empDash=document.getElementById('page-emp-dash');if(empDash&&empDash.classList.contains('active'))renderEmpDashboard();}
@@ -2093,7 +2112,7 @@ function effTargetDate(empId,ds){let d=ds;for(let i=0;i<400&&nonWorkingDay(empId
 //               otherwise Missed once the (extended) deadline is over
 function recalcStatuses(){
   const today=todayStr();
-  DB.tasks.forEach(t=>{
+  DB.tasks.concat(DB.rTasks||[]).forEach(t=>{
     const td=t.targetDate||'';
     if(t.completedDate&&t.completedDate!==''){
       const cd=t.completedDate;const eff=td?effTargetDate(t.empId,td):td;
@@ -2135,9 +2154,9 @@ function renderEmpTable(){
     <td style="font-size:12px">${s.team||'—'}</td>
     <td style="font-size:12px;color:var(--muted)">${formatDate(s.doj)}</td>
     <td style="font-size:12px">${s.email||'—'}</td>
-    <td><button class="btn btn-ghost btn-sm" onclick="removeEmp('${s.empId}')">✕</button></td>
+    <td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" title="Mark as resigned" onclick="resignEmp('${s.empId}')">⇥ Resign</button> <button class="btn btn-ghost btn-sm" title="Delete" onclick="removeEmp('${s.empId}')">✕</button></td>
   </tr>`).join('');
-  document.getElementById('emp-count').textContent=DB.staff.length+' staff';
+  document.getElementById('emp-count').textContent=DB.staff.length+' staff';const rc=document.getElementById('emp-resigned-count');if(rc)rc.textContent=(DB.resigned||[]).length+' resigned';
   renderTeamSummary();
 }
 
@@ -3320,7 +3339,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 function resetDB(){
-  DB.staff=[];DB.aow=[];DB.tasks=[];DB.pendingWorks=[];DB.reminders=[];DB.taskMaster=[];
+  DB.staff=[];DB.resigned=[];DB.rTasks=[];DB.rPW=[];DB.aow=[];DB.tasks=[];DB.pendingWorks=[];DB.reminders=[];DB.taskMaster=[];
   DB.comments=[];DB.templates=[];DB.seen={};DB.holidays=[];DB.holidaySet={};DB.leaves=[];DB.competencies=[];
   DB.settings={weeklyOff:[0]};
 }
@@ -3471,6 +3490,7 @@ document.querySelectorAll('.nav-item').forEach(el=>{
     if(page==='pms-reports')renderPmsReport();
     if(page==='activity')loadActivity();
     if(page==='recycle')loadRecycle();
+    if(page==='resigned')renderResigned();
   });
 });
 
@@ -3922,6 +3942,106 @@ document.getElementById('main-sidebar').addEventListener('click', function(e){
   e.stopPropagation();
 });
 
+</script>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// RESIGNED EMPLOYEES
+// Resigned staff are removed from every active view (dashboard, assignment, PMS grid,
+// dropdowns, auto-allot, login) and kept here with their tasks, pending works and PMS.
+// ══════════════════════════════════════════════════════════════
+let resSel='';
+window.resignEmp=async function(id){
+  if(!isAdminUser()){toast('Only admin can do this','var(--danger)');return;}
+  const s=DB.staff.find(x=>x.empId===id);if(!s)return;
+  const date=prompt('Last working day of '+s.name+' (YYYY-MM-DD):',todayStr());
+  if(date===null)return;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date.trim())){toast('Enter the date as YYYY-MM-DD','var(--danger)');return;}
+  const reason=prompt('Reason (optional):','')||'';
+  const open=DB.tasks.filter(t=>t.empId===id&&t.status==='Pending').length;
+  if(!confirm('Mark '+s.name+' ('+id+') as resigned?\n\n• Login is disabled and recurring tasks stop\n• '+open+' pending task(s) move with them to the Resigned tab\n• You can reinstate them any time'))return;
+  toast('Updating…');
+  try{await dbPost({action:'markResigned',empId:id,date:date.trim(),reason:reason});toast('✓ '+s.name+' moved to Resigned','var(--accent2)');await fullSync();}
+  catch(e){toast('Failed: '+e.message,'var(--danger)');}
+};
+window.reinstateEmp=async function(id){
+  if(!isAdminUser()){toast('Only admin can do this','var(--danger)');return;}
+  const s=DB.resigned.find(x=>x.empId===id);if(!s)return;
+  if(!confirm('Reinstate '+s.name+' ('+id+')? They return to Team Master and can log in again.'))return;
+  toast('Updating…');
+  try{await dbPost({action:'reinstateStaff',empId:id});resSel='';toast('✓ '+s.name+' reinstated','var(--accent2)');await fullSync();}
+  catch(e){toast('Failed: '+e.message,'var(--danger)');}
+};
+function resMonths(empId){
+  const set={};
+  DB.competencies.filter(c=>c.empId===empId).forEach(c=>{set[c.period]=1;});
+  DB.rTasks.filter(t=>t.empId===empId&&t.targetDate).forEach(t=>{set[String(t.targetDate).slice(0,7)]=1;});
+  const k=Object.keys(set).sort();
+  return k.length?ymRange(k[0],k[k.length-1]):[];
+}
+function resStats(s){
+  recalcStatuses();
+  const t=DB.rTasks.filter(x=>x.empId===s.empId);
+  const done=t.filter(x=>x.status==='Completed'),pend=t.filter(x=>x.status==='Pending'),miss=t.filter(x=>x.status==='Missed');
+  const a=pmsAgg(s.empId,resMonths(s.empId));
+  const pw=DB.rPW.filter(p=>p.empId===s.empId&&p.status!=='Resolved');
+  return{t,done,pend,miss,a,pw};
+}
+function resKpiClr(v){return v===null||v===undefined?'var(--muted)':v>=90?'var(--accent2)':v>=70?'var(--accent3)':'var(--danger)';}
+function renderResigned(){
+  const tb=document.getElementById('res-table');if(!tb)return;
+  const list=[...DB.resigned].sort((a,b)=>(b.resignDate||'').localeCompare(a.resignDate||''));
+  document.getElementById('res-count').textContent=list.length;
+  if(!list.length){tb.innerHTML='<tr><td colspan="12" class="empty-state"><div class="ei">◌</div><p>No resigned employees</p></td></tr>';document.getElementById('res-detail').innerHTML='';return;}
+  tb.innerHTML=list.map(s=>{
+    const x=resStats(s);const fin=x.a.fin;
+    const finTxt=fin.score!==undefined?`<strong style="color:${fin.band[2]}">${fin.score}</strong><br><span style="font-size:10px;color:var(--muted)">${mtEsc(fin.band[1])}</span>`:`<span style="font-size:11px;color:var(--muted)">${mtEsc(fin.text||'—')}</span>`;
+    return`<tr${s.empId===resSel?' style="background:var(--accent-light)"':''}>
+      <td><span style="font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:700">${mtEsc(s.empId)}</span></td>
+      <td><strong>${mtEsc(s.name)}</strong><br><span style="font-size:10px;color:var(--muted2)">${mtEsc(s.designation||'')}</span></td>
+      <td style="font-size:12px">${mtEsc(s.team||'—')}</td>
+      <td style="font-size:12px;color:var(--muted)">${formatDate(s.doj)}</td>
+      <td style="font-size:12px;font-weight:600">${formatDate(s.resignDate)}${s.resignReason?`<br><span style="font-size:10px;color:var(--muted2)">${mtEsc(s.resignReason)}</span>`:''}</td>
+      <td style="font-family:var(--mono);font-weight:600">${x.done.length}/${x.t.length}</td>
+      <td style="font-family:var(--mono);font-weight:700;color:var(--accent3)">${x.pend.length}</td>
+      <td style="font-family:var(--mono);font-weight:700;color:var(--danger)">${x.miss.length}</td>
+      <td style="font-family:var(--mono);font-weight:800;color:${resKpiClr(x.a.kpi)}">${x.a.kpi!==null?Math.round(x.a.kpi):'—'}</td>
+      <td>${finTxt}</td>
+      <td style="font-family:var(--mono);font-weight:700">${x.pw.length}</td>
+      <td style="white-space:nowrap"><button class="btn btn-primary btn-sm" data-e="${mtEsc(s.empId)}" onclick="resView(this.dataset.e)">View</button> <button class="btn btn-ghost btn-sm" data-e="${mtEsc(s.empId)}" onclick="resPrint(this.dataset.e)">🖨 PMS</button> <button class="btn btn-ghost btn-sm" data-e="${mtEsc(s.empId)}" onclick="reinstateEmp(this.dataset.e)">↺ Reinstate</button></td>
+    </tr>`;}).join('');
+  if(resSel&&DB.resigned.some(s=>s.empId===resSel))resView(resSel,true);else document.getElementById('res-detail').innerHTML='';
+}
+function resPrint(id){
+  const y=document.getElementById('pms-year');
+  if(y&&!y.options.length)renderPmsReport();
+  pmsPrint(id);
+}
+function resView(id,keep){
+  resSel=id;
+  const s=DB.resigned.find(x=>x.empId===id);if(!s)return;
+  const x=resStats(s);
+  const months=resMonths(id);
+  const openTasks=x.t.filter(t=>t.status==='Pending'||t.status==='Missed').sort((a,b)=>(a.targetDate||'').localeCompare(b.targetDate||''));
+  const taskRows=openTasks.map(t=>`<tr><td style="font-family:var(--mono);font-size:10px;color:var(--muted2)">${mtEsc(t.id)}</td><td><strong style="font-size:12px">${mtEsc(t.taskName)}</strong></td><td style="font-size:11px;color:var(--muted)">${mtEsc(t.area)}</td><td style="font-family:var(--mono);font-size:11px;color:var(--accent3);font-weight:700">${mtEsc(t.taskType)}</td><td style="font-family:var(--mono);font-size:11px">${formatDate(t.targetDate)}</td><td>${statusBadge(t.status)}</td></tr>`).join('')||'<tr><td colspan="6" class="empty-state"><p>No pending or missed tasks</p></td></tr>';
+  const pwRows=x.pw.map(p=>`<tr><td style="font-family:var(--mono);font-size:10px;color:var(--muted2)">${mtEsc(p.id)}</td><td style="font-size:12px">${mtEsc(p.desc)}</td><td style="font-size:11px">${mtEsc(p.category)}</td><td style="font-size:11px">${mtEsc(p.priority)}</td><td style="font-family:var(--mono);font-size:11px">${formatDate(p.dueDate)}</td><td style="font-size:11px">${mtEsc(p.status)}</td></tr>`).join('')||'<tr><td colspan="6" class="empty-state"><p>No open pending works</p></td></tr>';
+  const num=v=>v===''||v===null||v===undefined?'<span style="color:var(--muted2)">—</span>':v;
+  const pmsRows=months.slice().reverse().map(m=>{const a=pmsAgg(id,[m]);const f=a.fin;
+    return`<tr><td style="font-weight:600">${ymLabel(m)}</td>${COMPS.map(c=>`<td style="text-align:center">${num(a.per[c.key])}</td>`).join('')}<td style="text-align:center;font-weight:700">${num(a.comp)}</td><td style="text-align:center;font-weight:700">${a.kpi!==null?a.kpi:'—'}</td><td style="text-align:center">${f.score!==undefined?`<strong style="color:${f.band[2]}">${f.score}</strong>`:'—'}</td></tr>`;}).join('')||'<tr><td colspan="10" class="empty-state"><p>No PMS data</p></td></tr>';
+  const fin=x.a.fin;
+  document.getElementById('res-detail').innerHTML=`
+  <div class="section">
+    <div class="section-title">${mtEsc(s.name)} · ${mtEsc(s.empId)} <span class="badge">Resigned ${formatDate(s.resignDate)}</span></div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Overall PMS (all months): ${fin.score!==undefined?`<strong style="color:${fin.band[2]}">${fin.score} · ${mtEsc(fin.band[1])}</strong>`:mtEsc(fin.text||'—')}</div>
+    <div style="font-weight:700;font-size:13px;margin:10px 0 6px">Pending / Missed Tasks (${openTasks.length})</div>
+    <div class="table-wrap"><table><thead><tr><th>ID</th><th>Task</th><th>Area</th><th>Type</th><th>Target</th><th>Status</th></tr></thead><tbody>${taskRows}</tbody></table></div>
+    <div style="font-weight:700;font-size:13px;margin:16px 0 6px">Open Pending Works (${x.pw.length})</div>
+    <div class="table-wrap"><table><thead><tr><th>ID</th><th>Description</th><th>Category</th><th>Priority</th><th>Due</th><th>Status</th></tr></thead><tbody>${pwRows}</tbody></table></div>
+    <div style="font-weight:700;font-size:13px;margin:16px 0 6px">PMS — Month by Month</div>
+    <div class="table-wrap"><table><thead><tr><th>Month</th>${COMPS.map(c=>`<th style="text-align:center">${mtEsc(c.label)}</th>`).join('')}<th style="text-align:center">Comp Avg</th><th style="text-align:center">KPI</th><th style="text-align:center">Final</th></tr></thead><tbody>${pmsRows}</tbody></table></div>
+  </div>`;
+  if(!keep)document.getElementById('res-detail').scrollIntoView({behavior:'smooth',block:'start'});
+}
 </script>
 </body>
 </html>
@@ -5532,7 +5652,7 @@ function pmsAgg(empId,months){
   const per={};COMPS.forEach(c=>{per[c.key]=compAvg(recs.map(r=>r[c.key]));});
   const comp=compAvg(recs.map(r=>compAvg(COMPS.map(c=>r[c.key]))));
   const set={};months.forEach(m=>{set[m]=1;});
-  const t=DB.tasks.filter(x=>x.empId===empId&&set[String(x.targetDate||'').slice(0,7)]&&x.kpi!==''&&x.kpi!==undefined&&!isNaN(parseInt(x.kpi)));
+  const t=DB.tasks.concat(DB.rTasks||[]).filter(x=>x.empId===empId&&set[String(x.targetDate||'').slice(0,7)]&&x.kpi!==''&&x.kpi!==undefined&&!isNaN(parseInt(x.kpi)));
   const kpi=t.length?Math.round(t.reduce((a,x)=>a+parseInt(x.kpi),0)/t.length*10)/10:null;
   return{n:recs.length,per,comp,kpi,tasks:t.length,fin:compFinal(comp,kpi)};
 }
@@ -5647,7 +5767,7 @@ function pmsPrint(empId){
   if(!months.length){toast('Choose a valid period first','var(--danger)');return;}
   recalcStatuses();
   const isEmp=!!(currentUser&&currentUser.role==='employee');
-  let list=[...DB.staff].sort((a,b)=>a.name.localeCompare(b.name));
+  let list=[...DB.staff,...(DB.resigned||[])].sort((a,b)=>a.name.localeCompare(b.name));
   if(empId)list=list.filter(x=>Array.isArray(empId)?empId.includes(x.empId):x.empId===empId);
   if(!list.length){toast('No employees','var(--danger)');return;}
   const title=list.length===1?'PMS_'+list[0].name.replace(/[^\w]+/g,'_')+'_'+r.from+'_to_'+r.to:'PMS_Appraisal_Sheets_'+r.from+'_to_'+r.to;
