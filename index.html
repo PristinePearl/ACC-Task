@@ -1574,7 +1574,7 @@ tr.comp-dirty td:first-child{box-shadow:inset 3px 0 0 var(--accent3);}
 <div class="page" id="page-pms-reports">
   <div class="page-header">
     <div class="page-title-wrap"><div class="page-title" id="pms-title">PMS Reports</div><div class="page-sub" id="pms-subtitle">Monthly · Quarterly · Half-yearly · Yearly · Custom — KPI 60% + Competencies 40%</div></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" id="pms-printall" onclick="pmsOpenPrint()">🖨 Print Appraisal Sheets</button><button class="btn btn-ghost btn-sm" onclick="pmsExport()">⬇ Export CSV</button></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" id="pms-printall" onclick="pmsOpenPrint()">🖨 Print PMS Sheets</button><button class="btn btn-ghost btn-sm" onclick="pmsExport()">⬇ Export CSV</button></div>
   </div>
   <div class="section">
     <div class="comp-head">
@@ -5553,7 +5553,7 @@ function renderPmsReport(){
   const{r,months,rows}=pmsRows();
   const isEmp=!!(currentUser&&currentUser.role==='employee');
   document.getElementById('pms-title').textContent=isEmp?'My PMS':'PMS Reports';
-  document.getElementById('pms-printall').textContent=isEmp?'🖨 Print My Appraisal':'🖨 Print Appraisal Sheets';
+  document.getElementById('pms-printall').textContent=isEmp?'🖨 Print My PMS':'🖨 Print PMS Sheets';
   if(isEmp)document.getElementById('pms-subtitle').textContent='Your performance: KPI 60% + Competencies 40%';
   document.getElementById('pms-label').textContent=months.length?r.label+' · '+ymLabel(r.from)+' to '+ymLabel(r.to)+' ('+months.length+' month'+(months.length>1?'s':'')+')':r.label;
   if(!months.length){document.getElementById('pms-body').innerHTML='<tr><td colspan="14" class="empty-state"><p>Choose a valid range</p></td></tr>';document.getElementById('pms-mw-head').innerHTML='';document.getElementById('pms-mw-body').innerHTML='';document.getElementById('pms-stats').textContent='';return;}
@@ -5779,4 +5779,4 @@ function pmsPrintSummary(mode,ids,mw){
   w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${E(title)}</title><style>${css}</style></head><body>${body}${ft}</body></html>`);w.document.close();
   setTimeout(()=>{try{w.focus();w.print();}catch(e){}},500);
 }
-</script>
+</script> 
