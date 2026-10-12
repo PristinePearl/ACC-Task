@@ -1059,6 +1059,20 @@ sidebar-overlay{
 .aow-chip button:hover{background:var(--danger);color:#fff;}
 .badge-excused{background:#eef2ff;color:#3b5bdb;border:1px solid rgba(59,91,219,.2);}
 .badge-excused::before{background:#3b5bdb;}
+
+/* ── Competencies (manager ratings) ── */
+.comp-in{width:54px;text-align:center;font-family:var(--mono);font-weight:700;padding:8px 4px;}
+.comp-rm{min-width:90px;width:100%;}
+.comp-sub{font-size:10px;color:var(--muted2);font-family:var(--mono);}
+.comp-num{font-family:var(--mono);font-weight:800;font-size:15px;letter-spacing:-.5px;}
+.comp-pill{display:inline-block;font-size:11px;font-weight:700;border:1.5px solid;border-radius:20px;padding:2px 9px;white-space:nowrap;}
+.comp-bad{border-color:var(--danger)!important;background:var(--danger-light)!important;}
+tr.comp-dirty td:first-child{box-shadow:inset 3px 0 0 var(--accent3);}
+.comp-head{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px;}
+.comp-head .form-group{margin:0;min-width:170px;}
+#comp-table{min-width:1000px;}
+#pms-table th,#pms-table td{padding-left:8px;padding-right:8px;}
+#comp-table th.comp-th{text-align:center;white-space:normal;min-width:64px;}
 </style>
 </head>
 <body>
@@ -1172,6 +1186,8 @@ sidebar-overlay{
     <div class="nav-item" data-page="pending-works">
       <span class="nav-icon">⧗</span><span class="nav-item-label">Pending Works</span>
     </div>
+    <div class="nav-item" data-page="competencies"><span class="nav-icon">★</span><span class="nav-item-label">Competencies</span></div>
+    <div class="nav-item" data-page="pms-reports"><span class="nav-icon">▤</span><span class="nav-item-label">PMS Reports</span></div>
     <div class="nav-item" data-page="holidays"><span class="nav-icon">☼</span><span class="nav-item-label">Holidays &amp; Leave</span></div>
     <div class="nav-item" data-page="activity"><span class="nav-icon">☰</span><span class="nav-item-label">Activity Log</span></div>
     <div class="nav-item" data-page="recycle"><span class="nav-icon">♻</span><span class="nav-item-label">Recycle Bin</span></div>
@@ -1187,6 +1203,9 @@ sidebar-overlay{
     </div>
     <div class="nav-item" data-page="pending-works" id="nav-emp-pending" style="display:none">
       <span class="nav-icon">⧗</span><span class="nav-item-label">Pending Works</span>
+    </div>
+    <div class="nav-item" data-page="pms-reports" id="nav-emp-pms" style="display:none">
+      <span class="nav-icon">▤</span><span class="nav-item-label">My PMS</span>
     </div>
   </div>
 </div>
@@ -1513,6 +1532,72 @@ sidebar-overlay{
   </div>
 </div>
 
+
+<!-- COMPETENCIES -->
+<div class="page" id="page-competencies">
+  <div class="page-header">
+    <div class="page-title-wrap"><div class="page-title">Competencies</div><div class="page-sub">Manager ratings · 40% of the final appraisal, KPI is 60%</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" onclick="compExport()">⬇ Export CSV</button>
+      <button class="btn btn-ghost btn-sm" onclick="fullSync()">↻ Refresh</button>
+    </div>
+  </div>
+  <div class="alert alert-info">★ <div>Rate each of the six competencies <b>0–100</b> for the selected month. <b>Competency Score</b> = average of the ratings entered. <b>KPI Score</b> = average task KPI for tasks due that month (missed tasks count as 0). <b>Final Score</b> = KPI × 60% + Competency × 40%. Rating: <span id="comp-legend"></span></div></div>
+  <div class="section">
+    <div class="comp-head">
+      <div class="form-group"><label>Appraisal Month</label><div style="display:flex;gap:6px;align-items:center"><button class="btn btn-ghost btn-sm" onclick="compShift(-1)" title="Previous month">◀</button><input type="month" id="comp-period" onchange="compSetPeriod(this.value)"/><button class="btn btn-ghost btn-sm" onclick="compShift(1)" title="Next month">▶</button></div></div>
+      <div class="form-group" style="flex:1"><label>Search</label><input id="comp-q" placeholder="Name, Emp ID, designation, team…" oninput="compFilter()"/></div>
+      <div id="comp-summary" style="font-size:12px;color:var(--muted);font-weight:600;padding-bottom:10px"></div>
+      <button class="btn btn-primary" id="comp-saveall" style="display:none" onclick="compSaveAll()">Save all changes</button>
+    </div>
+    <div id="comp-months" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:14px"></div>
+    <div class="table-wrap"><table id="comp-table">
+      <thead><tr>
+        <th>Associate</th>
+        <th class="comp-th" title="Attendance, reporting on time and meeting deadlines">Punctuality</th>
+        <th class="comp-th" title="Clarity of communication, responsiveness and support to the team">Communication &amp; Team Work</th>
+        <th class="comp-th" title="Prioritising, scheduling and organising own work">Work Planning</th>
+        <th class="comp-th" title="Taking the first step and proposing improvements without being asked">Process Initiation</th>
+        <th class="comp-th" title="Job and domain knowledge, and keeping skills up to date">Knowledge</th>
+        <th class="comp-th" title="Honesty, ethics, confidentiality and ownership of actions">Integrity</th>
+        <th class="comp-th">Competency Score</th>
+        <th class="comp-th">KPI Score</th>
+        <th class="comp-th">Final Score</th>
+        <th class="comp-th">Final Rating</th>
+        <th>Remarks</th><th></th>
+      </tr></thead>
+      <tbody id="comp-body"></tbody></table></div>
+  </div>
+</div>
+
+<!-- PMS REPORTS -->
+<div class="page" id="page-pms-reports">
+  <div class="page-header">
+    <div class="page-title-wrap"><div class="page-title" id="pms-title">PMS Reports</div><div class="page-sub" id="pms-subtitle">Monthly · Quarterly · Half-yearly · Yearly · Custom — KPI 60% + Competencies 40%</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" id="pms-printall" onclick="pmsOpenPrint()">🖨 Print Appraisal Sheets</button><button class="btn btn-ghost btn-sm" onclick="pmsExport()">⬇ Export CSV</button></div>
+  </div>
+  <div class="section">
+    <div class="comp-head">
+      <div class="form-group"><label>Report</label><select id="pms-type" onchange="renderPmsReport()"><option value="month">Monthly</option><option value="quarter" selected>Quarterly</option><option value="half">Half-Yearly</option><option value="year">Yearly</option><option value="custom">Custom Range</option></select></div>
+      <div class="form-group" id="pms-g-basis"><label>Year Basis</label><select id="pms-basis" onchange="pmsFillYears();renderPmsReport()"><option value="FY" selected>Financial (Apr–Mar)</option><option value="CY">Calendar (Jan–Dec)</option></select></div>
+      <div class="form-group" id="pms-g-year"><label>Year</label><select id="pms-year" onchange="renderPmsReport()"></select></div>
+      <div class="form-group" id="pms-g-sub"><label id="pms-sub-label">Quarter</label><select id="pms-sub" onchange="renderPmsReport()"></select></div>
+      <div class="form-group" id="pms-g-month"><label>Month</label><input type="month" id="pms-month" onchange="renderPmsReport()"/></div>
+      <div class="form-group" id="pms-g-from"><label>From</label><input type="month" id="pms-from" onchange="renderPmsReport()"/></div>
+      <div class="form-group" id="pms-g-to"><label>To</label><input type="month" id="pms-to" onchange="renderPmsReport()"/></div>
+    </div>
+    <div id="pms-label" style="font-size:13px;font-weight:700;margin-bottom:6px"></div>
+    <div id="pms-stats" style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:14px"></div>
+    <div class="table-wrap"><table id="pms-table" style="min-width:0">
+      <thead><tr><th>#</th><th>Associate</th><th class="comp-th">Months Rated</th><th class="comp-th">Punctuality</th><th class="comp-th">Comm. &amp; Team Work</th><th class="comp-th">Work Planning</th><th class="comp-th">Process Initiation</th><th class="comp-th">Knowledge</th><th class="comp-th">Integrity</th><th class="comp-th">Competency Score</th><th class="comp-th">KPI Score</th><th class="comp-th">Final Score</th><th class="comp-th">Final Rating</th><th></th></tr></thead>
+      <tbody id="pms-body"></tbody></table></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Month-wise Final Score <span class="badge" id="pms-mw-count">0</span></div>
+    <div class="table-wrap"><table id="pms-mw"><thead id="pms-mw-head"></thead><tbody id="pms-mw-body"></tbody></table></div>
+    <div style="font-size:11px;color:var(--muted2);margin-top:8px">Each cell = KPI × 60% + Competency × 40% for that month. “c 72” = competency rated but no task KPI that month.</div>
+  </div>
+</div>
 
 <!-- HOLIDAYS & LEAVE -->
 <div class="page" id="page-holidays">
@@ -1898,7 +1983,7 @@ sidebar-overlay{
 
 <script>
 const DB_URL='https://script.google.com/macros/s/AKfycby_j29z-w7L4w0FqVYy-VHYtXnuhO9QhPPWUGZ3b02bOgXeH--qrqDW0EyY-iYRVMMD/exec';
-let DB={staff:[],aow:[],tasks:[],pendingWorks:[],reminders:[],taskMaster:[],comments:[],templates:[],seen:{},holidays:[],holidaySet:{},leaves:[],settings:{weeklyOff:[0]}};
+let DB={staff:[],aow:[],tasks:[],pendingWorks:[],reminders:[],taskMaster:[],comments:[],templates:[],seen:{},holidays:[],holidaySet:{},leaves:[],competencies:[],settings:{weeklyOff:[0]}};
 let dbConnected=false;
 
 let authToken='';
@@ -1938,6 +2023,7 @@ async function fullSync(){
     if(Array.isArray(d.seen)){const sn={};d.seen.forEach(x=>{sn[String(x)]=1;});seenPending.forEach(x=>{sn[x]=1;});DB.seen=sn;}
     if(Array.isArray(d.holidays)){DB.holidays=d.holidays.map(h=>({date:fmtDate(h.DATE),name:String(h.NAME||'')})).filter(h=>h.date);}
     if(Array.isArray(d.leaves)){DB.leaves=d.leaves.map(l=>({id:String(l.LEAVE_ID||''),empId:String(l.EMP_ID||''),name:String(l.NAME||''),from:fmtDate(l.FROM_DATE),to:fmtDate(l.TO_DATE),reason:String(l.REASON||'')})).filter(l=>l.id&&l.from&&l.to);}
+    if(Array.isArray(d.competencies)){DB.competencies=d.competencies.map(c=>({empId:String(c.EMP_ID||''),name:String(c.NAME||''),period:String(c.PERIOD||'').slice(0,7),punctuality:cn(c.PUNCTUALITY),communication:cn(c.COMMUNICATION_TEAMWORK),planning:cn(c.WORK_PLANNING),initiation:cn(c.PROCESS_INITIATION),knowledge:cn(c.KNOWLEDGE),integrity:cn(c.INTEGRITY),remarks:String(c.REMARKS||''),ratedBy:String(c.RATED_BY||''),updatedAt:String(c.UPDATED_AT||'')})).filter(c=>c.empId&&c.period);}
     if(d.settings){const raw=d.settings.WEEKLY_OFF===undefined?'0':String(d.settings.WEEKLY_OFF);DB.settings.weeklyOff=raw.split(',').map(x=>x.trim()).filter(x=>x!=='').map(Number).filter(x=>x>=0&&x<=6);}
     DB.holidaySet={};DB.holidays.forEach(h=>{DB.holidaySet[h.date]=1;});
     if(currentUser&&d.me&&d.me.displayName&&!currentUser.displayName)currentUser.displayName=d.me.displayName;
@@ -2604,7 +2690,7 @@ function renderStatusTable(){
   document.getElementById('st-pend').textContent=DB.tasks.filter(t=>t.status==='Pending').length;
   document.getElementById('st-miss').textContent=DB.tasks.filter(t=>t.status==='Missed').length;
   const tb=document.getElementById('status-table');
-  if(!tasks.length){tb.innerHTML='<tr><td colspan="11" class="empty-state"><div class="ei">◌</div><p>No tasks match filter</p></td></tr>';return;}
+  if(!tasks.length){tb.innerHTML='<tr><td colspan="13" class="empty-state"><div class="ei">◌</div><p>No tasks match filter</p></td></tr>';return;}
   tb.innerHTML=tasks.map(t=>`<tr class="row-clickable" onclick="openTaskDetailModal('${t.id}')">
     <td style="font-family:var(--mono);font-size:10px;color:var(--muted2)">${t.id}</td>
     <td><strong>${t.name}</strong></td>
@@ -3235,7 +3321,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 function resetDB(){
   DB.staff=[];DB.aow=[];DB.tasks=[];DB.pendingWorks=[];DB.reminders=[];DB.taskMaster=[];
-  DB.comments=[];DB.templates=[];DB.seen={};DB.holidays=[];DB.holidaySet={};DB.leaves=[];
+  DB.comments=[];DB.templates=[];DB.seen={};DB.holidays=[];DB.holidaySet={};DB.leaves=[];DB.competencies=[];
   DB.settings={weeklyOff:[0]};
 }
 
@@ -3260,6 +3346,7 @@ function startSession(){
     document.getElementById('emp-selector-section').style.display='none';
     document.getElementById('nav-emp-dash').style.display='flex';
     document.getElementById('nav-emp-pending').style.display='flex';
+    document.getElementById('nav-emp-pms').style.display='flex';
     showPage('emp-dash');fullSync().then(()=>{renderEmpDashboard();checkAndShowSplash();});
   }
 }
@@ -3275,6 +3362,7 @@ function doLogout(){
   document.getElementById('topbar-username').textContent='';
   document.getElementById('nav-emp-dash').style.display='none';
   document.getElementById('nav-emp-pending').style.display='none';
+  document.getElementById('nav-emp-pms').style.display='none';
   document.getElementById('reminder-splash').style.display='none';
   ['stat-modal','task-detail-modal','update-modal'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('open');});
 }
@@ -3359,7 +3447,7 @@ function renderEmpDashboard(){
 document.querySelectorAll('.nav-item').forEach(el=>{
   el.addEventListener('click',()=>{
     const page=el.dataset.page;
-    if(currentUser&&currentUser.role==='employee'&&page!=='emp'&&page!=='emp-dash'&&page!=='pending-works')return;
+    if(currentUser&&currentUser.role==='employee'&&page!=='emp'&&page!=='emp-dash'&&page!=='pending-works'&&page!=='pms-reports')return;
     document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
     document.querySelectorAll('.page').forEach(x=>{
       if(x.id==='page-pending-works'){x.style.display='none';x.classList.remove('active');}
@@ -3379,6 +3467,8 @@ document.querySelectorAll('.nav-item').forEach(el=>{
     if(page==='emp-dash')renderEmpDashboard();
     if(page==='pending-works')renderPendingWorks();
     if(page==='holidays')renderHolidays();
+    if(page==='competencies')renderCompetencies();
+    if(page==='pms-reports')renderPmsReport();
     if(page==='activity')loadActivity();
     if(page==='recycle')loadRecycle();
   });
@@ -5210,4 +5300,483 @@ window.refreshAllViews=function(){
   _prevRefreshAll();
   const p=document.getElementById('page-holidays');if(p&&p.classList.contains('active'))renderHolidays();
 };
+</script>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// COMPETENCIES — manager rates Punctuality, Communication & Team Work,
+// Work Planning, Process Initiation (0–100) per employee per month.
+// Final Score = KPI × 60% + Competency average × 40%   (same as the PMS Excel)
+// ══════════════════════════════════════════════════════════════
+const COMPS=[
+  {key:'punctuality',  label:'Punctuality',               hint:'Attendance, reporting on time and meeting deadlines'},
+  {key:'communication',label:'Communication & Team Work', hint:'Clarity of communication, responsiveness and support to the team'},
+  {key:'planning',     label:'Work Planning',             hint:'Prioritising, scheduling and organising own work'},
+  {key:'initiation',   label:'Process Initiation',        hint:'Taking the first step and proposing improvements without being asked'},
+  {key:'knowledge',    label:'Knowledge',                 hint:'Job and domain knowledge, and keeping skills up to date'},
+  {key:'integrity',    label:'Integrity',                 hint:'Honesty, ethics, confidentiality and ownership of actions'}
+];
+const KPI_WEIGHT=0.6,COMP_WEIGHT=0.4;
+// lower limit of each band on the 0–100 final score (edit here to change the bands)
+const RATING_BANDS=[[90,'Outstanding','var(--accent2)'],[70,'Exceeds Expectations','var(--accent)'],[50,'Meets Expectations','var(--text2)'],[30,'Needs Improvement','var(--accent3)'],[0,'Unsatisfactory','var(--danger)']];
+let compPeriod=todayStr().slice(0,7);
+const compDirty={};
+
+function cn(v){return(v===''||v===null||v===undefined||isNaN(Number(v)))?'':Number(v);}
+function compRating(score){for(const b of RATING_BANDS)if(score>=b[0])return b;return RATING_BANDS[RATING_BANDS.length-1];}
+function compRec(empId,period){return DB.competencies.find(c=>c.empId===empId&&c.period===period);}
+function compAvg(vals){const f=vals.filter(v=>v!==''&&v!==null&&!isNaN(v));return f.length?Math.round(f.reduce((a,b)=>a+b,0)/f.length*10)/10:'';}
+// average task KPI for tasks due in the month (Completed and Missed; Pending/Excused have no KPI)
+function compKpi(empId,period){
+  const t=DB.tasks.filter(x=>x.empId===empId&&String(x.targetDate||'').slice(0,7)===period&&x.kpi!==''&&x.kpi!==undefined&&!isNaN(parseInt(x.kpi)));
+  if(!t.length)return null;
+  return{avg:Math.round(t.reduce((a,x)=>a+parseInt(x.kpi),0)/t.length*10)/10,n:t.length};
+}
+function compFinal(avg,kpi){
+  if(avg==='')return{text:'Pending Manager Ratings'};
+  if(kpi===null)return{text:'No KPI data'};
+  const score=Math.round((kpi*KPI_WEIGHT+avg*COMP_WEIGHT)*10)/10;
+  return{score,band:compRating(score)};
+}
+
+function compActionsHTML(hasRec){
+  return`<button class="btn btn-success btn-sm" onclick="compSaveRow(this)">Save</button>`+(hasRec?` <button class="btn btn-ghost btn-sm" style="color:var(--danger)" title="Clear this month's ratings" onclick="compDeleteRow(this)">🗑</button>`:'');
+}
+function compRowHTML(s){
+  const rec=compRec(s.empId,compPeriod);const r=rec||{};
+  const k=compKpi(s.empId,compPeriod);
+  const inputs=COMPS.map(c=>`<td style="text-align:center"><input type="number" class="comp-in" min="0" max="100" step="1" data-k="${c.key}" value="${r[c.key]===undefined?'':r[c.key]}" oninput="compInput(this)" title="${mtEsc(c.hint)}"/></td>`).join('');
+  return`<tr data-emp="${mtEsc(s.empId)}" data-kpi="${k?k.avg:''}" data-q="${mtEsc((s.name+' '+s.empId+' '+(s.designation||'')+' '+(s.team||'')).toLowerCase())}">
+    <td><strong>${mtEsc(s.name)}</strong><br><span class="comp-sub">${mtEsc(s.designation||s.empId)}</span></td>
+    ${inputs}
+    <td class="c-avg" style="text-align:center"></td>
+    <td class="c-kpi" style="text-align:center">${k?`<span class="comp-num">${k.avg}</span><br><span class="comp-sub">${k.n} task${k.n>1?'s':''}</span>`:'<span class="comp-sub">No tasks</span>'}</td>
+    <td class="c-final" style="text-align:center"></td>
+    <td class="c-rate" style="text-align:center"></td>
+    <td><input class="comp-rm" data-k="remarks" placeholder="Remarks" value="${mtEsc(r.remarks||'')}" oninput="compInput(this)"/></td>
+    <td class="c-act" style="white-space:nowrap">${compActionsHTML(!!rec)}</td>
+  </tr>`;
+}
+function compRowCalc(tr){
+  const vals=[...tr.querySelectorAll('.comp-in')].map(i=>i.value===''?'':Number(i.value));
+  const avg=compAvg(vals);
+  const kpi=tr.dataset.kpi===''?null:Number(tr.dataset.kpi);
+  tr.querySelector('.c-avg').innerHTML=avg===''?'<span class="comp-sub">—</span>':`<span class="comp-num">${avg}</span>`;
+  const f=compFinal(avg,kpi);
+  const fe=tr.querySelector('.c-final'),re=tr.querySelector('.c-rate');
+  if(f.score===undefined){fe.innerHTML=`<span class="comp-sub">${f.text}</span>`;re.innerHTML=`<span class="comp-sub">${avg===''?'Pending Evaluation':'—'}</span>`;return;}
+  fe.innerHTML=`<span class="comp-num" style="color:${f.band[2]}">${f.score}</span>`;
+  re.innerHTML=`<span class="comp-pill" style="color:${f.band[2]}">${f.band[1]}</span>`;
+}
+function compInput(el){
+  const tr=el.closest('tr');
+  if(el.type==='number'){const v=el.value;el.classList.toggle('comp-bad',v!==''&&(Number(v)<0||Number(v)>100));}
+  compDirty[tr.dataset.emp]=1;tr.classList.add('comp-dirty');
+  compRowCalc(tr);compDirtyBar();
+}
+function compDirtyBar(){
+  const n=Object.keys(compDirty).length;const b=document.getElementById('comp-saveall');
+  if(b){b.style.display=n?'inline-flex':'none';b.textContent='Save all changes ('+n+')';}
+}
+function compFilter(){
+  const q=(document.getElementById('comp-q').value||'').toLowerCase().trim();
+  document.querySelectorAll('#comp-body tr[data-emp]').forEach(tr=>{tr.style.display=(!q||tr.dataset.q.includes(q))?'':'none';});
+}
+function compSummary(){
+  const el=document.getElementById('comp-summary');if(!el)return;
+  const rated=DB.staff.filter(s=>{const r=compRec(s.empId,compPeriod);return r&&compAvg(COMPS.map(c=>r[c.key]))!=='';}).length;
+  el.textContent=`Rated ${rated} of ${DB.staff.length} employees`;
+  compMonthChips();
+}
+function renderCompetencies(force){
+  const body=document.getElementById('comp-body');if(!body)return;
+  if(!force&&Object.keys(compDirty).length)return;   // never wipe unsaved ratings on a background refresh
+  Object.keys(compDirty).forEach(k=>delete compDirty[k]);
+  document.getElementById('comp-period').value=compPeriod;
+  document.getElementById('comp-legend').innerHTML=RATING_BANDS.map((b,i)=>`<b style="color:${b[2]}">${b[1]}</b> ${i===0?'≥ '+b[0]:i===RATING_BANDS.length-1?'&lt; '+RATING_BANDS[i-1][0]:b[0]+'–'+(RATING_BANDS[i-1][0]-0.1).toFixed(1)}`).join(' · ');
+  recalcStatuses();
+  const staff=[...DB.staff].sort((a,b)=>a.name.localeCompare(b.name));
+  body.innerHTML=staff.map(compRowHTML).join('')||'<tr><td colspan="13" class="empty-state"><div class="ei">◌</div><p>No employees</p></td></tr>';
+  body.querySelectorAll('tr[data-emp]').forEach(compRowCalc);
+  compFilter();compDirtyBar();compSummary();compMonthChips();
+}
+function compSetPeriod(v){
+  if(!/^\d{4}-\d{2}$/.test(v)){document.getElementById('comp-period').value=compPeriod;return;}
+  if(Object.keys(compDirty).length&&!confirm('Discard unsaved ratings for '+compPeriod+'?')){document.getElementById('comp-period').value=compPeriod;return;}
+  compPeriod=v;renderCompetencies(true);
+}
+
+async function compSaveTr(tr,silent){
+  const empId=tr.dataset.emp,period=compPeriod;
+  const d={empId,period,remarks:tr.querySelector('[data-k="remarks"]').value.trim()};
+  let any=false;
+  for(const c of COMPS){
+    const inp=tr.querySelector(`[data-k="${c.key}"]`);const v=inp.value.trim();
+    if(v===''){d[c.key]='';continue;}
+    const n=Number(v);
+    if(!isFinite(n)||n<0||n>100){toast(c.label+' must be between 0 and 100','var(--danger)');inp.focus();return false;}
+    d[c.key]=n;any=true;
+  }
+  if(!any){toast('Enter at least one rating','var(--danger)');return false;}
+  const s=DB.staff.find(x=>x.empId===empId);
+  const old=compRec(empId,period);
+  const rec={empId,name:s?s.name:empId,period,punctuality:d.punctuality,communication:d.communication,planning:d.planning,initiation:d.initiation,knowledge:d.knowledge,integrity:d.integrity,remarks:d.remarks,ratedBy:(currentUser&&(currentUser.displayName||currentUser.username))||'',updatedAt:''};
+  DB.competencies=DB.competencies.filter(c=>!(c.empId===empId&&c.period===period));DB.competencies.push(rec);
+  try{
+    await dbPost(Object.assign({action:'saveCompetency'},d));
+    if(period===compPeriod){delete compDirty[empId];tr.classList.remove('comp-dirty');tr.querySelector('.c-act').innerHTML=compActionsHTML(true);}
+    compDirtyBar();compSummary();
+    if(!silent)toast('✓ Ratings saved — '+rec.name,'var(--accent2)');
+    return true;
+  }catch(e){
+    DB.competencies=DB.competencies.filter(c=>!(c.empId===empId&&c.period===period));if(old)DB.competencies.push(old);
+    toast('Not saved: '+e.message,'var(--danger)');return false;
+  }
+}
+function compSaveRow(btn){return compSaveTr(btn.closest('tr'));}
+async function compSaveAll(){
+  const rows=[...document.querySelectorAll('#comp-body tr.comp-dirty')];
+  let ok=0;
+  for(const tr of rows){if(await compSaveTr(tr,true))ok++;}
+  if(ok)toast(`✓ Saved ${ok} employee${ok>1?'s':''}`,'var(--accent2)');
+}
+async function compDeleteRow(btn){
+  const tr=btn.closest('tr');const empId=tr.dataset.emp,period=compPeriod;
+  const s=DB.staff.find(x=>x.empId===empId);
+  if(!confirm('Clear '+period+' competency ratings for '+(s?s.name:empId)+'?'))return;
+  const old=compRec(empId,period);
+  DB.competencies=DB.competencies.filter(c=>!(c.empId===empId&&c.period===period));
+  try{await dbPost({action:'deleteCompetency',empId,period});toast('Ratings cleared','var(--accent3)');delete compDirty[empId];renderCompetencies(true);}
+  catch(e){if(old)DB.competencies.push(old);toast('Failed: '+e.message,'var(--danger)');}
+}
+
+// CSV in the same column order as the PMS Excel summary
+function compExport(){
+  recalcStatuses();
+  const esc=v=>{v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+  const head=['Associate Name','Designation','Month','Punctuality','Communication & Team Work','Work Planning','Process Initiation','Knowledge','Integrity','KPI Score','Competency Score','Final Score','Final Rating','Remarks'];
+  const rows=[...DB.staff].sort((a,b)=>a.name.localeCompare(b.name)).map(s=>{
+    const r=compRec(s.empId,compPeriod)||{};const k=compKpi(s.empId,compPeriod);
+    const avg=compAvg(COMPS.map(c=>r[c.key]));const f=compFinal(avg,k?k.avg:null);
+    return[s.name,s.designation||'',compPeriod,...COMPS.map(c=>r[c.key]===undefined?'':r[c.key]),k?k.avg:'',avg,f.score!==undefined?f.score:'',f.score!==undefined?f.band[1]:(avg===''?'Pending Evaluation':f.text),r.remarks||''].map(esc).join(',');
+  });
+  const blob=new Blob(['﻿'+[head.map(esc).join(','),...rows].join('\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Competencies_'+compPeriod+'.csv';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+// keep the page current after every sync while it is open
+const _prevRefreshAllComp=window.refreshAllViews;
+window.refreshAllViews=function(){
+  _prevRefreshAllComp();
+  const p=document.getElementById('page-competencies');if(p&&p.classList.contains('active'))renderCompetencies();
+};
+</script>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// Month navigation for Competencies + PMS Reports (quarter / half-year / year / custom)
+// ══════════════════════════════════════════════════════════════
+function ymAdd(ym,n){const[y,m]=ym.split('-').map(Number);const d=new Date(y,m-1+n,1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+function ymLabel(ym){const[y,m]=ym.split('-').map(Number);return new Date(y,m-1,1).toLocaleDateString('en-IN',{month:'short',year:'numeric'});}
+function ymRange(from,to){const out=[];if(!from||!to||to<from)return out;let c=from;while(c<=to&&out.length<60){out.push(c);c=ymAdd(c,1);}return out;}
+
+function compShift(n){compSetPeriod(ymAdd(compPeriod,n));}
+function compMonthChips(){
+  const el=document.getElementById('comp-months');if(!el)return;
+  const cnt={};
+  DB.competencies.forEach(r=>{if(compAvg(COMPS.map(c=>r[c.key]))!=='')cnt[r.period]=(cnt[r.period]||0)+1;});
+  const months=Object.keys(cnt).sort().reverse();
+  el.innerHTML='<span class="comp-sub" style="margin-right:4px">SAVED MONTHS</span>'+(months.length?months.map(m=>`<button class="btn btn-sm ${m===compPeriod?'btn-primary':'btn-ghost'}" onclick="compSetPeriod('${m}')">${ymLabel(m)} · ${cnt[m]}</button>`).join(''):'<span class="comp-sub">none yet</span>');
+}
+
+// ── PMS REPORT ───────────────────────────────────────────────
+const PMS_SUBS={quarter:['Q1','Q2','Q3','Q4'],half:['H1','H2']};
+function pmsBaseMonth(){return document.getElementById('pms-basis').value==='FY'?4:1;}
+function pmsFillYears(){
+  const ys=document.getElementById('pms-year'),basis=document.getElementById('pms-basis').value;
+  const now=new Date();let cur=now.getFullYear();if(basis==='FY'&&now.getMonth()<3)cur--;
+  const prev=ys.value;ys.innerHTML='';
+  for(let y=cur;y>=cur-5;y--)ys.innerHTML+=`<option value="${y}">${basis==='FY'?'FY '+y+'-'+String(y+1).slice(2):y}</option>`;
+  if(prev&&[...ys.options].some(o=>o.value===prev))ys.value=prev;
+}
+function pmsSyncControls(){
+  const t=document.getElementById('pms-type').value;
+  const show=(id,on)=>{document.getElementById(id).style.display=on?'':'none';};
+  show('pms-g-basis',t!=='month'&&t!=='custom');show('pms-g-year',t!=='month'&&t!=='custom');
+  show('pms-g-sub',t==='quarter'||t==='half');show('pms-g-month',t==='month');
+  show('pms-g-from',t==='custom');show('pms-g-to',t==='custom');
+  const sub=document.getElementById('pms-sub');
+  if(PMS_SUBS[t]){
+    const want=PMS_SUBS[t].join();
+    if(sub.dataset.k!==want){sub.dataset.k=want;
+      sub.innerHTML=PMS_SUBS[t].map((x,i)=>{const st=ymAdd('2001-'+String(pmsBaseMonth()).padStart(2,'0'),i*(t==='quarter'?3:6)),en=ymAdd(st,(t==='quarter'?3:6)-1);return`<option value="${i}">${x} (${ymLabel(st).slice(0,3)}–${ymLabel(en).slice(0,3)})</option>`;}).join('');}
+    document.getElementById('pms-sub-label').textContent=t==='quarter'?'Quarter':'Half';
+  }
+}
+function pmsRange(){
+  const t=document.getElementById('pms-type').value;
+  if(t==='month'){const m=document.getElementById('pms-month').value||compPeriod;return{from:m,to:m,label:ymLabel(m)};}
+  if(t==='custom'){const f=document.getElementById('pms-from').value,to=document.getElementById('pms-to').value;
+    return{from:f,to:to,label:f&&to?ymLabel(f)+' – '+ymLabel(to):'Pick From and To'};}
+  const basis=document.getElementById('pms-basis').value,y=document.getElementById('pms-year').value;
+  const start=y+'-'+String(pmsBaseMonth()).padStart(2,'0');
+  const fy=basis==='FY'?'FY '+y+'-'+String(+y+1).slice(2):y;
+  if(t==='year')return{from:start,to:ymAdd(start,11),label:fy+' (Yearly)'};
+  const i=+document.getElementById('pms-sub').value||0,len=t==='quarter'?3:6;
+  const from=ymAdd(start,i*len);
+  return{from,to:ymAdd(from,len-1),label:fy+' · '+PMS_SUBS[t][i]};
+}
+function pmsAgg(empId,months){
+  const recs=months.map(m=>compRec(empId,m)).filter(Boolean).filter(r=>compAvg(COMPS.map(c=>r[c.key]))!=='');
+  const per={};COMPS.forEach(c=>{per[c.key]=compAvg(recs.map(r=>r[c.key]));});
+  const comp=compAvg(recs.map(r=>compAvg(COMPS.map(c=>r[c.key]))));
+  const set={};months.forEach(m=>{set[m]=1;});
+  const t=DB.tasks.filter(x=>x.empId===empId&&set[String(x.targetDate||'').slice(0,7)]&&x.kpi!==''&&x.kpi!==undefined&&!isNaN(parseInt(x.kpi)));
+  const kpi=t.length?Math.round(t.reduce((a,x)=>a+parseInt(x.kpi),0)/t.length*10)/10:null;
+  return{n:recs.length,per,comp,kpi,tasks:t.length,fin:compFinal(comp,kpi)};
+}
+function pmsRows(){
+  const r=pmsRange();const months=ymRange(r.from,r.to);
+  recalcStatuses();
+  const rows=DB.staff.map(s=>({s,a:pmsAgg(s.empId,months)}));
+  rows.sort((x,y)=>{const fx=x.a.fin.score,fy=y.a.fin.score;if(fx!==undefined&&fy!==undefined)return fy-fx;if(fx!==undefined)return-1;if(fy!==undefined)return 1;return x.s.name.localeCompare(y.s.name);});
+  return{r,months,rows};
+}
+function renderPmsReport(){
+  if(!document.getElementById('pms-body'))return;
+  const mi=document.getElementById('pms-month');if(!mi.value)mi.value=compPeriod;
+  const fi=document.getElementById('pms-from'),ti=document.getElementById('pms-to');
+  if(!fi.value){fi.value=ymAdd(compPeriod,-2);ti.value=compPeriod;}
+  if(!document.getElementById('pms-year').options.length)pmsFillYears();
+  pmsSyncControls();
+  const{r,months,rows}=pmsRows();
+  const isEmp=!!(currentUser&&currentUser.role==='employee');
+  document.getElementById('pms-title').textContent=isEmp?'My PMS':'PMS Reports';
+  document.getElementById('pms-printall').textContent=isEmp?'🖨 Print My Appraisal':'🖨 Print Appraisal Sheets';
+  if(isEmp)document.getElementById('pms-subtitle').textContent='Your performance: KPI 60% + Competencies 40%';
+  document.getElementById('pms-label').textContent=months.length?r.label+' · '+ymLabel(r.from)+' to '+ymLabel(r.to)+' ('+months.length+' month'+(months.length>1?'s':'')+')':r.label;
+  if(!months.length){document.getElementById('pms-body').innerHTML='<tr><td colspan="14" class="empty-state"><p>Choose a valid range</p></td></tr>';document.getElementById('pms-mw-head').innerHTML='';document.getElementById('pms-mw-body').innerHTML='';document.getElementById('pms-stats').textContent='';return;}
+  const num=v=>v===''||v===null?'<span class="comp-sub">—</span>':`<span class="comp-num" style="font-size:13px">${v}</span>`;
+  let rank=0;const finals=[];
+  document.getElementById('pms-body').innerHTML=rows.map(({s,a})=>{
+    const f=a.fin;let rk='';let fc,rc;
+    if(f.score!==undefined){rank++;rk=isEmp?'':rank;finals.push(f.score);fc=`<span class="comp-num" style="color:${f.band[2]}">${f.score}</span>`;rc=`<span class="comp-pill" style="color:${f.band[2]}">${f.band[1]}</span>`;}
+    else{fc=`<span class="comp-sub">${f.text}</span>`;rc=`<span class="comp-sub">${a.comp===''?'Pending Evaluation':'—'}</span>`;}
+    return`<tr><td class="comp-sub">${rk}</td><td><strong>${mtEsc(s.name)}</strong><br><span class="comp-sub">${mtEsc(s.designation||s.empId)}</span></td>
+      <td style="text-align:center"><span class="comp-num" style="font-size:13px">${a.n}</span><span class="comp-sub">/${months.length}</span></td>
+      ${COMPS.map(c=>`<td style="text-align:center">${num(a.per[c.key])}</td>`).join('')}
+      <td style="text-align:center">${num(a.comp)}</td>
+      <td style="text-align:center">${a.kpi===null?'<span class="comp-sub">No tasks</span>':`<span class="comp-num" style="font-size:13px">${a.kpi}</span><br><span class="comp-sub">${a.tasks} task${a.tasks>1?'s':''}</span>`}</td>
+      <td style="text-align:center">${fc}</td><td style="text-align:center">${rc}</td><td>${isEmp?'':`<button class="btn btn-ghost btn-sm" title="Print appraisal sheet" data-e="${mtEsc(s.empId)}" onclick="pmsPrint(this.dataset.e)">🖨</button>`}</td></tr>`;
+  }).join('')||'<tr><td colspan="13" class="empty-state"><p>No employees</p></td></tr>';
+  const avg=finals.length?Math.round(finals.reduce((x,y)=>x+y,0)/finals.length*10)/10:'—';
+  document.getElementById('pms-stats').textContent=isEmp?'':`Evaluated ${finals.length} of ${rows.length} employees · Team average final score ${avg}`;
+  // month-wise grid
+  document.getElementById('pms-mw-count').textContent=months.length;
+  document.getElementById('pms-mw-head').innerHTML='<tr><th>Associate</th>'+months.map(m=>`<th class="comp-th">${ymLabel(m)}</th>`).join('')+'</tr>';
+  document.getElementById('pms-mw-body').innerHTML=rows.map(({s})=>`<tr><td><strong>${mtEsc(s.name)}</strong></td>${months.map(m=>{
+    const a=pmsAgg(s.empId,[m]);
+    if(a.fin.score!==undefined)return`<td style="text-align:center"><span class="comp-num" style="font-size:13px;color:${a.fin.band[2]}">${a.fin.score}</span></td>`;
+    if(a.comp!=='')return`<td style="text-align:center"><span class="comp-sub">c ${a.comp}</span></td>`;
+    return'<td style="text-align:center"><span class="comp-sub">—</span></td>';}).join('')}</tr>`).join('');
+}
+function pmsExport(){
+  const{r,months,rows}=pmsRows();if(!months.length){toast('Choose a valid range','var(--danger)');return;}
+  const esc=v=>{v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+  const head=['Rank','Associate Name','Designation','Period','Months Rated','Punctuality','Communication & Team Work','Work Planning','Process Initiation','Knowledge','Integrity','Competency Score','KPI Score','Final Score','Final Rating',...months.map(m=>'Final '+ymLabel(m))];
+  let rank=0;
+  const out=rows.map(({s,a})=>{
+    const f=a.fin;if(f.score!==undefined)rank++;
+    return[f.score!==undefined?rank:'',s.name,s.designation||'',r.from+' to '+r.to,a.n+'/'+months.length,...COMPS.map(c=>a.per[c.key]),a.comp,a.kpi===null?'':a.kpi,f.score!==undefined?f.score:'',f.score!==undefined?f.band[1]:(a.comp===''?'Pending Evaluation':f.text),
+      ...months.map(m=>{const x=pmsAgg(s.empId,[m]);return x.fin.score!==undefined?x.fin.score:'';})].map(esc).join(',');
+  });
+  const blob=new Blob(['﻿'+[head.map(esc).join(','),...out].join('\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='PMS_Report_'+r.from+'_to_'+r.to+'.csv';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+const _prevRefreshAllPms=window.refreshAllViews;
+window.refreshAllViews=function(){
+  _prevRefreshAllPms();
+  const p=document.getElementById('page-pms-reports');if(p&&p.classList.contains('active'))renderPmsReport();
+  compMonthChips();
+};
+</script>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// PRINTABLE APPRAISAL SHEET (A4) — one page per employee; Save as PDF from the print dialog
+// ══════════════════════════════════════════════════════════════
+const PMS_HEX={'Outstanding':'#0f9b6e','Exceeds Expectations':'#3b5bdb','Meets Expectations':'#374151','Needs Improvement':'#e8840a','Unsatisfactory':'#d93025'};
+function pmsSheetSection(s,r,months,isEmp){
+  const a=pmsAgg(s.empId,months),f=a.fin,E=mtEsc;
+  const set={};months.forEach(m=>{set[m]=1;});
+  const tk=DB.tasks.filter(x=>x.empId===s.empId&&set[String(x.targetDate||'').slice(0,7)]);
+  const types=[...new Set(tk.map(x=>x.taskType||'Other'))].sort();
+  const kpiRows=types.map(ty=>{
+    const t=tk.filter(x=>(x.taskType||'Other')===ty),k=t.filter(x=>x.kpi!==''&&!isNaN(parseInt(x.kpi)));
+    const v=k.length?Math.round(k.reduce((q,x)=>q+parseInt(x.kpi),0)/k.length*10)/10:'—';
+    return`<tr><td>${E(ty)}</td><td class="c">${t.length}</td><td class="c">${t.filter(x=>x.status==='Completed').length}</td><td class="c">${t.filter(x=>x.status==='Missed').length}</td><td class="c">${t.filter(x=>x.status==='Pending').length}</td><td class="c"><b>${v}</b></td></tr>`;
+  }).join('')||'<tr><td colspan="6" class="c muted">No tasks due in this period</td></tr>';
+  const compRows=COMPS.map(c=>{const v=a.per[c.key];return`<tr><td><b>${E(c.label)}</b><div class="muted">${E(c.hint)}</div></td><td class="c"><b>${v===''?'—':v}</b></td><td style="width:34%"><div class="bar"><i style="width:${v===''?0:Math.min(100,v)}%"></i></div></td></tr>`;}).join('');
+  const monthRows=months.length>1?months.map(m=>{const x=pmsAgg(s.empId,[m]);
+    return`<tr><td>${ymLabel(m)}</td>${COMPS.map(c=>`<td class="c">${x.per[c.key]===''?'—':x.per[c.key]}</td>`).join('')}<td class="c"><b>${x.comp===''?'—':x.comp}</b></td><td class="c">${x.kpi===null?'—':x.kpi}</td><td class="c"><b>${x.fin.score!==undefined?x.fin.score:'—'}</b></td></tr>`;}).join(''):'';
+  const remarks=isEmp?[]:months.map(m=>{const rc=compRec(s.empId,m);return rc&&rc.remarks?{m,t:rc.remarks}:null;}).filter(Boolean);
+  const hex=f.score!==undefined?PMS_HEX[f.band[1]]:'#6b7280';
+  const kpiW=a.kpi===null?'—':(Math.round(a.kpi*KPI_WEIGHT*10)/10),cW=a.comp===''?'—':(Math.round(a.comp*COMP_WEIGHT*10)/10);
+  return`<section>
+  <div class="hd"><div class="co">Pristine Pearl Pharma Private Limited</div><div class="tt">Employee Performance Appraisal (PMS)</div></div>
+  <table class="info"><tr><td><span>Associate</span><b>${E(s.name)}</b></td><td><span>Designation</span><b>${E(s.designation||'—')}</b></td><td><span>Emp ID</span><b>${E(s.empId)}</b></td></tr>
+  <tr><td><span>Team</span><b>${E(s.team||'—')}</b></td><td><span>Appraisal Period</span><b>${E(r.label)}</b></td><td><span>Months</span><b>${ymLabel(r.from)}${r.from!==r.to?' – '+ymLabel(r.to):''}</b></td></tr></table>
+  <h3>A. Key Result Areas / KPI <small>(Weight 60%)</small></h3>
+  <table class="g"><thead><tr><th>Task Type</th><th>Tasks Due</th><th>Completed</th><th>Missed</th><th>Pending</th><th>Avg KPI</th></tr></thead><tbody>${kpiRows}</tbody>
+  <tfoot><tr><td colspan="5"><b>KPI Score</b> <span class="muted">(avg of task KPI; 100 before target · 90 on target · 70 late · 0 missed)</span></td><td class="c"><b>${a.kpi===null?'—':a.kpi}</b></td></tr></tfoot></table>
+  <h3>B. Competencies <small>(Weight 40% · rated by Manager, 0–100)</small></h3>
+  <table class="g"><thead><tr><th>Competency</th><th style="width:60px">Score</th><th></th></tr></thead><tbody>${compRows}</tbody>
+  <tfoot><tr><td><b>Competency Score</b> <span class="muted">(average of ratings · ${a.n} of ${months.length} month${months.length>1?'s':''} rated)</span></td><td class="c"><b>${a.comp===''?'—':a.comp}</b></td><td></td></tr></tfoot></table>
+  ${monthRows?`<h3>C. Month-wise Summary</h3><table class="g sm"><thead><tr><th>Month</th>${COMPS.map(c=>`<th>${E(c.label.replace('Communication & Team Work','Comm. & Team'))}</th>`).join('')}<th>Comp.</th><th>KPI</th><th>Final</th></tr></thead><tbody>${monthRows}</tbody></table>`:''}
+  <h3>${monthRows?'D':'C'}. Final Appraisal Summary</h3>
+  <table class="sum"><tr><td><span>KPI Score × 60%</span><b>${kpiW}</b></td><td><span>Competency Score × 40%</span><b>${cW}</b></td><td><span>Final Score (max 100)</span><b style="color:${hex}">${f.score!==undefined?f.score:'—'}</b></td><td><span>Final Rating</span><b style="color:${hex}">${f.score!==undefined?f.band[1]:(a.comp===''?'Pending Evaluation':E(f.text))}</b></td></tr></table>
+  ${remarks.length?`<h3>Manager's Remarks</h3><div class="rem">${remarks.map(x=>`<p><b>${ymLabel(x.m)}:</b> ${E(x.t)}</p>`).join('')}</div>`:''}
+  <div class="sig"><div>Employee Signature<br><span>Date:</span></div><div>Reporting Manager<br><span>Date:</span></div><div>HR / Management<br><span>Date:</span></div></div>
+  <div class="ft">Rating scale: ${RATING_BANDS.map((b,i)=>b[1]+' '+(i===0?'≥ '+b[0]:i===RATING_BANDS.length-1?'< '+RATING_BANDS[i-1][0]:b[0]+'–'+(RATING_BANDS[i-1][0]-0.1).toFixed(1))).join(' · ')} &nbsp;|&nbsp; Generated ${new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</div>
+  </section>`;
+}
+function pmsPrint(empId){
+  const r=pmsRange(),months=ymRange(r.from,r.to);
+  if(!months.length){toast('Choose a valid period first','var(--danger)');return;}
+  recalcStatuses();
+  const isEmp=!!(currentUser&&currentUser.role==='employee');
+  let list=[...DB.staff].sort((a,b)=>a.name.localeCompare(b.name));
+  if(empId)list=list.filter(x=>Array.isArray(empId)?empId.includes(x.empId):x.empId===empId);
+  if(!list.length){toast('No employees','var(--danger)');return;}
+  const title=list.length===1?'PMS_'+list[0].name.replace(/[^\w]+/g,'_')+'_'+r.from+'_to_'+r.to:'PMS_Appraisal_Sheets_'+r.from+'_to_'+r.to;
+  const css=`@page{size:A4;margin:12mm}*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;color:#111827;font-size:11px;margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  section{page-break-after:always;padding:2px}section:last-child{page-break-after:auto}
+  .hd{border-bottom:3px solid #3b5bdb;padding-bottom:6px;margin-bottom:8px}.co{font-size:15px;font-weight:800}.tt{font-size:12px;color:#374151;margin-top:2px}
+  h3{font-size:12px;margin:12px 0 5px;background:#eef2ff;padding:5px 8px;border-left:4px solid #3b5bdb}h3 small{font-weight:400;color:#6b7280}
+  table{width:100%;border-collapse:collapse}.g th,.g td{border:1px solid #d1d5db;padding:5px 7px;text-align:left;vertical-align:middle}.g th{background:#f3f4f6;font-size:10px;text-transform:uppercase;letter-spacing:.3px}.g tfoot td{background:#f9fafb}
+  .g.sm th,.g.sm td{font-size:9.5px;padding:4px 4px}.c{text-align:center!important}.muted{color:#6b7280;font-size:9.5px;font-weight:400}
+  .info td{border:1px solid #d1d5db;padding:6px 8px;width:33%}.info span,.sum span{display:block;font-size:9px;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}.info b{font-size:12px}
+  .bar{height:8px;background:#e5e7eb;border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;background:#3b5bdb}
+  .sum td{border:1px solid #d1d5db;padding:10px;text-align:center;width:25%}.sum b{font-size:18px}
+  .rem{border:1px solid #d1d5db;padding:6px 10px}.rem p{margin:3px 0}
+  .sig{display:flex;gap:24px;margin-top:46px}.sig div{flex:1;border-top:1px solid #111827;padding-top:5px;font-size:10px;text-align:center}.sig span{display:block;color:#6b7280;margin-top:14px;text-align:left}
+  .ft{margin-top:16px;font-size:9px;color:#6b7280;text-align:center}`;
+  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${mtEsc(title)}</title><style>${css}</style></head><body>${list.map(x=>pmsSheetSection(x,r,months,isEmp)).join('')}</body></html>`;
+  const w=window.open('','_blank');
+  if(!w){toast('Pop-up blocked — allow pop-ups for this page to print','var(--danger)');return;}
+  w.document.write(html);w.document.close();
+  setTimeout(()=>{try{w.focus();w.print();}catch(e){}},500);
+}
+</script>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// PRINT OPTIONS — staff selection, consolidated and team-wise reports
+// ══════════════════════════════════════════════════════════════
+function pmsTeamOf(s){return(s.team||'').trim()||'Unassigned';}
+function pmsOpenPrint(){
+  const isEmp=!!(currentUser&&currentUser.role==='employee');
+  if(isEmp){pmsPrint(currentUser.empId);return;}
+  const r=pmsRange(),months=ymRange(r.from,r.to);
+  if(!months.length){toast('Choose a valid period first','var(--danger)');return;}
+  const old=document.getElementById('pms-print-modal');if(old)old.remove();
+  const teams=[...new Set(DB.staff.map(pmsTeamOf))].sort();
+  const m=document.createElement('div');m.id='pms-print-modal';
+  m.style.cssText='position:fixed;inset:0;background:rgba(17,24,39,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  m.innerHTML=`<div style="background:#fff;border-radius:14px;width:560px;max-width:100%;max-height:92vh;overflow:auto;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="font-size:17px;font-weight:800;margin-bottom:2px">Print PMS Report</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">${mtEsc(r.label)} · ${ymLabel(r.from)}${r.from!==r.to?' – '+ymLabel(r.to):''}</div>
+    <div class="form-group"><label>Report Format</label>
+      <label style="display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-size:13px;cursor:pointer;font-weight:500"><input type="radio" name="pp-mode" value="sheets" checked style="width:auto;margin-top:3px"/><span><b>Individual appraisal sheets</b><br><span style="color:var(--muted);font-size:11px">One A4 page per selected employee, with signature lines</span></span></label>
+      <label style="display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-size:13px;cursor:pointer;font-weight:500"><input type="radio" name="pp-mode" value="consolidated" style="width:auto;margin-top:3px"/><span><b>Consolidated report</b><br><span style="color:var(--muted);font-size:11px">All selected employees in one ranked table</span></span></label>
+      <label style="display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-size:13px;cursor:pointer;font-weight:500"><input type="radio" name="pp-mode" value="team" style="width:auto;margin-top:3px"/><span><b>Team-wise report</b><br><span style="color:var(--muted);font-size:11px">Team comparison summary, then each team's members with team averages</span></span></label>
+    </div>
+    <label id="pp-mw-wrap" style="display:none;align-items:center;gap:8px;font-size:12px;font-weight:600;margin:4px 0 10px;cursor:pointer"><input type="checkbox" id="pp-mw" ${months.length>1&&months.length<=12?'checked':''} style="width:auto"/> Include month-wise final score columns</label>
+    <div class="form-grid" style="grid-template-columns:1fr">
+      <div class="form-group"><label>Team</label><select id="pp-team"><option value="">All teams</option>${teams.map(t=>`<option value="${mtEsc(t)}">${mtEsc(t)}</option>`).join('')}</select></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 6px"><label style="margin:0">Employees <span class="badge" id="pp-count">0</span></label>
+      <span><button class="btn btn-ghost btn-sm" onclick="ppAll(true)">Select all</button> <button class="btn btn-ghost btn-sm" onclick="ppAll(false)">None</button></span></div>
+    <div id="pp-list" style="border:1px solid var(--border);border-radius:10px;max-height:220px;overflow:auto;padding:6px 10px"></div>
+    <div class="btn-row" style="justify-content:flex-end"><button class="btn btn-ghost" onclick="document.getElementById('pms-print-modal').remove()">Cancel</button><button class="btn btn-primary" onclick="ppGo()">🖨 Print / Save PDF</button></div>
+  </div>`;
+  document.body.appendChild(m);
+  m.addEventListener('click',e=>{if(e.target===m)m.remove();});
+  m.querySelectorAll('[name=pp-mode]').forEach(x=>x.addEventListener('change',ppSync));
+  document.getElementById('pp-team').addEventListener('change',ppList);
+  ppList();ppSync();
+}
+function ppSync(){
+  const mode=document.querySelector('[name=pp-mode]:checked').value;
+  document.getElementById('pp-mw-wrap').style.display=mode==='sheets'?'none':'flex';
+}
+function ppList(){
+  const t=document.getElementById('pp-team').value;
+  const list=[...DB.staff].filter(s=>!t||pmsTeamOf(s)===t).sort((a,b)=>a.name.localeCompare(b.name));
+  document.getElementById('pp-list').innerHTML=list.map(s=>`<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px;font-weight:500;cursor:pointer"><input type="checkbox" class="pp-emp" value="${mtEsc(s.empId)}" checked style="width:auto" onchange="ppCount()"/><span><b>${mtEsc(s.name)}</b> <span style="color:var(--muted2);font-size:11px">${mtEsc(s.designation||'')} · ${mtEsc(pmsTeamOf(s))}</span></span></label>`).join('')||'<div class="comp-sub" style="padding:8px">No employees</div>';
+  ppCount();
+}
+function ppAll(on){document.querySelectorAll('.pp-emp').forEach(x=>{x.checked=on;});ppCount();}
+function ppCount(){const n=document.querySelectorAll('.pp-emp:checked').length;document.getElementById('pp-count').textContent=n;}
+function ppGo(){
+  const ids=[...document.querySelectorAll('.pp-emp:checked')].map(x=>x.value);
+  if(!ids.length){toast('Select at least one employee','var(--danger)');return;}
+  const mode=document.querySelector('[name=pp-mode]:checked').value;
+  const mw=document.getElementById('pp-mw').checked;
+  document.getElementById('pms-print-modal').remove();
+  if(mode==='sheets')pmsPrint(ids);else pmsPrintSummary(mode,ids,mw);
+}
+
+function pmsSummaryRows(ids,months){
+  recalcStatuses();
+  const rows=DB.staff.filter(s=>ids.includes(s.empId)).map(s=>({s,a:pmsAgg(s.empId,months)}));
+  rows.sort((x,y)=>{const fx=x.a.fin.score,fy=y.a.fin.score;if(fx!==undefined&&fy!==undefined)return fy-fx;if(fx!==undefined)return-1;if(fy!==undefined)return 1;return x.s.name.localeCompare(y.s.name);});
+  return rows;
+}
+function pmsMean(arr){const f=arr.filter(v=>v!==''&&v!==null&&v!==undefined&&!isNaN(v));return f.length?Math.round(f.reduce((a,b)=>a+b,0)/f.length*10)/10:'';}
+function pmsSumTable(rows,months,mw){
+  const E=mtEsc;let rank=0;
+  const body=rows.map(({s,a})=>{
+    const f=a.fin,ok=f.score!==undefined;if(ok)rank++;const hex=ok?PMS_HEX[f.band[1]]:'#6b7280';
+    return`<tr><td class="c">${ok?rank:''}</td><td><b>${E(s.name)}</b><div class="muted">${E(s.designation||'')}</div></td><td>${E(pmsTeamOf(s))}</td><td class="c">${a.n}/${months.length}</td>${COMPS.map(c=>`<td class="c">${a.per[c.key]===''?'—':a.per[c.key]}</td>`).join('')}<td class="c"><b>${a.comp===''?'—':a.comp}</b></td><td class="c">${a.kpi===null?'—':a.kpi}</td><td class="c"><b style="color:${hex}">${ok?f.score:'—'}</b></td><td style="color:${hex};font-weight:700">${ok?f.band[1]:(a.comp===''?'Pending Evaluation':E(f.text))}</td>${mw?months.map(m=>{const x=pmsAgg(s.empId,[m]);return`<td class="c">${x.fin.score!==undefined?x.fin.score:'—'}</td>`;}).join(''):''}</tr>`;
+  }).join('');
+  const fin=pmsMean(rows.map(x=>x.a.fin.score));
+  const avgRow=`<tr class="tot"><td></td><td colspan="3"><b>Average (${rows.filter(x=>x.a.fin.score!==undefined).length} evaluated)</b></td>${COMPS.map(c=>`<td class="c">${pmsMean(rows.map(x=>x.a.per[c.key]))||'—'}</td>`).join('')}<td class="c"><b>${pmsMean(rows.map(x=>x.a.comp))||'—'}</b></td><td class="c">${pmsMean(rows.map(x=>x.a.kpi))||'—'}</td><td class="c"><b>${fin||'—'}</b></td><td></td>${mw?months.map(m=>`<td class="c">${pmsMean(rows.map(x=>pmsAgg(x.s.empId,[m]).fin.score))||'—'}</td>`).join(''):''}</tr>`;
+  return`<table class="g sm"><thead><tr><th>#</th><th>Associate</th><th>Team</th><th>Months Rated</th>${COMPS.map(c=>`<th>${E(c.label.replace('Communication & Team Work','Comm. & Team Work'))}</th>`).join('')}<th>Competency</th><th>KPI</th><th>Final</th><th>Rating</th>${mw?months.map(m=>`<th>${ymLabel(m)}</th>`).join(''):''}</tr></thead><tbody>${body}${avgRow}</tbody></table>`;
+}
+function pmsDist(rows){
+  const d={};rows.forEach(x=>{if(x.a.fin.score!==undefined){const n=x.a.fin.band[1];d[n]=(d[n]||0)+1;}});
+  return RATING_BANDS.map(b=>`<span style="color:${PMS_HEX[b[1]]};font-weight:700">${b[1]}: ${d[b[1]]||0}</span>`).join(' &nbsp;·&nbsp; ');
+}
+function pmsPrintSummary(mode,ids,mw){
+  const r=pmsRange(),months=ymRange(r.from,r.to);
+  const rows=pmsSummaryRows(ids,months);
+  const E=mtEsc;
+  const head=(t)=>`<div class="hd"><div class="co">Pristine Pearl Pharma Private Limited</div><div class="tt">${t} · ${(()=>{const rg=ymLabel(r.from)+(r.from!==r.to?' – '+ymLabel(r.to):'');return r.label===rg?rg:E(r.label)+' · '+rg;})()}</div></div>`;
+  let body='';
+  if(mode==='consolidated'){
+    body=head('Consolidated PMS Report')+pmsSumTable(rows,months,mw)+`<div class="dist">${pmsDist(rows)}</div>`;
+  }else{
+    const teams=[...new Set(rows.map(x=>pmsTeamOf(x.s)))].sort();
+    const trs=teams.map(t=>{const rs=rows.filter(x=>pmsTeamOf(x.s)===t);
+      return`<tr><td><b>${E(t)}</b></td><td class="c">${rs.length}</td><td class="c">${rs.filter(x=>x.a.fin.score!==undefined).length}</td><td class="c">${pmsMean(rs.map(x=>x.a.comp))||'—'}</td><td class="c">${pmsMean(rs.map(x=>x.a.kpi))||'—'}</td><td class="c"><b>${pmsMean(rs.map(x=>x.a.fin.score))||'—'}</b></td><td class="c">${rs.filter(x=>x.a.fin.score!==undefined&&x.a.fin.band[1]==='Outstanding').length}</td><td class="c">${rs.filter(x=>x.a.fin.score!==undefined&&x.a.fin.band[0]<50).length}</td></tr>`;}).join('');
+    body=head('Team-wise PMS Report')+`<h3>Team Comparison</h3><table class="g"><thead><tr><th>Team</th><th>Headcount</th><th>Evaluated</th><th>Avg Competency</th><th>Avg KPI</th><th>Avg Final</th><th>Outstanding</th><th>Below “Meets”</th></tr></thead><tbody>${trs}</tbody></table>`+
+      teams.map(t=>`<div class="team"><h3>Team: ${E(t)}</h3>${pmsSumTable(rows.filter(x=>pmsTeamOf(x.s)===t),months,mw)}<div class="dist">${pmsDist(rows.filter(x=>pmsTeamOf(x.s)===t))}</div></div>`).join('');
+  }
+  const css=`@page{size:A4 landscape;margin:10mm}*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;color:#111827;font-size:10px;margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .hd{border-bottom:3px solid #3b5bdb;padding-bottom:6px;margin-bottom:10px}.co{font-size:15px;font-weight:800}.tt{font-size:11px;color:#374151;margin-top:2px}
+  h3{font-size:12px;margin:12px 0 5px;background:#eef2ff;padding:5px 8px;border-left:4px solid #3b5bdb}
+  table{width:100%;border-collapse:collapse}.g th,.g td{border:1px solid #d1d5db;padding:4px 5px;text-align:left;vertical-align:middle}.g th{background:#f3f4f6;font-size:8.5px;text-transform:uppercase;letter-spacing:.2px}
+  .g.sm th,.g.sm td{font-size:9px}.c{text-align:center!important}.muted{color:#6b7280;font-size:8.5px}.tot td{background:#f9fafb;border-top:2px solid #9ca3af}
+  tr{page-break-inside:avoid}.team{page-break-inside:avoid}.dist{margin-top:8px;font-size:10px}
+  .ft{margin-top:14px;font-size:9px;color:#6b7280;text-align:center}`;
+  const title=(mode==='team'?'PMS_Team_wise_':'PMS_Consolidated_')+r.from+'_to_'+r.to;
+  const ft=`<div class="ft">Final = KPI × 60% + Competency × 40% &nbsp;|&nbsp; Rating scale: ${RATING_BANDS.map((b,i)=>b[1]+' '+(i===0?'≥ '+b[0]:i===RATING_BANDS.length-1?'< '+RATING_BANDS[i-1][0]:b[0]+'–'+(RATING_BANDS[i-1][0]-0.1).toFixed(1))).join(' · ')} &nbsp;|&nbsp; Generated ${new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</div>`;
+  const w=window.open('','_blank');
+  if(!w){toast('Pop-up blocked — allow pop-ups for this page to print','var(--danger)');return;}
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${E(title)}</title><style>${css}</style></head><body>${body}${ft}</body></html>`);w.document.close();
+  setTimeout(()=>{try{w.focus();w.print();}catch(e){}},500);
+}
 </script>
